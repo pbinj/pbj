@@ -1,5 +1,5 @@
 # PBinJ
-Proxy Based Injection for JavaScript (PBinJ)
+Proxy Based Injection for JavaScript (PB-in-J)
 
 > A lightweight, proxy-based Dependency Injection (DI) framework for Node.js with full TypeScript support.
 
@@ -69,7 +69,7 @@ userService.getUsers(); // Outputs: Connected to database
 
 ## Documentation
 
-For detailed documentation, examples, and advanced usage, visit our [documentation site](https://spbjjus.github.io/pbj).
+For detailed documentation, examples, and advanced usage, visit our [documentation site](https://pbinj.github.io/pbj).
 
 ## License
 

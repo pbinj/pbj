@@ -1,5 +1,5 @@
 {
-  "name": "@pbinj/pbj-metrics-example",
+  "name": "pbj-metrics-example",
   "type": "module",
   "version": "1.0.2",
   "description": "A simple example on how to use @pbinj/pbj-metrics in your app",
