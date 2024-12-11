@@ -1,5 +1,13 @@
 # @pbinj/pbj-metrics
 
+## 1.0.3
+
+### Patch Changes
+
+- 8e3f995: putting these at the same version
+- Updated dependencies [8e3f995]
+  - @pbinj/pbj@0.4.2
+
 ## 1.0.2
 
 ### Patch Changes
