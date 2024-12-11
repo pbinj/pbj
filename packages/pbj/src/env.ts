@@ -9,7 +9,7 @@ export const Default = {
 type Env = typeof process.env;
 
 //make env easier to use.
-export interface PBinJEnv extends Env { }
+export interface PBinJEnv extends Env {}
 
 export const envPBinJKey = pbjKey<PBinJEnv>("@pbj/env");
 

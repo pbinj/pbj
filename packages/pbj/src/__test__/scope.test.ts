@@ -9,7 +9,7 @@ describe("scope", () => {
     const scopedKey = pbjKey<string>("async-scoped-value");
 
     class ScopedValue {
-      constructor(public value: string = pbj(scopedKey)) { }
+      constructor(public value: string = pbj(scopedKey)) {}
     }
     const sv = pbj(ScopedValue);
     const scopeHandler = context.scoped(scopedKey);

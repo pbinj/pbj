@@ -12,7 +12,9 @@ export const connectionPBinJKey = pbjKey<string>("connection");
 export class DBService implements IDBService {
   public static readonly [serviceSymbol] = dbServiceSymbol;
 
-  constructor(private readonly connectionUrl: string = pbj(connectionPBinJKey)) { }
+  constructor(
+    private readonly connectionUrl: string = pbj(connectionPBinJKey),
+  ) {}
   connection() {
     return this.connectionUrl;
   }

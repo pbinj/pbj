@@ -8,7 +8,7 @@ describe("ServiceDescription", () => {
       expect(new ServiceDescriptor(myKey).name).toEqual("my-cool-key");
     });
     it("should name it with Constructor", () => {
-      expect(new ServiceDescriptor(class A { }).name).toEqual("A");
+      expect(new ServiceDescriptor(class A {}).name).toEqual("A");
     });
     it("should return anonymous", () => {
       expect(new ServiceDescriptor(() => "what").name).toEqual("<anonymous>");

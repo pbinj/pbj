@@ -38,11 +38,12 @@ export interface Context<TRegistry extends RegistryType = Registry> {
   onServiceAdded(fn: ServiceDescriptorListener): () => void;
 }
 export class Context<TRegistry extends RegistryType = Registry>
-  implements Context<TRegistry> {
+  implements Context<TRegistry>
+{
   //this thing is used to keep track of dependencies.
   protected map = new Map<CKey, ServiceDescriptor<TRegistry, any>>();
   private listeners: ServiceDescriptorListener[] = [];
-  constructor(private readonly parent?: Context<any>) { }
+  constructor(private readonly parent?: Context<any>) {}
 
   public onServiceAdded(fn: ServiceDescriptorListener): () => void {
     fn(...this.map.values());

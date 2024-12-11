@@ -62,7 +62,9 @@ const scoped: Context["scoped"] = function (this: Context, key) {
   };
 };
 
-function getServiceDescription(key: PBinJKey<any>): ServiceDescriptor<any, any> {
+function getServiceDescription(
+  key: PBinJKey<any>,
+): ServiceDescriptor<any, any> {
   const serviceDesc = asyncLocalStorage.getStore()?.get(key);
   if (!serviceDesc) {
     throw new PBinJError(

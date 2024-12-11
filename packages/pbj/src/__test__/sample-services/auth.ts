@@ -10,7 +10,7 @@ export interface IAuthService {
 export class AuthService implements IAuthService {
   public static readonly service = authServiceSymbol;
 
-  constructor(private readonly dbService = pbj(DBService)) { }
+  constructor(private readonly dbService = pbj(DBService)) {}
 
   async isAuthenticated() {
     this.dbService.connection();

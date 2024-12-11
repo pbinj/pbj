@@ -18,7 +18,7 @@ export class ClientConfig {
     provider = "github",
     private _clientId = env(`AUTH_${provider.toUpperCase()}_ID`),
     private _clientSecret = env(`AUTH_${provider.toUpperCase()}_SECRET`),
-  ) { }
+  ) {}
   get clientId(): string {
     //This is a hack to get around the fact that the auth library expects a string, but we are using a proxy.
     return this._clientId + "";
@@ -36,5 +36,5 @@ export class ExpressAuthConfigClass implements ExpressAuthConfig {
     ],
     public adapter = pbj(DrizzleAdapter),
     public basePath = "/auth",
-  ) { }
+  ) {}
 }
