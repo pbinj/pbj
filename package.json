@@ -1,5 +1,5 @@
 {
-  "name": "@pbinj/pbj-root",
+  "name": "pbinj-root",
   "version": "0.3.3",
   "license": "MIT",
   "private": true,
@@ -15,10 +15,6 @@
     "lint:check": "pnpm run -r lint:check",
     "ci:version": "changeset version",
     "ci:publish": "pnpm --filter=./packages/** publish --access=public"
-  },
-  "dependencies": {
-    "@auth/express": "^0.8.4",
-    "@pbinj/pbj": "^0.3.2"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.10",

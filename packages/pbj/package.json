@@ -12,7 +12,7 @@
     "type": "git",
     "url": "git+https://github.com/pbinj/pbj.git"
   },
-  "author": "Justin Spears",
+  "author": "Justin Spears <speajus@gmail.com>",
   "keywords": [
     "dependency injection",
     "di",

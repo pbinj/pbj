@@ -34,12 +34,11 @@
     "prom-client": "^15.1.3",
     "typescript": "^5.7.2",
     "vite-tsconfig-paths": "^5.1.2",
-    "vitest": "^2.1.5"
+    "vitest": "^2.1.5",
+    "@pbinj/pbj": "workspace:*"
   },
   "peerDependencies": {
-    "prom-client": "^15.1.3"
-  },
-  "dependencies": {
+    "prom-client": "^15.1.3",
     "@pbinj/pbj": "workspace:*"
   }
 }
