@@ -4,8 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "lint:check": "prettier --check .",
-    "lint": "prettier --write .",
+    "lint:check": "prettier --check --ignore-path ../../.prettierignore .",
+    "lint": "prettier --ignore-path ../../.prettierignore --write  .",
     "dev": "tsx --env-file .env.local src/index.ts",
     "clean": "rm -rf dist",
     "test": "vitest run",

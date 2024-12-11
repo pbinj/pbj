@@ -39,8 +39,8 @@
     "build": "tsc",
     "watch": "tsc -w",
     "clean": "rm -rf dist",
-    "lint:check": "prettier --check .",
-    "lint": "prettier --write ."
+    "lint:check": "prettier --check --ignore-path ../../.prettierignore .",
+    "lint": "prettier --ignore-path ../../.prettierignore --write  ."
   },
   "dependencies": {}
 }
