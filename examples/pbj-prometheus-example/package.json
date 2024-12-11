@@ -1,5 +1,5 @@
 {
-  "name": "pjb-prometheus-example",
+  "name": "pbj-prometheus-example",
   "type": "module",
   "version": "1.0.3",
   "description": "A simple example on how to use @pbinj/pbj-prometheus in your app",
