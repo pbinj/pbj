@@ -1,4 +1,5 @@
 # PBinJ
+Proxy Based Injection for JavaScript (PBinJ)
 
 > A lightweight, proxy-based Dependency Injection (DI) framework for Node.js with full TypeScript support.
 
@@ -20,18 +21,17 @@ npm install @pbinj/pbj
 ```
 
 Using yarn:
-@pbinj
 
 ```bash
 yarn add @pbinj/pbj
 ```
 
-@pbinj
 Using pnpm:
 
 ````bash
 pnpm add @pbinj/pbj
-```@pbinj
+```
+
 
 ## Quick Start
 
@@ -60,7 +60,7 @@ class UserService {
 
 const userService = context.resolve(UserService);
 userService.getUsers(); // Outputs: Connected to database
-````
+```
 
 ## Requirements
 
