@@ -28,7 +28,7 @@ yarn add @pbinj/pbj
 
 Using pnpm:
 
-````bash
+```bash
 pnpm add @pbinj/pbj
 ```
 
