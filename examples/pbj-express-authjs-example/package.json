@@ -1,5 +1,5 @@
 {
-  "name": "@pbinj/pbj-express-authjs-example",
+  "name": "pbj-express-authjs-example",
   "version": "1.0.3",
   "type": "module",
   "private": true,
@@ -28,7 +28,7 @@
     "@auth/express": "^0.8.4",
     "@libsql/client": "0.14.0",
     "@pbinj/pbj": "workspace:*",
-    "@pbinj/pbj-drizzle-example": "workspace:*",
+    "pbj-drizzle-example": "workspace:*",
     "@types/express": "^5.0.0",
     "drizzle-orm": "^0.37.0",
     "ejs": "^3.1.10"

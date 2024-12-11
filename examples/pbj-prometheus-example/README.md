@@ -1,4 +1,4 @@
-# @pbinj/pbj-metrics-example
+# @pbinj/pbj-prometheus-example
 
 > This is an example of how you can use [prometheus](https://prometheus.io/) to monitor the inner workings of the bean contexts. It measures how long invocations takes.
 

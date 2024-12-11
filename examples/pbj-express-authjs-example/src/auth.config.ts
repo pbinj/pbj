@@ -3,7 +3,7 @@ import { context, pbj } from "@pbinj/pbj";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import GitHub from "@auth/express/providers/github";
 import { env } from "@pbinj/pbj/env";
-import { drizzlePBinJKey, register } from "@pbinj/pbj-drizzle-example";
+import { drizzlePBinJKey, register } from "pbj-drizzle-example";
 import "@pbinj/pbj/async";
 
 register();
@@ -18,7 +18,7 @@ export class ClientConfig {
     provider = "github",
     private _clientId = env(`AUTH_${provider.toUpperCase()}_ID`),
     private _clientSecret = env(`AUTH_${provider.toUpperCase()}_SECRET`),
-  ) {}
+  ) { }
   get clientId(): string {
     //This is a hack to get around the fact that the auth library expects a string, but we are using a proxy.
     return this._clientId + "";
@@ -36,5 +36,5 @@ export class ExpressAuthConfigClass implements ExpressAuthConfig {
     ],
     public adapter = pbj(DrizzleAdapter),
     public basePath = "/auth",
-  ) {}
+  ) { }
 }

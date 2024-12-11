@@ -1,8 +1,8 @@
 {
-  "name": "@pbinj/pbj-metrics-example",
+  "name": "pjb-prometheus-example",
   "type": "module",
   "version": "1.0.3",
-  "description": "A simple example on how to use @pbinj/pbj-metrics in your app",
+  "description": "A simple example on how to use @pbinj/pbj-prometheus in your app",
   "scripts": {
     "prometheus": "docker run -p 9090:9090  -v ./prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus",
     "start": "tsx ./src/server.ts",
@@ -22,12 +22,13 @@
   "license": "MIT",
   "dependencies": {
     "@pbinj/pbj": "workspace:*",
-    "@pbinj/pbj-metrics": "workspace:*",
+    "@pbinj/pbj-prometheus": "workspace:*",
     "express": "^4.21.2"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
     "@types/node": "^22.9.0",
-    "tsx": "^4.19.2"
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
   }
 }

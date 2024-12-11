@@ -1,7 +1,7 @@
 import { it, describe, expect } from "vitest";
 import { ExpressAuthConfigClass } from "../auth.config";
 import { context } from "@pbinj/pbj/context";
-import { migrate } from "@pbinj/pbj-drizzle-example";
+import { migrate } from "pbj-drizzle-example";
 
 describe("auth config", () => {
   it("should work", async () => {
