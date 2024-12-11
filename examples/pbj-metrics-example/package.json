@@ -1,7 +1,7 @@
 {
   "name": "@pbinj/pbj-metrics-example",
   "type": "module",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A simple example on how to use @pbinj/pbj-metrics in your app",
   "scripts": {
     "prometheus": "docker run -p 9090:9090  -v ./prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus",
