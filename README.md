@@ -1,15 +1,17 @@
-# [@speajus/pea](https://github.com/speajus/pea)
+# [PBinJ](https://github.com/pbinj/pbj)
+
+(*P*roxy *B*ased *In*jection for *J*avascript)
 
 A lightweight, proxy-based Dependency Injection (DI) framework for Node.js with full TypeScript support.
 
-[![npm version](https://badge.fury.io/js/@speajus%2Fpea.svg)](https://www.npmjs.com/package/@speajus/pea)
+[![npm version](https://badge.fury.io/js/@pbinj%2Fpbj.svg)](https://www.npmjs.com/package/@pbinj/pbj)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[Documentation](https://speajus.github.io/pea)
+[Documentation](https://pbinj.github.io/pbj)
 
 ## Features
 
-- Lightweight nearly everything is done with `peaKey`, `context.register`, `context.resolve` and `pea`.
+- Lightweight nearly everything is done with `pbjKey`, `context.register`, `context.resolve` and `pbj`.
 - Proxy-based lazy loading of dependencies
 - No (runtime) dependencies (other than `node:async_hooks`)
 - Type-safe and fully typed
@@ -26,13 +28,13 @@ This has no runtime dependencies. It also works with most modern JS runtimes.
 ## Installation
 
 ```bash
-npm install @speajus/pea
+npm install @pbinj/pbj
 ```
 
 or
 
 ```bash
-yarn add @speajus/pea
+yarn add @pbinj/pbj
 ```
 
 ## Basic Usage
@@ -40,7 +42,7 @@ yarn add @speajus/pea
 Here's a simple example of how to use Injection:
 
 ```typescript
-import { pea, context } from "@speajus/pea";
+import { pbj, context } from "@pbinj/pbj";
 
 // Define a service
 class DatabaseService {
@@ -54,7 +56,7 @@ context.register(DatabaseService);
 
 // Use the service
 class UserService {
-  constructor(private db = pea(DatabaseService)) {}
+  constructor(private db = pbj(DatabaseService)) {}
 
   getUsers() {
     this.db.connect();

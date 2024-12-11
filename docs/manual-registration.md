@@ -1,13 +1,13 @@
 # Manual Registration
 
-While Pea supports auto-registration, manual registration provides more control over how services are created and managed. This guide covers various manual registration patterns and best practices.
+While PBinJ supports auto-registration, manual registration provides more control over how services are created and managed. This guide covers various manual registration patterns and best practices.
 
 ## Basic Registration
 
 ### Class Registration
 
 ```typescript
-import { pea, context } from "@speajus/pea";
+import { pbj, context } from "@pbinj/pbj";
 
 class LoggerService {
   log(message: string) {
@@ -27,13 +27,13 @@ class UserService {
     this.logger.log("UserService initialized");
   }
 }
-const userService = context.resolve(UserService, pea(LoggerService));
+const userService = context.resolve(UserService, pbj(LoggerService));
 ```
 
 ### Factory Registration
 
 ```typescript
-import { pea, context, peaKey } from "@speajus/pea";
+import { pbj, context, pbjKey } from "@pbinj/pbj";
 
 // Define a factory function
 const createDatabase = () => ({
@@ -46,7 +46,7 @@ const createDatabase = () => ({
 context.register(createDatabase);
 
 // Or with a specific key
-const dbKey = peaKey<ReturnType<typeof createDatabase>>("database");
+const dbKey = pbjKey<ReturnType<typeof createDatabase>>("database");
 context.register(dbKey, createDatabase);
 ```
 
@@ -55,8 +55,8 @@ context.register(dbKey, createDatabase);
 ### Conditional Registration
 
 ```typescript
-import { pea, context } from "@speajus/pea";
-import { env } from "@speajus/pea/env";
+import { pbj, context } from "@pbinj/pbj";
+import { env } from "@pbinj/pbj/env";
 }
 // Environment-based registration
 context.register(CacheService, (nodeEnv = env("NODE_ENV")) =>
@@ -72,7 +72,7 @@ if (featureFlag) {
 ### Registration with Dependencies
 
 ```typescript
-import { pea, context } from "@speajus/pea";
+import { pbj, context } from "@pbinj/pbj";
 
 class ConfigService {
   constructor(readonly dbUrl = process.env.DATABASE_URL) {}
@@ -85,22 +85,22 @@ class DatabaseService {
 // Register with explicit dependencies
 context.register(
   DatabaseService,
-  (config = pea(ConfigService)) => new DatabaseService(config)
+  (config = pbj(ConfigService)) => new DatabaseService(config)
 );
 ```
 
 ## Type-Safe Registration
 
-### Using PeaKey
+### Using PBinJKey
 
 ```typescript
-import { pea, peaKey } from "@speajus/pea";
+import { pbj, pbjKey } from "@pbinj/pbj";
 
 interface MetricsService {
   track(event: string): void;
 }
 
-const metricsKey = peaKey<MetricsService>("metrics");
+const metricsKey = pbjKey<MetricsService>("metrics");
 
 // Type-safe registration
 context.register(metricsKey, {
@@ -109,7 +109,7 @@ context.register(metricsKey, {
 
 // Usage
 class AnalyticsService {
-  constructor(private metrics = pea(metricsKey)) {
+  constructor(private metrics = pbj(metricsKey)) {
     this.metrics.track("AnalyticsService.init");
   }
 }
@@ -118,12 +118,12 @@ class AnalyticsService {
 ### Module Augmentation
 
 ```typescript
-import { pea, peaKey } from "@speajus/pea";
+import { pbj, pbjKey } from "@pbinj/pbj";
 
-const configKey = peaKey<Config>("config");
+const configKey = pbjKey<Config>("config");
 
 // Extend Registry type
-declare module "@speajus/pea" {
+declare module "@pbinj/pbj" {
   interface Registry {
     [configKey]: Config;
   }
@@ -140,7 +140,7 @@ context.register(configKey, {
 ### Singleton vs Factory
 
 ```typescript
-import { pea, context } from "@speajus/pea";
+import { pbj, context } from "@pbinj/pbj";
 
 // Singleton (default)
 context.register(UserService);
@@ -160,7 +160,7 @@ context
 ### Tags and Metadata
 
 ```typescript
-import { pea, context } from "@speajus/pea";
+import { pbj, context } from "@pbinj/pbj";
 
 // Register with tags
 context.register(UserService).withTags("service", "user");
@@ -174,7 +174,7 @@ context.register(UserService).withMetadata({ version: "1.0.0" });
 1. **Explicit Dependencies**: Prefer explicit registration for core services to make dependencies clear.
 
    ```typescript
-   context.register(CoreService, pea(LoggerService), pea(ConfigService));
+   context.register(CoreService, pbj(LoggerService), pbj(ConfigService));
    ```
 
 2. **Configuration Management**: Use manual registration for configuration objects.
@@ -205,9 +205,9 @@ context.register(UserService).withMetadata({ version: "1.0.0" });
 ### Plugin Registration
 
 ```typescript
-import { pea, context, peaKey } from "@speajus/pea";
+import { pbj, context, pbjKey } from "@pbinj/pbj";
 
-const pluginKey = peaKey<Plugin[]>("plugins");
+const pluginKey = pbjKey<Plugin[]>("plugins");
 
 context.register(AuthPlugin).withTag(pluginKey);
 context.register(LoggingPlugin).withTag(pluginKey);
@@ -224,13 +224,13 @@ class PluginManager {
 ### Feature Toggles
 
 ```typescript
-import { pea, context, peaKey } from "@speajus/pea";
+import { pbj, context, pbjKey } from "@pbinj/pbj";
 
 interface FeatureFlag {
   newUI: boolean;
   beta: boolean;
 }
-const featureKey = peaKey<FeatureFlag>("features");
+const featureKey = pbjKey<FeatureFlag>("features");
 
 // Register feature flags
 context.register(featureKey, {

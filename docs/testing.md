@@ -1,6 +1,6 @@
-# Testing with Pea
+# Testing with PBinJ
 
-This guide covers testing strategies using Pea's dependency injection system, including mocking dependencies, creating isolated test contexts, and common testing patterns.
+This guide covers testing strategies using PBinJ's dependency injection system, including mocking dependencies, creating isolated test contexts, and common testing patterns.
 
 ## Basic Testing Setup
 
@@ -9,11 +9,11 @@ This guide covers testing strategies using Pea's dependency injection system, in
 Use `createNewContext()` to create isolated contexts for each test:
 
 ```typescript
-import { createNewContext, pea, peaKey } from "@speajus/pea";
+import { createNewContext, pbj, pbjKey } from "@pbinj/pbj";
 
 describe("UserService", () => {
   let context: Context;
-  
+
   beforeEach(() => {
     context = createNewContext();
   });
@@ -30,28 +30,28 @@ describe("UserService", () => {
 #### Method 1: Direct Mock Registration
 
 ```typescript
-import { context, pea, peaKey } from "@speajus/pea";
+import { context, pbj, pbjKey } from "@pbinj/pbj";
 
 interface Logger {
   log(message: string): void;
 }
 
-const loggerKey = peaKey<Logger>("logger");
+const loggerKey = pbjKey<Logger>("logger");
 
 describe("UserService", () => {
   it("should log user creation", () => {
     // Create mock
     const mockLogger = {
-      log: vi.fn()
+      log: vi.fn(),
     };
-    
+
     // Register mock
     context.register(loggerKey, mockLogger);
-    
+
     // Test implementation
     const userService = context.resolve(UserService);
     await userService.createUser({ name: "Test" });
-    
+
     expect(mockLogger.log).toHaveBeenCalledWith(
       expect.stringContaining("User created")
     );
@@ -59,20 +59,19 @@ describe("UserService", () => {
 });
 ```
 
-
 ## Advanced Testing Patterns
 
 ### Testing Async Contexts
 
 ```typescript
-import "@speajus/pea/async";
+import "@pbinj/pbj/async";
 
 describe("AuthService", () => {
   it("should handle session-scoped dependencies", async () => {
-    const sessionKey = peaKey<Session>("session");
+    const sessionKey = pbjKey<Session>("session");
     const scopeHandler = context.scoped(sessionKey);
     const mockSession = { user: { id: "1", name: "Test" } };
-    
+
     await scopeHandler(async () => {
       const authService = context.resolve(AuthService);
       expect(authService.isAuthenticated()).toBe(true);
@@ -88,21 +87,21 @@ interface ApiClient {
   fetch(url: string): Promise<any>;
 }
 
-const apiClientKey = peaKey<ApiClient>("api-client");
+const apiClientKey = pbjKey<ApiClient>("api-client");
 
 describe("DataService", () => {
   it("should use configured API client", async () => {
     const mockApiClient = {
-      fetch: vi.fn().mockResolvedValue({ data: "test" })
+      fetch: vi.fn().mockResolvedValue({ data: "test" }),
     };
-    
-    context.register(apiClientKey, (config = pea(ConfigService)) => {
+
+    context.register(apiClientKey, (config = pbj(ConfigService)) => {
       return mockApiClient;
     });
-    
+
     const dataService = context.resolve(DataService);
     await dataService.getData();
-    
+
     expect(mockApiClient.fetch).toHaveBeenCalled();
   });
 });
@@ -115,19 +114,19 @@ interface Plugin {
   execute(): void;
 }
 
-const pluginKey = peaKey<Plugin>("plugin");
+const pluginKey = pbjKey<Plugin>("plugin");
 
 describe("PluginManager", () => {
   it("should execute all plugins", () => {
     const mockPlugin1 = { execute: vi.fn() };
     const mockPlugin2 = { execute: vi.fn() };
-    
-    context.register(peaKey("plugin-1"), mockPlugin1);
-    context.register(peaKey("plugin-2"), mockPlugin2);
-    
+
+    context.register(pbjKey("plugin-1"), mockPlugin1);
+    context.register(pbjKey("plugin-2"), mockPlugin2);
+
     const plugins = context.listOf(pluginKey);
-    plugins.forEach(plugin => plugin.execute());
-    
+    plugins.forEach((plugin) => plugin.execute());
+
     expect(mockPlugin1.execute).toHaveBeenCalled();
     expect(mockPlugin2.execute).toHaveBeenCalled();
   });
@@ -142,11 +141,11 @@ describe("PluginManager", () => {
 // test/helpers.ts
 export function createTestContext() {
   const context = createNewContext();
-  
+
   // Register common mocks
   context.register(loggerKey, createMockLogger());
   context.register(configKey, createTestConfig());
-  
+
   return context;
 }
 
@@ -154,7 +153,7 @@ export function createMockLogger() {
   return {
     log: vi.fn(),
     error: vi.fn(),
-    warn: vi.fn()
+    warn: vi.fn(),
   };
 }
 ```
@@ -168,7 +167,7 @@ export interface TestContext {
   config: TestConfig;
 }
 
-declare module "@speajus/pea" {
+declare module "@pbinj/pbj" {
   interface Registry extends TestContext {
     // Additional test-specific types
   }
@@ -183,7 +182,7 @@ export function createMockDatabase() {
   return {
     query: vi.fn(),
     transaction: vi.fn(),
-    close: vi.fn()
+    close: vi.fn(),
   };
 }
 
@@ -191,7 +190,7 @@ export function createMockDatabase() {
 export function createMockAuthProvider() {
   return {
     authenticate: vi.fn(),
-    validateToken: vi.fn()
+    validateToken: vi.fn(),
   };
 }
 ```
@@ -201,7 +200,7 @@ export function createMockAuthProvider() {
 Here's a complete example testing a user registration flow:
 
 ```typescript
-import { createNewContext, pea, peaKey } from "@speajus/pea";
+import { createNewContext, pbj, pbjKey } from "@pbinj/pbj";
 import { UserService } from "../services/user";
 import { EmailService } from "../services/email";
 import { DatabaseService } from "../services/database";
@@ -213,17 +212,17 @@ describe("User Registration", () => {
 
   beforeEach(() => {
     context = createNewContext();
-    
+
     // Create mocks
     mockDb = {
       saveUser: vi.fn(),
-      findUserByEmail: vi.fn()
+      findUserByEmail: vi.fn(),
     };
-    
+
     mockEmail = {
-      sendWelcomeEmail: vi.fn()
+      sendWelcomeEmail: vi.fn(),
     };
-    
+
     // Register mocks
     context.register(dbKey, mockDb);
     context.register(emailKey, mockEmail);
@@ -232,37 +231,35 @@ describe("User Registration", () => {
   it("should register new user", async () => {
     mockDb.findUserByEmail.mockResolvedValue(null);
     mockDb.saveUser.mockResolvedValue({ id: "1", email: "test@example.com" });
-    
+
     const userService = context.resolve(UserService);
-    
+
     await userService.register({
       email: "test@example.com",
-      password: "password123"
+      password: "password123",
     });
-    
+
     expect(mockDb.saveUser).toHaveBeenCalledWith(
       expect.objectContaining({
-        email: "test@example.com"
+        email: "test@example.com",
       })
     );
-    
-    expect(mockEmail.sendWelcomeEmail).toHaveBeenCalledWith(
-      "test@example.com"
-    );
+
+    expect(mockEmail.sendWelcomeEmail).toHaveBeenCalledWith("test@example.com");
   });
 
   it("should throw on duplicate email", async () => {
     mockDb.findUserByEmail.mockResolvedValue({ id: "1" });
-    
+
     const userService = context.resolve(UserService);
-    
+
     await expect(
       userService.register({
         email: "existing@example.com",
-        password: "password123"
+        password: "password123",
       })
     ).rejects.toThrow("Email already exists");
-    
+
     expect(mockDb.saveUser).not.toHaveBeenCalled();
     expect(mockEmail.sendWelcomeEmail).not.toHaveBeenCalled();
   });
@@ -285,25 +282,26 @@ describe("Integration: UserService", () => {
 
   it("should persist user in database", async () => {
     const context = createNewContext();
-    
+
     // Use real database adapter
     context.register(dbKey, DrizzleAdapter);
-    
+
     // Mock only email service
     context.register(emailKey, {
-      sendWelcomeEmail: vi.fn()
+      sendWelcomeEmail: vi.fn(),
     });
-    
+
     const userService = context.resolve(UserService);
     const user = await userService.register({
       email: "test@example.com",
-      password: "password123"
+      password: "password123",
     });
-    
+
     // Verify user was persisted
-    const savedUser = await context.resolve(DrizzleAdapter)
+    const savedUser = await context
+      .resolve(DrizzleAdapter)
       .findUserByEmail("test@example.com");
-      
+
     expect(savedUser).toBeDefined();
     expect(savedUser.email).toBe("test@example.com");
   });
@@ -314,4 +312,4 @@ describe("Integration: UserService", () => {
 
 - [Vitest Documentation](https://vitest.dev/)
 - [Jest Documentation](https://jestjs.io/)
-- [Example Projects](https://github.com/speajus/pea/tree/main/examples)
+- [Example Projects](https://github.com/spbjjus/pbj/tree/main/examples)

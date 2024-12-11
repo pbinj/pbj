@@ -1,6 +1,6 @@
 # Caveats and Limitations
 
-When using Pea, it's important to understand certain limitations and behaviors that come from its proxy-based implementation. This guide covers common pitfalls and how to avoid them.
+When using PBinJ, it's important to understand certain limitations and behaviors that come from its proxy-based implementation. This guide covers common pitfalls and how to avoid them.
 
 ## Proxy Behavior
 
@@ -8,20 +8,20 @@ When using Pea, it's important to understand certain limitations and behaviors t
 
 #### No Property Copying
 
-Pea uses JavaScript Proxies, which means properties are accessed dynamically. The proxy doesn't keep copies of properties:
+PBinJ uses JavaScript Proxies, which means properties are accessed dynamically. The proxy doesn't keep copies of properties:
 
 ### Avoid Destructuring Dependencies
 
 ```typescript
 class EmailService {
-  constructor(private deps = pea(Dependencies)) {}
-  
+  constructor(private deps = pbj(Dependencies)) {}
+
   // ❌ Bad: Destructuring breaks proxy
   sendEmail() {
     const { logger, mailer } = this.deps;
     logger.log("Sending email"); // May fail
   }
-  
+
   // ✅ Good: Keep proxy intact
   sendEmail() {
     this.deps.logger.log("Sending email");
@@ -36,18 +36,18 @@ The spread operator doesn't work well with proxies:
 
 ```typescript
 class ConfigService {
-  constructor(private config = pea(AppConfig)) {}
-  
+  constructor(private config = pbj(AppConfig)) {}
+
   // ❌ Bad: Spread operator breaks proxy
   getFullConfig() {
     return { ...this.config };
   }
-  
+
   // ✅ Good: Return specific properties
   getFullConfig() {
     return {
       apiUrl: this.config.apiUrl,
-      timeout: this.config.timeout
+      timeout: this.config.timeout,
     };
   }
 }
@@ -57,32 +57,31 @@ class ConfigService {
 
 ### Circular Dependencies
 
-Pea can handle circular dependencies, but they should be avoided:
+PBinJ can handle circular dependencies, but they should be avoided:
 
 ```typescript
 // ❌ Bad: Circular dependency
 class ServiceA {
-  constructor(private b = pea(ServiceB)) {}
+  constructor(private b = pbj(ServiceB)) {}
 }
 
 class ServiceB {
-  constructor(private a = pea(ServiceA)) {}
+  constructor(private a = pbj(ServiceA)) {}
 }
 
 // ✅ Good: Use events or restructure
 class ServiceA {
-  constructor(private eventBus = pea(EventBus)) {}
+  constructor(private eventBus = pbj(EventBus)) {}
 }
 
 class ServiceB {
-  constructor(private eventBus = pea(EventBus)) {}
+  constructor(private eventBus = pbj(EventBus)) {}
 }
 ```
 
 ### Async Initialization
 
 Services are initialized lazily, which can lead to unexpected async behavior:
-
 
 ## Type Safety
 
@@ -93,11 +92,11 @@ Type inference with generics can be tricky:
 ```typescript
 // ❌ Bad: Generic type lost in proxy
 class Repository<T> {
-  constructor(private db = pea(Database)) {}
+  constructor(private db = pbj(Database)) {}
 }
 
 // ✅ Good: Use specific type key
-const userRepoKey = peaKey<Repository<User>>("userRepo");
+const userRepoKey = pbjKey<Repository<User>>("userRepo");
 context.register(userRepoKey, new Repository<User>());
 ```
 
@@ -108,12 +107,12 @@ Be explicit about optional dependencies:
 ```typescript
 // ❌ Bad: Implicit optional dependency
 class Service {
-  constructor(private logger = pea(Logger)) {}
+  constructor(private logger = pbj(Logger)) {}
 }
 
 // ✅ Good: Explicit optional dependency
 class Service {
-  constructor(private logger:Logger | undefined = pea(Logger)) {}
+  constructor(private logger: Logger | undefined = pbj(Logger)) {}
 }
 ```
 
@@ -123,7 +122,6 @@ class Service {
 
 Proxies add a small performance overhead:
 Proxies keep references to their targets:
-
 
 ## Testing Considerations
 
@@ -145,7 +143,7 @@ Spying on proxy properties requires proper setup:
 
 ```typescript
 // ❌ Bad: Direct spy on proxy
-const spy = jest.spyOn(service.logger, 'log');
+const spy = jest.spyOn(service.logger, "log");
 
 // ✅ Good: Register spy through context
 const mockLogger = { log: jest.fn() };
@@ -155,18 +153,20 @@ context.register(LoggerKey, mockLogger);
 ## Best Practices to Avoid Issues
 
 1. **Keep References**
+
 ```typescript
 // Always store proxy references
 class Service {
-  private readonly config = pea(Config);
-  private readonly logger = pea(Logger);
+  private readonly config = pbj(Config);
+  private readonly logger = pbj(Logger);
 }
 ```
 
 2. **Avoid Object Manipulation**
+
 ```typescript
 // Don't manipulate proxy objects directly
-const config = pea(Config);
+const config = pbj(Config);
 Object.assign(config, newValues); // ❌ Bad
 
 // Instead, use proper registration
@@ -174,9 +174,10 @@ context.register(Config, newValues); // ✅ Good
 ```
 
 3. **Type Safety**
+
 ```typescript
 // Always declare types in registry
-declare module "@speajus/pea" {
+declare module "@pbinj/pbj" {
   interface Registry {
     [ConfigKey]: Config;
     [LoggerKey]: Logger;
@@ -185,6 +186,7 @@ declare module "@speajus/pea" {
 ```
 
 4. **Async Handling**
+
 ```typescript
 // Use async factories for async initialization
 context.register(DatabaseKey, async () => {
@@ -201,17 +203,17 @@ Some native operations might not work as expected:
 
 ```typescript
 // ❌ Bad: Direct property enumeration
-const config = pea(Config);
+const config = pbj(Config);
 Object.keys(config); // May not return expected keys
 
 // ✅ Good: Use specific properties
-const config = pea(Config);
-const keys = ['apiUrl', 'timeout'];
-const values = keys.map(key => config[key]);
+const config = pbj(Config);
+const keys = ["apiUrl", "timeout"];
+const values = keys.map((key) => config[key]);
 ```
 
 ## Related Resources
 
 - [JavaScript Proxy Documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
 - [TypeScript Generics Guide](https://www.typescriptlang.org/docs/handbook/2/generics.html)
-- [Pea Examples](https://github.com/speajus/pea/tree/main/examples)
+- [PBinJ Examples](https://github.com/spbjjus/pbj/tree/main/examples)

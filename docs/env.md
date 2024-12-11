@@ -1,12 +1,11 @@
-
 # Environment Variables
 
-Pea provides built-in support for environment variables through two main functions: `env` and `envRequired`.
+PBinJ provides built-in support for environment variables through two main functions: `env` and `envRequired`.
 
 ## Basic Usage
 
 ```typescript
-import { env, envRequired } from "@speajus/pea/env";
+import { env, envRequired } from "@pbinj/pbj/env";
 
 // Optional environment variable with default
 const apiUrl = env("API_URL", "http://localhost:3000");
@@ -20,11 +19,12 @@ const apiKey = envRequired("API_KEY");
 The `env` function retrieves an environment variable with an optional default value.
 
 ### Syntax
+
 ```typescript
-function env<K extends keyof PeaEnv & string>(
+function env<K extends keyof PBinJEnv & string>(
   envKey: K,
-  defaultValue?: PeaEnv[K]
-): string | undefined
+  defaultValue?: PBinJEnv[K]
+): string | undefined;
 ```
 
 ### Examples
@@ -50,10 +50,9 @@ class ConfigService {
 The `envRequired` function retrieves an environment variable and throws an error if it's not set.
 
 ### Syntax
+
 ```typescript
-function envRequired<K extends keyof PeaEnv & string>(
-  envKey: K
-): string
+function envRequired<K extends keyof PBinJEnv & string>(envKey: K): string;
 ```
 
 ### Examples
@@ -73,12 +72,12 @@ class DatabaseConfig {
 
 ## Type Safety
 
-The environment variables are fully typed through the `PeaEnv` interface:
+The environment variables are fully typed through the `PBinJEnv` interface:
 
 ```typescript
-// Extend PeaEnv to add type safety to your environment variables
-declare module "@speajus/pea" {
-  interface PeaEnv {
+// Extend PBinJEnv to add type safety to your environment variables
+declare module "@pbinj/pbj" {
+  interface PBinJE@pbinj
     NODE_ENV: "development" | "production" | "test";
     API_KEY: string;
     DATABASE_URL: string;
@@ -90,15 +89,17 @@ declare module "@speajus/pea" {
 ## Best Practices
 
 1. **Use Required for Critical Variables**
+
    ```typescript
    // Good - Critical configuration
    const dbConnection = envRequired("DATABASE_URL");
-   
+
    // Good - Optional feature flag with default
    const enableMetrics = env("ENABLE_METRICS", "false");
    ```
 
 2. **Centralize Configuration**
+
    ```typescript
    class AppConfig {
      constructor(
@@ -111,9 +112,9 @@ declare module "@speajus/pea" {
    ```
 
 3. **Type Environment Variables**
-   ```typescript
-   declare module "@speajus/pea" {
-     interface PeaEnv {
+   ```typescript@pbinj
+   declare module "@pbinj/pbj" {
+     interface PBinJEnv {
        DATABASE_URL: string;
        API_KEY: string;
        PORT: string;
@@ -131,18 +132,18 @@ class ConfigService {
   readonly database = {
     url: envRequired("DATABASE_URL"),
     maxConnections: Number(env("DB_MAX_CONNECTIONS", "10")),
-    timeout: Number(env("DB_TIMEOUT", "5000"))
+    timeout: Number(env("DB_TIMEOUT", "5000")),
   };
 
   readonly api = {
     url: env("API_URL", "http://localhost:3000"),
     key: envRequired("API_KEY"),
-    timeout: Number(env("API_TIMEOUT", "30000"))
+    timeout: Number(env("API_TIMEOUT", "30000")),
   };
 
   readonly features = {
     enableMetrics: env("ENABLE_METRICS", "false") === "true",
-    enableCache: env("ENABLE_CACHE", "true") === "true"
+    enableCache: env("ENABLE_CACHE", "true") === "true",
   };
 }
 ```
@@ -152,22 +153,21 @@ class ConfigService {
 ```typescript
 class EnvironmentConfig {
   readonly nodeEnv = env("NODE_ENV", "development");
-  
+
   get isDevelopment() {
     return this.nodeEnv === "development";
   }
-  
+
   get isProduction() {
     return this.nodeEnv === "production";
   }
-  
+
   get isTest() {
     return this.nodeEnv === "test";
   }
-  
+
   readonly databaseUrl = this.isDevelopment
     ? env("DATABASE_URL", "sqlite://local.db")
     : envRequired("DATABASE_URL");
 }
 ```
-

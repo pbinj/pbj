@@ -1,2 +1,3 @@
 # 🚧 Express
-The example project [pea-express-authjs-example](//github.com/speajus/pea/examples/pea-express-authjs-example) has some code that should probably pulled out and turned into `@speajus/pea-express`
+
+The example project [pbj-express-authjs-example](//github.com/pbinj/pbj/examples/pbj-express-authjs-example) has some code that should probably pulled out and turned into `@pbinj/pbj-express`

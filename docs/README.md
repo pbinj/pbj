@@ -1,4 +1,4 @@
-# Pea
+# PBinJ
 
 > A lightweight, proxy-based Dependency Injection (DI) framework for Node.js with full TypeScript support.
 
@@ -14,24 +14,29 @@
 ## Installation
 
 Using npm:
+
 ```bash
-npm install @speajus/pea
+npm install @pbinj/pbj
 ```
 
 Using yarn:
+@pbinj
+
 ```bash
-yarn add @speajus/pea
+yarn add @pbinj/pbj
 ```
 
+@pbinj
 Using pnpm:
-```bash
-pnpm add @speajus/pea
-```
+
+````bash
+pnpm add @pbinj/pbj
+```@pbinj
 
 ## Quick Start
 
 ```typescript
-import { pea, context } from "@speajus/pea";
+import { pbj, context } from "@pbinj/pbj";
 
 // Define a service
 class DatabaseService {
@@ -45,7 +50,7 @@ context.register(DatabaseService);
 
 // Use the service
 class UserService {
-  constructor(private db = pea(DatabaseService)) {}
+  constructor(private db = pbj(DatabaseService)) {}
 
   getUsers() {
     this.db.connect();
@@ -55,7 +60,7 @@ class UserService {
 
 const userService = context.resolve(UserService);
 userService.getUsers(); // Outputs: Connected to database
-```
+````
 
 ## Requirements
 
@@ -64,7 +69,7 @@ userService.getUsers(); // Outputs: Connected to database
 
 ## Documentation
 
-For detailed documentation, examples, and advanced usage, visit our [documentation site](https://speajus.github.io/pea).
+For detailed documentation, examples, and advanced usage, visit our [documentation site](https://spbjjus.github.io/pbj).
 
 ## License
 

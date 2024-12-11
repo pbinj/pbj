@@ -1,0 +1,37 @@
+{
+  "name": "@pbinj/pbj-drizzle-example",
+  "version": "1.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint:check": "prettier --check .",
+    "lint": "prettier --write .",
+    "test": "pnpm drizzle-kit generate && vitest run",
+    "build": "tsc",
+    "watch": "tsc -w",
+    "clean": "rm -rf dist local.db local.test.db",
+    "generate": "pnpm drizzle-kit generate",
+    "migrate": "pnpm run generate && tsx --env-file .env.local src/migrate.ts",
+    "seed": "tsx src/seed.ts",
+    "setup": "pnpm run migrate && pnpm run seed"
+  },
+  "bin": {
+    "migrate": "src/migrate.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "drizzle-kit": "^0.28.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vite-tsconfig-paths": "^5.1.2",
+    "vitest": "^2.1.5"
+  },
+  "dependencies": {
+    "@auth/core": "^0.37.4",
+    "@libsql/client": "0.14.0",
+    "@pbinj/pbj": "workspace:*",
+    "drizzle-orm": "^0.37.0"
+  }
+}

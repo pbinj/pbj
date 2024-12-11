@@ -1,7 +1,7 @@
 packages:
   - "packages/*"
   - "examples/*"
-  - "speajus.github.io"
+  - "pbinj.github.io"
   - "docs"
 # Define a catalog of version ranges.
 catalog:

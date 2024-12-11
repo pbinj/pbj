@@ -1,31 +1,39 @@
-# Getting Started with Pea
+# Getting Started with PBinJ
+
 ## Installation
+
 Install like any other npm package:
+
 ```bash
-$ npm install @speajus/pea
+$ npm install @@pbinja
 ```
-```bash
-$ pnpm install @speajus/pea
+
+```bash@pbinj
+$ pnpm install @pbinj/pbj
 ```
+
 ```bash
-$ yarn install @speajus/pea
+$ yarn install @pbinj/pbj
 ```
 
 ## Basic Concepts
 
-Pea is built around three core concepts:
+PBinJ is built around three core concepts:
+
 - `context` - The container that manages your dependencies
-- `pea()` - The function used to inject dependencies
-- `peaKey` - Type-safe symbols for service registration
+- `pbj()` - The function used to inject dependencies
+- `pbjKey` - Type-safe symbols for service registration
 
 ## Basic Usage
 
+@pbinj
+
 ### 1. Service Registration
 
-There are several ways to register services with Pea:
+There are several ways to register services with PBinJ:
 
 ```typescript
-import { pea, context, peaKey } from "@speajus/pea";
+import { pbj, context, pbjKey } from "@pbinj/pbj";
 
 // Method 1: Direct class registration
 class LoggerService {
@@ -35,8 +43,8 @@ class LoggerService {
 }
 context.register(LoggerService);
 
-// Method 2: Using peaKey (recommended)
-const dbServiceKey = peaKey<DatabaseService>("database");
+// Method 2: Using pbjKey (recommended)
+const dbServiceKey = pbjKey<DatabaseService>("database");
 context.register(dbServiceKey, DatabaseService);
 
 // Method 3: Factory registration
@@ -47,14 +55,14 @@ context.register(dbServiceKey, () => {
 
 ### 2. Dependency Injection
 
-Inject dependencies using the `pea()` function:
+Inject dependencies using the `pbj()` function:
 
 ```typescript
 class UserService {
   // Constructor injection
   constructor(
-    private logger = pea(LoggerService),
-    private db = pea(dbServiceKey)
+    private logger = pbj(LoggerService),
+    private db = pbj(dbServiceKey)
   ) {}
 
   async getUser(id: string) {
@@ -70,45 +78,45 @@ Resolve services using `context.resolve()`:
 
 ```typescript
 const userService = context.resolve(UserService);
-await userService.getUser("123");
+await userServic@pbinjr("123");
 ```
 
 ## Type Safety
 
-Pea provides full TypeScript support. Define your registry types for better type inference:
+PBinJ provides full TypeScript support. Define your registry types for better type inference:
 
 ```typescript
-declare module "@speajus/pea" {
+declare module "@pbinj/pbj" {
   export interface Registry {
     [dbServiceKey]: DatabaseService;
   }
-}
+}@pbinj
 ```
 
 ## Environment Variables
 
-Pea includes built-in support for environment variables:
+PBinJ includes built-in support for environment variables:
 
 ```typescript
-import { env, envRequired } from "@speajus/pea/env";
+import { env, envRequired } from "@pbinj/pbj/env";
 
 class ConfigService {
   // Optional environment variable with default
   readonly apiUrl = env("API_URL", "http://localhost:3000");
-  
+
   // Required environment variable
   readonly apiKey = envRequired("API_KEY");
-}
+}@pbinj
 ```
 
 ## Async Context
 
-For web applications, Pea supports request-scoped dependencies:
+For web applications, PBinJ supports request-scoped dependencies:
 
 ```typescript
-import "@speajus/pea/async";
+import "@pbinj/pbj/async";
 
-const sessionKey = peaKey<Session>("session");
+const sessionKey = pbjKey<Session>("session");
 
 // In your middleware
 app.use((req, res, next) => {
@@ -118,8 +126,8 @@ app.use((req, res, next) => {
 
 // In your service
 class AuthService {
-  constructor(private session = pea(sessionKey)) {}
-  
+  constructor(private session = pbj(sessionKey)) {}
+
   isAuthenticated() {
     return Boolean(this.session?.user);
   }
@@ -128,12 +136,14 @@ class AuthService {
 
 ## Best Practices
 
-1. Use `peaKey` for service registration:
+1. Use `pbjKey` for service registration:
+
    ```typescript
-   const loggerKey = peaKey<LoggerService>("logger");
+   const loggerKey = pbjKey<LoggerService>("logger");
    ```
 
 2. Register services at application startup:
+
    ```typescript
    export function register() {
      context.register(loggerKey, LoggerService);
@@ -142,8 +152,9 @@ class AuthService {
    ```
 
 3. Use factory functions for configurable services:
+
    ```typescript
-   context.register(dbKey, (config = pea(ConfigService)) => {
+   context.register(dbKey, (config = pbj(ConfigService)) => {
      return new DatabaseService(config.connectionString);
    });
    ```
@@ -152,17 +163,17 @@ class AuthService {
    ```typescript
    class UserService {
      constructor(
-       private db = pea(dbKey),
-       private logger = pea(loggerKey),
-       private auth = pea(authKey)
+       private db = pbj(dbKey),
+       private logger = pbj(loggerKey),
+       private auth = pbj(authKey)
      ) {}
    }
    ```
 
 ## Next Steps
 
-- Explore the [examples](https://github.com/speajus/pea/tree/main/examples) for real-world usage
-- Read the [API documentation](https://speajus.github.io/pea) for detailed information
+- Explore the [examples](https://github.com/spbjjus/pbj/tree/main/examples) for real-world usage
+- Read the [API documentation](https://spbjjus.github.io/pbj) for detailed information
 - Check out integration examples with popular frameworks:
   - Express
   - Drizzle ORM

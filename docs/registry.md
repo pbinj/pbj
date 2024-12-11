@@ -1,15 +1,15 @@
 # Registry and Module Augmentation
 
-The Pea registry system uses TypeScript's module augmentation to provide type safety for your dependency injection. This allows you to define the types of your services at compile time and get full type checking and IntelliSense support.
+The PBinJ registry system uses TypeScript's module augmentation to provide type safety for your dependency injection. This allows you to define the types of your services at compile time and get full type checking and IntelliSense support.
 
 ## Basic Registry Augmentation
 
 ### Declaring Service Types
 
-To register your service types with Pea, augment the `Registry` interface:
+To register your service types with PBinJ, augment the `Registry` interface:
 
 ```typescript
-import { peaKey } from "@speajus/pea";
+import { pbjKey } from "@pbinj/pbj";
 
 // Define your service
 interface DatabaseService {
@@ -21,7 +21,7 @@ interface DatabaseService {
 const dbKey = Symbol("DatabaseService");
 
 // Augment the registry
-declare module "@speajus/pea" {
+declare module "@pbinj/pbj" {
   interface Registry {
     [dbKey]: DatabaseService;
   }
@@ -39,7 +39,7 @@ class LoggerService {
   }
 }
 
-declare module "@speajus/pea" {
+declare module "@pbinj/pbj" {
   interface Registry {
     [typeof LoggerService]: InstanceType<typeof LoggerService>;
   }
@@ -57,16 +57,16 @@ interface CacheService {
   set(key: string, value: string): Promise<void>;
 }
 
-const cacheKey = peaKey<CacheService>("cache");
+const cacheKey = pbjKey<CacheService>("cache");
 
-declare module "@speajus/pea" {
+declare module "@pbinj/pbj" {
   interface Registry {
     [cacheKey]: CacheService;
   }
 }
 
 // Type-safe factory registration
-context.register(cacheKey, (config = pea(ConfigService)) => {
+context.register(cacheKey, (config = pbj(ConfigService)) => {
   return new RedisCacheService(config.redisUrl);
 });
 ```
@@ -80,10 +80,10 @@ interface AuthProvider {
   authenticate(token: string): Promise<boolean>;
 }
 
-const localAuthKey = peaKey<AuthProvider>("local-auth");
-const oauthKey = peaKey<AuthProvider>("oauth");
+const localAuthKey = pbjKey<AuthProvider>("local-auth");
+const oauthKey = pbjKey<AuthProvider>("oauth");
 
-declare module "@speajus/pea" {
+declare module "@pbinj/pbj" {
   interface Registry {
     [localAuthKey]: AuthProvider;
     [oauthKey]: AuthProvider;
@@ -104,9 +104,9 @@ interface User {
   name: string;
 }
 
-const userRepoKey = peaKey<Repository<User>>("user-repository");
+const userRepoKey = pbjKey<Repository<User>>("user-repository");
 
-declare module "@speajus/pea" {
+declare module "@pbinj/pbj" {
   interface Registry {
     [userRepoKey]: Repository<User>;
   }
@@ -121,18 +121,14 @@ Create a dedicated types file for your registry declarations:
 
 ```typescript
 // types/registry.ts
-import { peaKey } from "@speajus/pea";
-import type { 
-  UserService, 
-  AuthService, 
-  LoggerService 
-} from "../services";
+import { pbjKey } from "@pbinj/pbj";
+import type { UserService, AuthService, LoggerService } from "../services";
 
-export const userServiceKey = peaKey<UserService>("user");
-export const authServiceKey = peaKey<AuthService>("auth");
-export const loggerServiceKey = peaKey<LoggerService>("logger");
+export const userServiceKey = pbjKey<UserService>("user");
+export const authServiceKey = pbjKey<AuthService>("auth");
+export const loggerServiceKey = pbjKey<LoggerService>("logger");
 
-declare module "@speajus/pea" {
+declare module "@pbinj/pbj" {
   interface Registry {
     [userServiceKey]: UserService;
     [authServiceKey]: AuthService;
@@ -147,7 +143,7 @@ declare module "@speajus/pea" {
 // services/database/types.ts
 export const dbServiceSymbol = Symbol("DatabaseService");
 
-declare module "@speajus/pea" {
+declare module "@pbinj/pbj" {
   interface Registry {
     [dbServiceSymbol]: DatabaseService;
   }
@@ -159,12 +155,12 @@ declare module "@speajus/pea" {
 ```typescript
 // features/auth/types.ts
 export const authKeys = {
-  service: peaKey<AuthService>("auth-service"),
-  provider: peaKey<AuthProvider>("auth-provider"),
-  cache: peaKey<AuthCache>("auth-cache")
+  service: pbjKey<AuthService>("auth-service"),
+  provider: pbjKey<AuthProvider>("auth-provider"),
+  cache: pbjKey<AuthCache>("auth-cache"),
 } as const;
 
-declare module "@speajus/pea" {
+declare module "@pbinj/pbj" {
   interface Registry {
     [authKeys.service]: AuthService;
     [authKeys.provider]: AuthProvider;
@@ -187,7 +183,7 @@ interface CacheService {
    * @returns The cached value or null if not found
    */
   get(key: string): Promise<string | null>;
-  
+
   /**
    * Stores a value in cache
    * @param key - The cache key
@@ -197,7 +193,7 @@ interface CacheService {
   set(key: string, value: string, ttl?: number): Promise<void>;
 }
 
-declare module "@speajus/pea" {
+declare module "@pbinj/pbj" {
   interface Registry {
     [cacheServiceKey]: CacheService;
   }
@@ -219,10 +215,10 @@ interface ApiClient {
   post(path: string, data: any): Promise<any>;
 }
 
-const configKey = peaKey<Config>("config");
-const apiClientKey = peaKey<ApiClient>("api-client");
+const configKey = pbjKey<Config>("config");
+const apiClientKey = pbjKey<ApiClient>("api-client");
 
-declare module "@speajus/pea" {
+declare module "@pbinj/pbj" {
   interface Registry {
     [configKey]: Config;
     [apiClientKey]: ApiClient;
@@ -230,12 +226,12 @@ declare module "@speajus/pea" {
 }
 
 // Type-safe factory with dependencies
-context.register(apiClientKey, (
-  config = pea(configKey),
-  logger = pea(LoggerService)
-) => {
-  return new ApiClientImpl(config, logger);
-});
+context.register(
+  apiClientKey,
+  (config = pbj(configKey), logger = pbj(LoggerService)) => {
+    return new ApiClientImpl(config, logger);
+  }
+);
 ```
 
 ### Conditional Registration
@@ -245,9 +241,9 @@ interface EmailProvider {
   sendEmail(to: string, subject: string, body: string): Promise<void>;
 }
 
-const emailKey = peaKey<EmailProvider>("email");
+const emailKey = pbjKey<EmailProvider>("email");
 
-declare module "@speajus/pea" {
+declare module "@pbinj/pbj" {
   interface Registry {
     [emailKey]: EmailProvider;
   }
@@ -265,7 +261,7 @@ if (process.env.NODE_ENV === "production") {
 
 ```typescript
 // test/mocks/registry.ts
-declare module "@speajus/pea" {
+declare module "@pbinj/pbj" {
   interface Registry {
     [dbKey]: jest.Mocked<DatabaseService>;
     [authKey]: jest.Mocked<AuthService>;
@@ -276,7 +272,9 @@ declare module "@speajus/pea" {
 context.register(dbKey, () => createMock<DatabaseService>());
 context.register(authKey, () => createMock<AuthService>());
 ```
+
 ```
 </augment_code_snippet>
 
-This documentation covers module augmentation in Pea's registry system, including basic usage, type safety features, advanced patterns, and best practices for maintaining a type-safe dependency injection system.
+This documentation covers module augmentation in PBinJ's registry system, including basic usage, type safety features, advanced patterns, and best practices for maintaining a type-safe dependency injection system.
+```

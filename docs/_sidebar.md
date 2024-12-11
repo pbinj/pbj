@@ -4,7 +4,7 @@
   - [Auto Registration](auto-registration.md)
   - [Manual Registration](manual-registration.md)
 - Injection
-  - [PeaKey](pea-key.md)
+  - [pbjKey](pbj-key.md)
   - [Constructor Injection](constructor-injection.md)
   - [Factory Injection](factory-injection.md)
   - [ListOf](list-of.md)
@@ -20,6 +20,6 @@
   - [🚧 Authjs](./plugins/authjs.md)
 - [Caveats](caveats.md)
 - [Testing](testing.md)
-- [Examples](https://github.com/speajus/pea/tree/main/examples)
+- [Examples](https://github.com/spbjjus/pbj/tree/main/examples)
 - [Ideas](ideas.md)
 - [License](license.md)

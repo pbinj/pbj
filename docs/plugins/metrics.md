@@ -1,11 +1,11 @@
 # Metrics Plugin
 
-The `@speajus/pea-metrics` plugin provides Prometheus metrics integration for your Pea applications, offering automatic service monitoring and custom metrics collection.
+The `@pbinj/pbj-metrics` plugin provides Prometheus metrics integration for your PBinJ applications, offering automatic service monitoring and custom metrics collection.
 
 ## Installation
 
 ```bash
-npm install @speajus/pea-metrics prom-client
+npm install @pbinj/pbj-metrics prom-client
 ```
 
 Note: `prom-client` is a peer dependency and must be installed separately.
@@ -15,14 +15,15 @@ Note: `prom-client` is a peer dependency and must be installed separately.
 ### 1. Basic Setup
 
 ```typescript
-import { apply } from '@speajus/pea-metrics';
-import express from 'express';
+import { apply } from "@pbinj/pbj-metrics";
+import express from "express";
 
 const app = express();
 apply(app);
 ```
 
 This will:
+
 - Start a metrics server on port 9100 (configurable)
 - Expose metrics at `/metrics` endpoint
 - Begin collecting default metrics
@@ -32,46 +33,53 @@ This will:
 Configure the metrics through environment variables or the `MetricsConfig` class:
 
 ```typescript
-import { MetricsConfig, context } from '@speajus/pea-metrics';
+import { MetricsConfig, context } from "@pbinj/pbj-metrics";
 
-context.register(MetricsConfig, new MetricsConfig({
+context.register(
+  MetricsConfig,
+  new MetricsConfig({
     port: 9464,
-    path: '/metrics',
-    host: 'localhost',
-    prefix: 'app_',
-    metricType: 'summary',
+    path: "/metrics",
+    host: "localhost",
+    prefix: "app_",
+    metricType: "summary",
     percentiles: [0.5, 0.75, 0.95, 0.98, 0.99],
-    maxAgeSeconds: 600
-}));
+    maxAgeSeconds: 600,
+  })
+);
 ```
 
 Environment variables:
+
 - `METRICS_PORT` (default: "9464")
 - `METRICS_PATH` (default: "/metrics")
 - `METRICS_HOST` (default: "localhost")
-- `METRICS_PREFIX` (default: "pea_")
+- `METRICS_PREFIX` (default: "pbj\_")
 - `METRICS_TIMEOUT` (default: "1000")
 - `METRICS_LABELS` (default: "{}")
 
 ### 3. Custom Metrics
 
 ```typescript
-import { pea } from '@speajus/pea';
-import { promClientPeaKey } from '@speajus/pea-metrics';
+import { pbj } from "@pbinj/pbj";
+import { promClientPBinJKey } from "@pbinj/pbj-metrics";
 
 class CustomMetricsService {
-    constructor(private prometheus = pea(promClientPeaKey),  register = pea(registerKey)) {
-        this.requestCounter = new prometheus.Counter({
-            name: 'http_requests_total',
-            help: 'Total HTTP requests',
-            labelNames: ['method', 'status'],
-            registers: [register]
-        });
-    }
+  constructor(
+    private prometheus = pbj(promClientPBinJKey),
+    register = pbj(registerKey)
+  ) {
+    this.requestCounter = new prometheus.Counter({
+      name: "http_requests_total",
+      help: "Total HTTP requests",
+      labelNames: ["method", "status"],
+      registers: [register],
+    });
+  }
 
-    recordRequest(method: string, status: number) {
-        this.requestCounter.inc({ method, status });
-    }
+  recordRequest(method: string, status: number) {
+    this.requestCounter.inc({ method, status });
+  }
 }
 ```
 
@@ -80,15 +88,16 @@ class CustomMetricsService {
 The plugin automatically monitors registered services:
 
 ```typescript
-import { MetricsConfig } from '@speajus/pea-metrics';
+import { MetricsConfig } from "@pbinj/pbj-metrics";
 
 // Monitor specific services
 context.register(MetricsConfig, {
-    tags: [userServiceKey, authServiceKey]
+  tags: [userServiceKey, authServiceKey],
 });
 ```
 
 This creates metrics for:
+
 - Invocation duration
 - Success/failure counts
 - Active requests
@@ -98,13 +107,13 @@ This creates metrics for:
 ### Keys
 
 ```typescript
-import { promClientPeaKey, registerKey } from '@speajus/pea-metrics';
+import { promClientPBinJKey, registerKey } from "@pbinj/pbj-metrics";
 
 // Access Prometheus client
-const prometheus = pea(promClientPeaKey);
+const prometheus = pbj(promClientPBinJKey);
 
 // Access metrics registry
-const registry = pea(registerKey);
+const registry = pbj(registerKey);
 ```
 
 ### MetricService
@@ -112,58 +121,60 @@ const registry = pea(registerKey);
 Core service for managing metrics:
 
 ```typescript
-import { MetricService } from '@speajus/pea-metrics';
+import { MetricService } from "@pbinj/pbj-metrics";
 
 class CustomService {
-    constructor(private metrics = pea(MetricService)) {
-        // Access metrics functionality
-    }
+  constructor(private metrics = pbj(MetricService)) {
+    // Access metrics functionality
+  }
 }
 ```
 
 ### Express Middleware
 
 ```typescript
-import { middleware } from '@speajus/pea-metrics';
-import express from 'express';
+import { middleware } from "@pbinj/pbj-metrics";
+import express from "express";
 
 const app = express();
-app.use('/metrics', middleware());
+app.use("/metrics", middleware());
 ```
 
 ## Best Practices
 
 1. **Naming Conventions**
+
    ```typescript
    // Good - Clear, descriptive names
    const requestDuration = new prometheus.Histogram({
-       name: 'http_request_duration_seconds',
-       help: 'HTTP request duration in seconds'
+     name: "http_request_duration_seconds",
+     help: "HTTP request duration in seconds",
    });
 
    // Bad - Unclear naming
    const metric = new prometheus.Counter({
-       name: 'x',
-       help: 'some metric'
+     name: "x",
+     help: "some metric",
    });
    ```
 
 2. **Label Usage**
+
    ```typescript
    // Good - Relevant labels
-   counter.inc({ 
-       method: 'GET', 
-       status: 200, 
-       path: '/api/users' 
+   counter.inc({
+     method: "GET",
+     status: 200,
+     path: "/api/users",
    });
 
    // Bad - Too many labels
-   counter.inc({ 
-       method: 'GET',
-       status: 200,
-       path: '/api/users',
-       user: 'john',  // Too granular
-       timestamp: Date.now()  // Don't use time as label
+   counter.inc({
+     method: "GET",
+     status: 200,
+     path: "/api/users",
+     user: "john", // Too granular
+     timestamp: Date.now(), // Don't use time as label
    });
    ```
 
@@ -176,35 +187,40 @@ app.use('/metrics', middleware());
 ## Example: Complete Setup
 
 ```typescript
-import { context, pea } from '@speajus/pea';
-import { 
-    MetricsConfig, 
-    MetricService, 
-    promClientPeaKey 
-} from '@speajus/pea-metrics';
-import express from 'express';
+import { context, pbj } from "@pbinj/pbj";
+import {
+  MetricsConfig,
+  MetricService,
+  promClientPBinJKey,
+} from "@pbinj/pbj-metrics";
+import express from "express";
 
 // Configure metrics
 context.register(MetricsConfig, {
-    port: 9464,
-    prefix: 'myapp_',
-    tags: [userServiceKey, authServiceKey]
+  port: 9464,
+  prefix: "myapp_",
+  tags: [userServiceKey, authServiceKey],
 });
 
 // Create custom metrics
 class ApiMetrics {
-    constructor(private prometheus = pea(promClientPeaKey)) {
-        this.requestDuration = new prometheus.Histogram({
-            name: 'api_request_duration_seconds',
-            help: 'API request duration',
-            labelNames: ['method', 'path', 'status'],
-            buckets: [0.1, 0.5, 1, 2, 5]
-        });
-    }
+  constructor(private prometheus = pbj(promClientPBinJKey)) {
+    this.requestDuration = new prometheus.Histogram({
+      name: "api_request_duration_seconds",
+      help: "API request duration",
+      labelNames: ["method", "path", "status"],
+      buckets: [0.1, 0.5, 1, 2, 5],
+    });
+  }
 
-    recordRequest(method: string, path: string, status: number, duration: number) {
-        this.requestDuration.observe({ method, path, status }, duration);
-    }
+  recordRequest(
+    method: string,
+    path: string,
+    status: number,
+    duration: number
+  ) {
+    this.requestDuration.observe({ method, path, status }, duration);
+  }
 }
 
 // Setup Express app
@@ -213,7 +229,7 @@ apply(app);
 
 // Start server
 app.listen(3000, () => {
-    console.log('Server running with metrics at http://localhost:9464/metrics');
+  console.log("Server running with metrics at http://localhost:9464/metrics");
 });
 ```
 
@@ -223,9 +239,9 @@ Example `prometheus.yml`:
 
 ```yaml
 scrape_configs:
-  - job_name: 'pea-app'
+  - job_name: "pbj-app"
     static_configs:
-      - targets: ['localhost:9464']
+      - targets: ["localhost:9464"]
     scrape_interval: 15s
 ```
 
@@ -234,14 +250,14 @@ scrape_configs:
 The plugin provides utilities for testing metrics:
 
 ```typescript
-import { context } from '@speajus/pea';
-import { registerKey } from '@speajus/pea-metrics';
+import { context } from "@pbinj/pbj";
+import { registerKey } from "@pbinj/pbj-metrics";
 
-describe('Metrics', () => {
-    it('should record metrics', async () => {
-        const registry = context.resolve(registerKey);
-        const metrics = await registry.metrics();
-        expect(metrics).toContain('http_requests_total');
-    });
+describe("Metrics", () => {
+  it("should record metrics", async () => {
+    const registry = context.resolve(registerKey);
+    const metrics = await registry.metrics();
+    expect(metrics).toContain("http_requests_total");
+  });
 });
 ```

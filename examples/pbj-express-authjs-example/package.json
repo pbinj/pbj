@@ -1,0 +1,36 @@
+{
+  "name": "@pbinj/pbj-express-authjs-example",
+  "version": "1.0.1",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "lint:check": "prettier --check .",
+    "lint": "prettier --write .",
+    "dev": "tsx --env-file .env.local src/index.ts",
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/ejs": "^3.1.5",
+    "drizzle-kit": "^0.28.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vite-tsconfig-paths": "^5.1.2",
+    "vitest": "^2.1.5"
+  },
+  "dependencies": {
+    "@auth/drizzle-adapter": "^1.7.4",
+    "@auth/express": "^0.8.4",
+    "@libsql/client": "0.14.0",
+    "@pbinj/pbj": "workspace:*",
+    "@pbinj/pbj-drizzle-example": "workspace:*",
+    "@types/express": "^5.0.0",
+    "drizzle-orm": "^0.37.0",
+    "ejs": "^3.1.10"
+  }
+}

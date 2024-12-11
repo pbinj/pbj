@@ -1,15 +1,15 @@
 # Auto Registration
 
-`Pea` provides automatic registration capabilities for both constructors and factories, making dependency management more convenient and reducing boilerplate code.
+`PBinJ` provides automatic registration capabilities for both constructors and factories, making dependency management more convenient and reducing boilerplate code.
 
 ## Constructor Auto Registration
 
 ### Basic Auto Registration
 
-When a class is used as a dependency without explicit registration, Pea will automatically register it:
+When a class is used as a dependency without explicit registration, PBinJ will automatically register it:
 
 ```typescript
-import { pea, context } from "@speajus/pea";
+import { pbj, context } from "@pbinj/pbj";
 
 class LoggerService {
   log(message: string) {
@@ -19,7 +19,7 @@ class LoggerService {
 
 // No explicit registration needed
 class UserService {
-  constructor(private logger = pea(LoggerService)) {}
+  constructor(private logger = pbj(LoggerService)) {}
 
   createUser() {
     this.logger.log("Creating user...");
@@ -37,7 +37,7 @@ const userService = context.resolve(UserService);
 Factories are automatically registered when used as dependencies:
 
 ```typescript
-import { pea, context, peaKey } from "@speajus/pea";
+import { pbj, context, pbjKey } from "@pbinj/pbj";
 
 interface DatabaseConnection {
   query(sql: string): Promise<any>;
@@ -53,7 +53,7 @@ const dbFactory = () => {
 
 // Factory is automatically registered
 class Repository {
-  constructor(private db = pea(dbFactory)) {}
+  constructor(private db = pbj(dbFactory)) {}
 }
 ```
 
@@ -62,13 +62,13 @@ class Repository {
 Auto-registered factories can use other dependencies:
 
 ```typescript
-import { pea, context } from "@speajus/pea";
+import { pbj, context } from "@pbinj/pbj";
 
 class ConfigService {
   constructor(readonly dbUrl = "postgres://localhost:5432") {}
 }
 
-const createDatabase = (config = pea(ConfigService)) => {
+const createDatabase = (config = pbj(ConfigService)) => {
   return {
     connect: async () => {
       // Use config.dbUrl
@@ -78,7 +78,7 @@ const createDatabase = (config = pea(ConfigService)) => {
 
 // Both ConfigService and createDatabase are auto-registered
 class UserRepository {
-  constructor(private db = pea(createDatabase)) {}
+  constructor(private db = pbj(createDatabase)) {}
 }
 ```
 
@@ -89,16 +89,16 @@ class UserRepository {
 Auto registration can be combined with conditional logic:
 
 ```typescript
-import { pea, context, peaKey } from "@speajus/pea";
+import { pbj, context, pbjKey } from "@pbinj/pbj";
 
 interface Cache {
   get(key: string): Promise<string | null>;
   set(key: string, value: string): Promise<void>;
 }
 
-const cacheKey = peaKey<Cache>("cache");
+const cacheKey = pbjKey<Cache>("cache");
 
-const createCache = (config = pea(ConfigService)) => {
+const createCache = (config = pbj(ConfigService)) => {
   if (config.environment === "production") {
     return new RedisCache(config.redisUrl);
   }
@@ -107,7 +107,7 @@ const createCache = (config = pea(ConfigService)) => {
 
 // Cache implementation is auto-selected based on environment
 class CacheService {
-  constructor(private cache = pea(createCache)) {}
+  constructor(private cache = pbj(createCache)) {}
 }
 ```
 
@@ -118,7 +118,7 @@ class CacheService {
 Be explicit about factory return types:
 
 ```typescript
-import { pea, context } from "@speajus/pea";
+import { pbj, context } from "@pbinj/pbj";
 
 interface Logger {
   log(message: string): void;
@@ -132,7 +132,7 @@ const createLogger = (): Logger => {
 
 // Type-safe auto registration
 class Service {
-  constructor(private logger = pea(createLogger)) {}
+  constructor(private logger = pbj(createLogger)) {}
 }
 ```
 
@@ -141,7 +141,7 @@ class Service {
 Override auto-registered services in tests:
 
 ```typescript
-import { context } from "@speajus/pea";
+import { context } from "@pbinj/pbj";
 
 describe("UserService", () => {
   beforeEach(() => {
@@ -167,15 +167,15 @@ Auto registration doesn't prevent circular dependencies, but does try to resolve
 ```typescript
 // ❌ Bad: Circular dependency with auto registration
 class ServiceA {
-  constructor(private b = pea(ServiceB)) {}
+  constructor(private b = pbj(ServiceB)) {}
 }
 
 class ServiceB {
-  constructor(private a = pea(ServiceA)) {}
+  constructor(private a = pbj(ServiceA)) {}
 }
 
 // ✅ Good: Use events or restructure
 class ServiceA {
-  constructor(private events = pea(EventBus)) {}
+  constructor(private events = pbj(EventBus)) {}
 }
 ```
