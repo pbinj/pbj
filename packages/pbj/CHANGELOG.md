@@ -1,5 +1,11 @@
 # @pbinj/pbj
 
+## 0.4.2
+
+### Patch Changes
+
+- 8e3f995: putting these at the same version
+
 ## 0.4.1
 
 ### Patch Changes

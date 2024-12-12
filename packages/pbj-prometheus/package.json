@@ -1,6 +1,6 @@
 {
-  "name": "@pbinj/pbj-metrics",
-  "version": "0.4.1",
+  "name": "@pbinj/pbj-prometheus",
+  "version": "0.4.2",
   "description": "A @pbinj/pbj extension for prometheus metrics.",
   "type": "module",
   "types": "./dist/index.d.ts",
