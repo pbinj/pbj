@@ -107,8 +107,8 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
     "paths": {
-      "@pbinj/pbj-drizzle-example": [
-        "./node_modules/@pbinj/pbj-drizzle-example/src/index.ts"
+      "pbj-drizzle-example": [
+        "./node_modules/pbj-drizzle-example/src/index.ts"
       ],
       "@pbinj/pbj/*": ["./node_modules/@pbinj/pbj/src/*.ts"],
       "@pbinj/pbj": ["./node_modules/@pbinj/pbj/src/index.ts"]

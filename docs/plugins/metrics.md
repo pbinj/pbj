@@ -1,11 +1,11 @@
 # Metrics Plugin
 
-The `@pbinj/pbj-metrics` plugin provides Prometheus metrics integration for your PBinJ applications, offering automatic service monitoring and custom metrics collection.
+The `@pbinj/pbj-prometheus` plugin provides Prometheus metrics integration for your PBinJ applications, offering automatic service monitoring and custom metrics collection.
 
 ## Installation
 
 ```bash
-npm install @pbinj/pbj-metrics prom-client
+npm install @pbinj/pbj-prometheus prom-client
 ```
 
 Note: `prom-client` is a peer dependency and must be installed separately.
@@ -15,7 +15,7 @@ Note: `prom-client` is a peer dependency and must be installed separately.
 ### 1. Basic Setup
 
 ```typescript
-import { apply } from "@pbinj/pbj-metrics";
+import { apply } from "@pbinj/pbj-prometheus";
 import express from "express";
 
 const app = express();
@@ -33,7 +33,7 @@ This will:
 Configure the metrics through environment variables or the `MetricsConfig` class:
 
 ```typescript
-import { MetricsConfig, context } from "@pbinj/pbj-metrics";
+import { MetricsConfig, context } from "@pbinj/pbj-prometheus";
 
 context.register(
   MetricsConfig,
@@ -62,7 +62,7 @@ Environment variables:
 
 ```typescript
 import { pbj } from "@pbinj/pbj";
-import { promClientPBinJKey } from "@pbinj/pbj-metrics";
+import { promClientPBinJKey } from "@pbinj/pbj-prometheus";
 
 class CustomMetricsService {
   constructor(
@@ -88,7 +88,7 @@ class CustomMetricsService {
 The plugin automatically monitors registered services:
 
 ```typescript
-import { MetricsConfig } from "@pbinj/pbj-metrics";
+import { MetricsConfig } from "@pbinj/pbj-prometheus";
 
 // Monitor specific services
 context.register(MetricsConfig, {
@@ -107,7 +107,7 @@ This creates metrics for:
 ### Keys
 
 ```typescript
-import { promClientPBinJKey, registerKey } from "@pbinj/pbj-metrics";
+import { promClientPBinJKey, registerKey } from "@pbinj/pbj-prometheus";
 
 // Access Prometheus client
 const prometheus = pbj(promClientPBinJKey);
@@ -121,7 +121,7 @@ const registry = pbj(registerKey);
 Core service for managing metrics:
 
 ```typescript
-import { MetricService } from "@pbinj/pbj-metrics";
+import { MetricService } from "@pbinj/pbj-prometheus";
 
 class CustomService {
   constructor(private metrics = pbj(MetricService)) {
@@ -133,7 +133,7 @@ class CustomService {
 ### Express Middleware
 
 ```typescript
-import { middleware } from "@pbinj/pbj-metrics";
+import { middleware } from "@pbinj/pbj-prometheus";
 import express from "express";
 
 const app = express();
@@ -192,7 +192,7 @@ import {
   MetricsConfig,
   MetricService,
   promClientPBinJKey,
-} from "@pbinj/pbj-metrics";
+} from "@pbinj/pbj-prometheus";
 import express from "express";
 
 // Configure metrics
@@ -251,7 +251,7 @@ The plugin provides utilities for testing metrics:
 
 ```typescript
 import { context } from "@pbinj/pbj";
-import { registerKey } from "@pbinj/pbj-metrics";
+import { registerKey } from "@pbinj/pbj-prometheus";
 
 describe("Metrics", () => {
   it("should record metrics", async () => {

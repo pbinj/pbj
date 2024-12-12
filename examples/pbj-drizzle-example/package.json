@@ -1,5 +1,5 @@
 {
-  "name": "@pbinj/pbj-drizzle-example",
+  "name": "pbj-drizzle-example",
   "version": "1.0.3",
   "private": true,
   "type": "module",

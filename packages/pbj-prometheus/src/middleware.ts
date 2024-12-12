@@ -20,7 +20,7 @@ export async function apply(v: Express, ctx = context) {
 
   v.listen(config.port, config.host, () => {
     console.log(
-      `@pbinj/pbj-metrics is running on 'http://${host}:${config.port}${path}'`,
+      `@pbinj/pbj-prometheus is running on 'http://${host}:${config.port}${path}'`,
     );
   });
 }
