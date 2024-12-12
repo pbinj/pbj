@@ -1,5 +1,13 @@
 # @pbinj/pbj-metrics
 
+## 0.4.3
+
+### Patch Changes
+
+- 93c119c: renamed packages keeping them at the same version
+- Updated dependencies [93c119c]
+  - @pbinj/pbj@0.4.3
+
 ## 1.0.3
 
 ### Patch Changes

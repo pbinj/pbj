@@ -1,5 +1,11 @@
 # @pbinj/pbj
 
+## 0.4.3
+
+### Patch Changes
+
+- 93c119c: renamed packages keeping them at the same version
+
 ## 0.4.2
 
 ### Patch Changes
