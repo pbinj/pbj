@@ -36,16 +36,23 @@ export interface Context<TRegistry extends RegistryType = Registry> {
     service: T,
     fn: VisitFn<TRegistry, T>,
   ): void;
-  onServiceAdded(fn: ServiceDescriptorListener, noInitial?: boolean): () => void;
+  onServiceAdded(
+    fn: ServiceDescriptorListener,
+    noInitial?: boolean,
+  ): () => void;
 }
 export class Context<TRegistry extends RegistryType = Registry>
-  implements Context<TRegistry> {
+  implements Context<TRegistry>
+{
   //this thing is used to keep track of dependencies.
   protected map = new Map<CKey, ServiceDescriptor<TRegistry, any>>();
   private listeners: ServiceDescriptorListener[] = [];
-  constructor(private readonly parent?: Context<any>) { }
+  constructor(private readonly parent?: Context<any>) {}
 
-  public onServiceAdded(fn: ServiceDescriptorListener, intitialize = true): () => void {
+  public onServiceAdded(
+    fn: ServiceDescriptorListener,
+    intitialize = true,
+  ): () => void {
     if (intitialize) {
       for (const service of this.map.values()) {
         for (const fn of this.listeners) {
@@ -197,10 +204,14 @@ export class Context<TRegistry extends RegistryType = Registry>
   }
   private notifyAdd(inst: ServiceDescriptor<TRegistry, any>) {
     return new Promise<void>((resolve) => {
-      setTimeout((listeners) => {
-        listeners.forEach((fn) => fn(inst));
-        resolve();
-      }, 0, this.listeners);
+      setTimeout(
+        (listeners) => {
+          listeners.forEach((fn) => fn(inst));
+          resolve();
+        },
+        0,
+        this.listeners,
+      );
     });
   }
   resolve<TKey extends PBinJKey<TRegistry>>(
