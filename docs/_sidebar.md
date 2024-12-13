@@ -9,12 +9,18 @@
   - [Factory Injection](factory-injection.md)
   - [ListOf](list-of.md)
   - [Registry](registry.md)
+- Advanced
+  - [Service Interceptors](advanced/interceptors.md)
+  - [Caching](advanced/caching.md)
+  - [Tags](advanced/tags.md)
+  - [Description](advanced/service-events.md)
+  - [Name](advanced/name.md)
 - Helpers
   - [Async Context](async.md)
   - [Environment Variables](env.md)
   - [Path Of](path-of.md)
 - Plugins
-  - [Metrics](./plugins/metrics.md)
+  - [Prometheus](./plugins/metrics.md)
   - [🚧 Drizzle](./plugins/drizzle.md)
   - [🚧 Express](./plugins/express.md)
   - [🚧 Authjs](./plugins/authjs.md)
