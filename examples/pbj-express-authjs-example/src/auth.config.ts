@@ -10,14 +10,14 @@ register();
 
 context.register(
   DrizzleAdapter,
-  pbj(drizzlePBinJKey) as unknown as Parameters<typeof DrizzleAdapter>[0]
+  pbj(drizzlePBinJKey) as unknown as Parameters<typeof DrizzleAdapter>[0],
 );
 
 export class ClientConfig {
   constructor(
     provider = "github",
     private _clientId = env(`AUTH_${provider.toUpperCase()}_ID`),
-    private _clientSecret = env(`AUTH_${provider.toUpperCase()}_SECRET`)
+    private _clientSecret = env(`AUTH_${provider.toUpperCase()}_SECRET`),
   ) {}
   get clientId(): string {
     //This is a hack to get around the fact that the auth library expects a string, but we are using a proxy.
@@ -35,6 +35,6 @@ export class ExpressAuthConfigClass implements ExpressAuthConfig {
       GitHub(pbj(ClientConfig)),
     ],
     public adapter = pbj(DrizzleAdapter),
-    public basePath = "/auth"
+    public basePath = "/auth",
   ) {}
 }
