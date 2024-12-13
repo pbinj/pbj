@@ -10,6 +10,7 @@ import type {
   RegistryType,
   ServiceArgs,
   PBinJKeyType,
+  Service,
 } from "./types";
 import {
   ServiceDescriptor,
@@ -35,7 +36,10 @@ export interface Context<TRegistry extends RegistryType = Registry> {
     service: T,
     fn: VisitFn<TRegistry, T>,
   ): void;
-  onServiceAdded(fn: ServiceDescriptorListener): () => void;
+  onServiceAdded(
+    fn: ServiceDescriptorListener,
+    noInitial?: boolean,
+  ): () => void;
 }
 export class Context<TRegistry extends RegistryType = Registry>
   implements Context<TRegistry>
@@ -45,8 +49,17 @@ export class Context<TRegistry extends RegistryType = Registry>
   private listeners: ServiceDescriptorListener[] = [];
   constructor(private readonly parent?: Context<any>) {}
 
-  public onServiceAdded(fn: ServiceDescriptorListener): () => void {
-    fn(...this.map.values());
+  public onServiceAdded(
+    fn: ServiceDescriptorListener,
+    intitialize = true,
+  ): () => void {
+    if (intitialize) {
+      for (const service of this.map.values()) {
+        for (const fn of this.listeners) {
+          fn(service);
+        }
+      }
+    }
     this.listeners.push(fn);
     return () => {
       this.listeners = this.listeners.filter((v) => v !== fn);
@@ -150,8 +163,8 @@ export class Context<TRegistry extends RegistryType = Registry>
         this.invalidate(k, v, seen);
       }
     }
-    this.listeners?.forEach((fn) => fn(ctx));
   }
+
   register<TKey extends PBinJKey<TRegistry>>(
     tkey: TKey,
     ...origArgs: ServiceArgs<TKey, TRegistry> | []
@@ -186,10 +199,21 @@ export class Context<TRegistry extends RegistryType = Registry>
     );
 
     this.map.set(key, newInst);
-    this.listeners.forEach((fn) => fn(newInst));
+    void this.notifyAdd(newInst);
     return newInst;
   }
-
+  private notifyAdd(inst: ServiceDescriptor<TRegistry, any>) {
+    return new Promise<void>((resolve) => {
+      setTimeout(
+        (listeners) => {
+          listeners.forEach((fn) => fn(inst));
+          resolve();
+        },
+        0,
+        this.listeners,
+      );
+    });
+  }
   resolve<TKey extends PBinJKey<TRegistry>>(
     tkey: TKey,
     ...args: ServiceArgs<TKey, TRegistry> | []

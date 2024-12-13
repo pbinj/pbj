@@ -293,7 +293,9 @@ export class ServiceDescriptor<
     }
     return this;
   }
-
+  hasTag(tag: PBinJKeyType<any>) {
+    return this.tags.includes(tag);
+  }
   invalidate = () => {
     if (this.invoked === false) {
       return;
@@ -363,5 +365,5 @@ export class ServiceDescriptor<
 type InterceptFn<T> = (invoke: () => T) => T;
 
 export type ServiceDescriptorListener = (
-  ...args: ServiceDescriptor<any, any>[]
+  service: ServiceDescriptor<any, any>,
 ) => void;
