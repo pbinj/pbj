@@ -9,12 +9,6 @@
   - [Factory Injection](factory-injection.md)
   - [ListOf](list-of.md)
   - [Registry](registry.md)
-- Advanced
-  - [Service Interceptors](advanced/interceptors.md)
-  - [Caching](advanced/caching.md)
-  - [Tags](advanced/tags.md)
-  - [Description](advanced/service-events.md)
-  - [Name](advanced/name.md)
 - Helpers
   - [Async Context](async.md)
   - [Environment Variables](env.md)
@@ -24,6 +18,12 @@
   - [🚧 Drizzle](./plugins/drizzle.md)
   - [🚧 Express](./plugins/express.md)
   - [🚧 Authjs](./plugins/authjs.md)
+- Advanced
+  - [Interceptors](advanced/interceptors.md)
+  - [Caching](advanced/caching.md)
+  - [Tags](advanced/tags.md)
+  - [Events](advanced/service-events.md)
+  - [Naming](advanced/name.md)
 - [Caveats](caveats.md)
 - [Testing](testing.md)
 - [Examples](https://github.com/spbjjus/pbj/tree/main/examples)
