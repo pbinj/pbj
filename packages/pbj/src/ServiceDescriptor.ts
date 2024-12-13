@@ -27,13 +27,13 @@ type EmptyTuple = typeof EMPTY;
 type Args<T> = T extends Constructor
   ? ConstructorParameters<T>
   : T extends Fn
-    ? Parameters<T>
-    : EmptyTuple;
+  ? Parameters<T>
+  : EmptyTuple;
 type Returns<T> = T extends Constructor
   ? InstanceType<T>
   : T extends Fn
-    ? ReturnType<T>
-    : T;
+  ? ReturnType<T>
+  : T;
 
 export class ServiceDescriptor<
   TRegistry extends RegistryType,
@@ -293,7 +293,9 @@ export class ServiceDescriptor<
     }
     return this;
   }
-
+  hasTag(tag: PBinJKeyType<any>) {
+    return this.tags.includes(tag);
+  }
   invalidate = () => {
     if (this.invoked === false) {
       return;
@@ -363,5 +365,5 @@ export class ServiceDescriptor<
 type InterceptFn<T> = (invoke: () => T) => T;
 
 export type ServiceDescriptorListener = (
-  ...args: ServiceDescriptor<any, any>[]
+  service: ServiceDescriptor<any, any>
 ) => void;
