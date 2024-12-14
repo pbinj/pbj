@@ -14,10 +14,10 @@ import type {
 } from "./types";
 import {
   ServiceDescriptor,
-  ServiceDescriptorListener,
+  type ServiceDescriptorListener,
 } from "./ServiceDescriptor";
 import { filterMap, isInherited, keyOf } from "./util";
-import { pbjKey, isPBinJKey } from "./symbols";
+import { pbjKey, isPBinJKey } from "./pbjKey";
 
 export interface Context<TRegistry extends RegistryType = Registry> {
   register<TKey extends PBinJKey<TRegistry>>(
@@ -283,6 +283,9 @@ export class Context<TRegistry extends RegistryType = Registry>
     });
 
     return ret.proxy as any;
+  }
+  toJSON() {
+    return Array.from(this.map.values()).map((v) => v.toJSON());
   }
 }
 

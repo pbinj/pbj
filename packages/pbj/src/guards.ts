@@ -1,6 +1,11 @@
-import { proxyKey } from "./newProxy";
-import { serviceSymbol } from "./symbols";
-import { Constructor, Fn, Primitive, PrimitiveType } from "./types";
+import { serviceSymbol, proxyKey } from "./symbols";
+import type {
+  Constructor,
+  Fn,
+  PBinJKeyType,
+  Primitive,
+  PrimitiveType,
+} from "./types";
 
 export function isSymbol(x: unknown): x is symbol {
   return typeof x === "symbol";

@@ -4,4 +4,6 @@ export * from "./context";
 export * from "./registry";
 export * from "./helpers";
 export * from "./types";
+export * from "./pbjKey";
+
 export { serviceDesciptor } from "./newProxy";
