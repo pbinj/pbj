@@ -7,9 +7,10 @@ import {
   isSymbol,
   PBinJError,
 } from "./guards";
-import { newProxy, proxyKey } from "./newProxy";
+import { newProxy,  } from "./newProxy";
 import type { Registry } from "./registry";
-import { isPBinJKey, pbjKeyName, serviceSymbol } from "./symbols";
+import {  proxyKey, serviceSymbol } from "./symbols";
+import { isPBinJKey, pbjKey, pbjKeyName } from "./pbjKey";
 import type {
   Args,
   CKey,

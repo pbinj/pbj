@@ -1,4 +1,4 @@
-import { hasA, nullableSymbol } from "./guards";
+import { has, hasA, nullableSymbol } from "./guards";
 import { proxyKey, serviceSymbol } from "./symbols";
 import type { Constructor, Fn, ServiceDescriptorI } from "./types";
 
