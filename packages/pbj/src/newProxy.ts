@@ -1,4 +1,4 @@
-import {  hasA, nullableSymbol } from "./guards";
+import { has, hasA, nullableSymbol } from "./guards";
 import { proxyKey, serviceSymbol } from "./symbols";
 import type { Constructor, Fn, ServiceDescriptorI } from "./types";
 
@@ -84,7 +84,7 @@ export function newProxy<T extends Constructor>(
 function isServiceDescriptor<T extends Fn | Constructor | unknown>(
   v: unknown,
 ): v is ServiceDescriptorI<any, T> {
-  return  has(v, serviceSymbol);
+  return has(v, serviceSymbol);
 }
 
 export const serviceDesciptor = <T extends Fn | Constructor | unknown>(

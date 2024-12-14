@@ -1,5 +1,11 @@
 import { serviceSymbol, proxyKey } from "./symbols";
-import type { Constructor, Fn, PBinJKeyType, Primitive, PrimitiveType } from "./types";
+import type {
+  Constructor,
+  Fn,
+  PBinJKeyType,
+  Primitive,
+  PrimitiveType,
+} from "./types";
 
 export function isSymbol(x: unknown): x is symbol {
   return typeof x === "symbol";
@@ -79,5 +85,3 @@ export function isNullish(v: unknown): v is null | undefined {
     ? (v?.nullable ?? false)
     : false;
 }
-
-

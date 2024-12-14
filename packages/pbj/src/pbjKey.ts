@@ -30,16 +30,16 @@ export function asString(key: PBinJKey<any>) {
 }
 
 let count = 0;
-/** 
+/**
  * We want to return a unique number for each anonymous function, it should be the same number
  * for the same function.
  */
-function anonymous(v:Fn){
-    let val = anonymousMap.get(v);
-    if (val != null) {
-      return val;
-    }
-   
-    anonymousMap.set(v, ( val = `<anonymous>@${count++}`));
+function anonymous(v: Fn) {
+  let val = anonymousMap.get(v);
+  if (val != null) {
     return val;
+  }
+
+  anonymousMap.set(v, (val = `<anonymous>@${count++}`));
+  return val;
 }

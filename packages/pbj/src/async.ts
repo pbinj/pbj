@@ -3,12 +3,12 @@ import { has, hasA, isFn, isSymbol, PBinJError } from "./guards";
 import { Context } from "./context";
 import { ServiceDescriptor } from "./ServiceDescriptor";
 import { keyOf } from "./util";
-import { type PBinJKey, type ServiceDescriptor } from "./types";
-import { pbjKey } from "./symbols";
+import { type PBinJKey, type ServiceDescriptorI } from "./types";
+import { pbjKey } from "./pbjKey";
 
 //borrowed from https://eytanmanor.medium.com/should-you-use-asynclocalstorage-2063854356bb
 const asyncLocalStorage = new AsyncLocalStorage<
-  Map<PBinJKey<any>, ServiceDescriptor<any, any>>
+  Map<PBinJKey<any>, ServiceDescriptorI<any, any>>
 >();
 const serviceProxySymbol = pbjKey<Symbol>("@pbj/ServiceDescriptorProxy");
 
@@ -64,7 +64,7 @@ const scoped: Context["scoped"] = function (this: Context, key) {
 
 function getServiceDescription(
   key: PBinJKey<any>,
-): ServiceDescriptor<any, any> {
+): ServiceDescriptorI<any, any> {
   const serviceDesc = asyncLocalStorage.getStore()?.get(key);
   if (!serviceDesc) {
     throw new PBinJError(

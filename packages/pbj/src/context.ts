@@ -10,6 +10,7 @@ import type {
   RegistryType,
   ServiceArgs,
   PBinJKeyType,
+  Service,
 } from "./types";
 import {
   ServiceDescriptor,

@@ -1,5 +1,5 @@
 import { context } from "./context";
-import { pbjKey } from "./symbols";
+import { pbjKey } from "./pbjKey";
 import { pathOf } from "./helpers";
 
 export const Default = {

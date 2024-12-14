@@ -7,9 +7,10 @@ import {
   isSymbol,
   PBinJError,
 } from "./guards";
-import { newProxy, proxyKey } from "./newProxy";
+import { newProxy } from "./newProxy";
 import type { Registry } from "./registry";
-import { isPBinJKey, pbjKeyName, serviceSymbol } from "./symbols";
+import { proxyKey, serviceSymbol } from "./symbols";
+import { isPBinJKey, pbjKey, pbjKeyName } from "./pbjKey";
 import type {
   Args,
   CKey,
@@ -49,7 +50,7 @@ export class ServiceDescriptor<
     return new ServiceDescriptor(service, service, args, false);
   }
 
-//  public readonly [serviceSymbol]: PBinJKey<TRegistry>;
+  //  public readonly [serviceSymbol]: PBinJKey<TRegistry>;
   dependencies?: Set<CKey>;
   private _instance?: Returns<T>;
   public invoked = false;
@@ -87,7 +88,7 @@ export class ServiceDescriptor<
   }
 
   get name() {
-    return this._name ?? asString(this[serviceSymbol])
+    return this._name ?? asString(this[serviceSymbol]);
   }
 
   set name(name: string | undefined) {
