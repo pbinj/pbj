@@ -1,6 +1,6 @@
-import { Registry } from "./registry";
+import { type Registry } from "./registry";
 import { pbj } from "./context";
-import { PBinJKey, RegistryType, ValueOf } from "./types";
+import type { PBinJKey, RegistryType, ValueOf } from "./types";
 
 type PathOf<
   T,

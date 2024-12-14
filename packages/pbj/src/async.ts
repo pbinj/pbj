@@ -3,7 +3,7 @@ import { has, hasA, isFn, isSymbol, PBinJError } from "./guards";
 import { Context } from "./context";
 import { ServiceDescriptor } from "./ServiceDescriptor";
 import { keyOf } from "./util";
-import { PBinJKey } from "./types";
+import { type PBinJKey, type ServiceDescriptor } from "./types";
 import { pbjKey } from "./symbols";
 
 //borrowed from https://eytanmanor.medium.com/should-you-use-asynclocalstorage-2063854356bb
