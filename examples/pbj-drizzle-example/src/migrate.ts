@@ -9,7 +9,7 @@ register();
 
 export async function migrate(
   db = pbj(drizzlePBinJKey),
-  migrationsFolder = `${process.cwd()}/drizzle`,
+  migrationsFolder = `${process.cwd()}/drizzle`
 ) {
   console.log("Running migrations from: %s", migrationsFolder);
 
