@@ -1,5 +1,5 @@
 import { it, describe, expect } from "vitest";
-import { pbjKey } from "../symbols";
+import { pbjKey } from "../pbjKey";
 import { ServiceDescriptor } from "../ServiceDescriptor";
 describe("ServiceDescription", () => {
   describe("ServiceDescription#name", () => {
@@ -11,7 +11,8 @@ describe("ServiceDescription", () => {
       expect(new ServiceDescriptor(class A {}).name).toEqual("A");
     });
     it("should return anonymous", () => {
-      expect(new ServiceDescriptor(() => "what").name).toEqual("<anonymous>");
+      expect(new ServiceDescriptor(() => "what").name).toEqual("<anonymous>@0");
+      expect(new ServiceDescriptor(() => "what").name).toEqual("<anonymous>@1");
     });
     it("should use function name", () => {
       const myFunc = () => "w";
