@@ -8,8 +8,8 @@
 
     "paths": {
       "@/*": ["./src/*"],
-      "@pbinj/pbj/*":["./node_modules/@pbinj/pbj/src/*.ts"],
-      "@pbinj/pbj":["./node_modules/@pbinj/pbj/src/index.ts"]
+      "@pbinj/pbj/*": ["./node_modules/@pbinj/pbj/src/*.ts"],
+      "@pbinj/pbj": ["./node_modules/@pbinj/pbj/src/index.ts"]
     }
   }
 }
