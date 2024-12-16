@@ -26,8 +26,7 @@ describe("onServiceAdded", () => {
     ctx.register(pbjKey<string>("intital"), "initial");
 
     ctx.onServiceAdded((service) => {
-        events.push(`changed: ${service.name}`);
-      
+      events.push(`changed: ${service.name}`);
     });
 
     // Update service
