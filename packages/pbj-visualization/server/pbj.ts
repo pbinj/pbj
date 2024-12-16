@@ -2,13 +2,16 @@ import {  pbjKey, context } from "@pbinj/pbj";
 import { env } from "@pbinj/pbj/env";
 import express from "express";
 
+/**
+ * CJS / ESM madness.   
+ */
 const dirname = (() => {
   try {
   
       //@ts-ignore
-      return new URL(".", import.meta.url).pathname;
+      return new URL("..", import.meta.url).pathname;
     } catch (e) {
-      return __dirname;
+      return `${__dirname}/..`;
     }
 })();
 export const serverConfigPBinJKey = pbjKey<ServerConfig>("serverConfig");
