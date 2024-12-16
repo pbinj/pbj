@@ -1,5 +1,15 @@
 # @pbinj/pbj
 
+## 1.0.0
+
+### Minor Changes
+
+- c9efd95: Changed the onServicesAdd api so that it is more obvious and easier to use
+
+### Patch Changes
+
+- cb5246a: Added visualization and commonjs packaging
+
 ## 0.4.3
 
 ### Patch Changes

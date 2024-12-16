@@ -1,5 +1,17 @@
 # @pbinj/pbj-metrics
 
+## 1.0.0
+
+### Minor Changes
+
+- c9efd95: Changed the onServicesAdd api so that it is more obvious and easier to use
+
+### Patch Changes
+
+- Updated dependencies [c9efd95]
+- Updated dependencies [cb5246a]
+  - @pbinj/pbj@1.0.0
+
 ## 0.4.3
 
 ### Patch Changes
