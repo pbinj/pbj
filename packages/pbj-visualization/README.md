@@ -1,5 +1,6 @@
 # pbj-visualization
-This provides a view of your  PBinJ context.   Both in network and table form.
+
+This provides a view of your PBinJ context. Both in network and table form.
 
 ## Project Setup
 

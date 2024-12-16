@@ -1,18 +1,17 @@
-import {  pbjKey, context } from "@pbinj/pbj";
+import { pbjKey, context } from "@pbinj/pbj";
 import { env } from "@pbinj/pbj/env";
 import express from "express";
 
 /**
- * CJS / ESM madness.   
+ * CJS / ESM madness.
  */
 const dirname = (() => {
   try {
-  
-      //@ts-ignore
-      return new URL("..", import.meta.url).pathname;
-    } catch (e) {
-      return `${__dirname}/..`;
-    }
+    //@ts-ignore
+    return new URL("..", import.meta.url).pathname;
+  } catch (e) {
+    return `${__dirname}/..`;
+  }
 })();
 export const serverConfigPBinJKey = pbjKey<ServerConfig>("serverConfig");
 export class ServerConfig {
@@ -20,7 +19,7 @@ export class ServerConfig {
     private _port = env("PJB_PORT", "3000"),
     private _host = env("PJB_HOST", "localhost"),
     private _path = env("PJB_PATH", "/"),
-  ) { }
+  ) {}
   get host() {
     return this._host + "";
   }
@@ -33,7 +32,6 @@ export class ServerConfig {
   get path() {
     return this._path + "";
   }
-
 }
 context.register(serverConfigPBinJKey, ServerConfig);
 
@@ -49,9 +47,7 @@ export async function register(ctx = context) {
     res.send(JSON.stringify(ctx.toJSON()));
   });
 
-
   app.listen(config.port, config.host, () => {
     console.log("PBinJ visualization server started at: %s", config.url);
   });
- 
 }

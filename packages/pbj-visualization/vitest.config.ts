@@ -6,7 +6,7 @@ export default mergeConfig(
   viteConfig,
   defineConfig({
     test: {
-          pool: "vmThreads",
+      pool: "vmThreads",
 
       css: true,
       environment: "jsdom",

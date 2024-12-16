@@ -28,12 +28,12 @@ const scoped: Context["scoped"] = function (this: Context, key) {
     serviceDesc[serviceProxySymbol] !== (keyOf(key) as any)
   ) {
     throw new PBinJError(
-      `key ${String(key)} already registered as '${String(serviceDesc[serviceProxySymbol])}', can not register a key into more than one scope`
+      `key ${String(key)} already registered as '${String(serviceDesc[serviceProxySymbol])}', can not register a key into more than one scope`,
     );
   }
   if (has(serviceDesc, asyncLocalSymbol)) {
     throw new PBinJError(
-      `key ${String(key)} already registered as async scoped, can not register a key into more than one scope`
+      `key ${String(key)} already registered as async scoped, can not register a key into more than one scope`,
     );
   }
 
@@ -54,8 +54,8 @@ const scoped: Context["scoped"] = function (this: Context, key) {
           args as any,
           false,
           isFn(service),
-          `async scoped pbj '${String(key)}'`
-        )
+          `async scoped pbj '${String(key)}'`,
+        ),
       );
     }
     return asyncLocalStorage.run(map, next) as any;
@@ -63,12 +63,12 @@ const scoped: Context["scoped"] = function (this: Context, key) {
 };
 
 function getServiceDescription(
-  key: PBinJKey<any>
+  key: PBinJKey<any>,
 ): ServiceDescriptorI<any, any> {
   const serviceDesc = asyncLocalStorage.getStore()?.get(key);
   if (!serviceDesc) {
     throw new PBinJError(
-      `key ${String(key)} not found in async storage, make sure the callback has been handled.`
+      `key ${String(key)} not found in async storage, make sure the callback has been handled.`,
     );
   }
   return serviceDesc;

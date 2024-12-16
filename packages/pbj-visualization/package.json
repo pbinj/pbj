@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "type": "module",
   "typings": "./dist/esm/index.d.ts",
-
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pbinj/pbj.git"
@@ -18,7 +17,7 @@
     "typescript"
   ],
   "exports": {
-    ".":{
+    ".": {
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
     }
@@ -38,7 +37,7 @@
     "preview": "vite preview",
     "test:unit": "vitest",
     "build-only": "vite build",
-    "build-server":"tsc -p ./server/tsconfig.json && tsc -p ./server/tsconfig.cjs.json",
+    "build-server": "tsc -p ./server/tsconfig.json && tsc -p ./server/tsconfig.cjs.json",
     "type-check": "vue-tsc --build",
     "start": "tsx --tsconfig ./server/tsconfig.node.json ./server/index.ts ",
     "lint:check": "prettier --check --ignore-path ../../.prettierignore .",
@@ -79,5 +78,5 @@
     "vue-router": "^4.4.5",
     "vue-tsc": "^2.1.10",
     "vuetify": "^3.7.5"
-    }
+  }
 }

@@ -15,7 +15,7 @@ export default defineConfig({
     },
   },
   build: {
-      outDir: "./web",
+    outDir: "./web",
   },
   server: {
     proxy: {

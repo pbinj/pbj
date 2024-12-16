@@ -19,7 +19,7 @@ const toPath = (path: string) => path.split(/\.|\[(.+?)\]/g).filter(Boolean);
 function get<T, TKey extends string>(
   obj: T,
   key: TKey,
-  defaultValue?: PathOf<T, TKey> | undefined
+  defaultValue?: PathOf<T, TKey> | undefined,
 ): PathOf<T, TKey> {
   const value = toPath(key).reduce((acc, part) => {
     return (acc as any)?.[part];
@@ -34,7 +34,7 @@ export function pathOf<
 >(
   service: T,
   path: TPath,
-  defaultValue?: PathOf<ValueOf<TRegistry, T>, TPath> | undefined
+  defaultValue?: PathOf<ValueOf<TRegistry, T>, TPath> | undefined,
 ) {
   return (ctx = pbj(service)) =>
     get(ctx as ValueOf<TRegistry, T>, path, defaultValue);
