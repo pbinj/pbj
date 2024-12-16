@@ -5,10 +5,11 @@ import vue from "@vitejs/plugin-vue";
 import vueJsx from "@vitejs/plugin-vue-jsx";
 import vueDevTools from "vite-plugin-vue-devtools";
 import vuetify from "vite-plugin-vuetify";
+import tsConfigPaths from "vite-tsconfig-paths";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue(), vueJsx(), vueDevTools(), vuetify()],
+  plugins: [tsConfigPaths(), vue(), vueJsx(), vueDevTools(), vuetify()],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
