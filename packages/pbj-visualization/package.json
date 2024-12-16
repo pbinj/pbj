@@ -7,6 +7,10 @@
     "type": "git",
     "url": "git+https://github.com/pbinj/pbj.git"
   },
+  "description": "A lightweight Dependency Injection (DI) framework for Node.js, based on proxies.",
+  "bin": {
+    "pbj-visualization": "./server/server.ts"
+  },
   "author": "Justin Spears <speajus@gmail.com>",
   "license": "MIT",
   "keywords": [
