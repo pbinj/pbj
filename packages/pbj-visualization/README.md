@@ -2,6 +2,8 @@
 
 This provides a view of your PBinJ context. Both in network and table form.
 
+see [docs](https://pbinj.github.io/pbj/plugins/visualization)
+
 ## Project Setup
 
 ```sh
