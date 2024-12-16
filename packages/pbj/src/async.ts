@@ -1,10 +1,10 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import { has, hasA, isFn, isSymbol, PBinJError } from "./guards";
-import { Context } from "./context";
-import { ServiceDescriptor } from "./ServiceDescriptor";
-import { keyOf } from "./util";
-import { type PBinJKey, type ServiceDescriptorI } from "./types";
-import { pbjKey } from "./pbjKey";
+import { has, hasA, isFn, isSymbol, PBinJError } from "./guards.js";
+import { Context } from "./context.js";
+import { ServiceDescriptor } from "./ServiceDescriptor.js";
+import { keyOf } from "./util.js";
+import { type PBinJKey, type ServiceDescriptorI } from "./types.js";
+import { pbjKey } from "./pbjKey.js";
 
 //borrowed from https://eytanmanor.medium.com/should-you-use-asynclocalstorage-2063854356bb
 const asyncLocalStorage = new AsyncLocalStorage<
@@ -28,12 +28,12 @@ const scoped: Context["scoped"] = function (this: Context, key) {
     serviceDesc[serviceProxySymbol] !== (keyOf(key) as any)
   ) {
     throw new PBinJError(
-      `key ${String(key)} already registered as '${String(serviceDesc[serviceProxySymbol])}', can not register a key into more than one scope`,
+      `key ${String(key)} already registered as '${String(serviceDesc[serviceProxySymbol])}', can not register a key into more than one scope`
     );
   }
   if (has(serviceDesc, asyncLocalSymbol)) {
     throw new PBinJError(
-      `key ${String(key)} already registered as async scoped, can not register a key into more than one scope`,
+      `key ${String(key)} already registered as async scoped, can not register a key into more than one scope`
     );
   }
 
@@ -54,8 +54,8 @@ const scoped: Context["scoped"] = function (this: Context, key) {
           args as any,
           false,
           isFn(service),
-          `async scoped pbj '${String(key)}'`,
-        ),
+          `async scoped pbj '${String(key)}'`
+        )
       );
     }
     return asyncLocalStorage.run(map, next) as any;
@@ -63,12 +63,12 @@ const scoped: Context["scoped"] = function (this: Context, key) {
 };
 
 function getServiceDescription(
-  key: PBinJKey<any>,
+  key: PBinJKey<any>
 ): ServiceDescriptorI<any, any> {
   const serviceDesc = asyncLocalStorage.getStore()?.get(key);
   if (!serviceDesc) {
     throw new PBinJError(
-      `key ${String(key)} not found in async storage, make sure the callback has been handled.`,
+      `key ${String(key)} not found in async storage, make sure the callback has been handled.`
     );
   }
   return serviceDesc;

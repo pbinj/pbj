@@ -1,11 +1,5 @@
-import { serviceSymbol, proxyKey } from "./symbols";
-import type {
-  Constructor,
-  Fn,
-  PBinJKeyType,
-  Primitive,
-  PrimitiveType,
-} from "./types";
+import { serviceSymbol, proxyKey } from "./symbols.js";
+import type { Constructor, Fn, Primitive, PrimitiveType } from "./types.js";
 
 export function isSymbol(x: unknown): x is symbol {
   return typeof x === "symbol";
@@ -33,7 +27,7 @@ export function isObjectish(x: unknown): x is object {
 
 export function has(
   x: unknown,
-  k: PropertyKey,
+  k: PropertyKey
 ): x is { [k in PropertyKey]: unknown } {
   return isObjectish(x) && k in x;
 }
@@ -41,7 +35,7 @@ export function has(
 export function hasA<V>(
   x: unknown,
   k: PropertyKey,
-  guard: isA<V>,
+  guard: isA<V>
 ): x is { [k in PropertyKey]: V } {
   return has(x, k) ? guard(x[k]) : false;
 }

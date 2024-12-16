@@ -1,6 +1,6 @@
-import { hasA, isSymbol } from "./guards";
-import { serviceSymbol } from "./symbols";
-import type { CKey, PBinJKey, Service } from "./types";
+import { hasA, isSymbol } from "./guards.js";
+import { serviceSymbol } from "./symbols.js";
+import type { CKey, PBinJKey, Service } from "./types.js";
 
 export function keyOf(key: PBinJKey<any> | Service): CKey {
   return hasA(key, serviceSymbol, isSymbol)

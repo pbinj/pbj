@@ -5,8 +5,8 @@ import * as d3 from "d3"
 import 'd3-force';
 import {
   ForceLayout,
-  ForceNodeDatum,
-  ForceEdgeDatum,
+  type ForceNodeDatum,
+  type ForceEdgeDatum,
 } from "v-network-graph/lib/force-layout"
 import type { ServiceI } from "../types";
 import { ref } from 'vue';
@@ -51,8 +51,8 @@ const configs =
 
   
 
-const nodes = {};
-const edges = {};
+const nodes:Record<string, ServiceI> = {};
+const edges:Record<string, { source: string, target: string }> = {};
     for (const value of props.services ) {
       nodes[value.name] = value;
       for (const dep of value.dependencies) {

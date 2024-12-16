@@ -1,4 +1,4 @@
-import { keyOf } from "./util";
+import { keyOf } from "./util.js";
 import {
   has,
   isConstructor,
@@ -6,11 +6,11 @@ import {
   isPrimitive,
   isSymbol,
   PBinJError,
-} from "./guards";
-import { newProxy } from "./newProxy";
-import type { Registry } from "./registry";
-import { proxyKey, serviceSymbol } from "./symbols";
-import { isPBinJKey, pbjKey, pbjKeyName } from "./pbjKey";
+} from "./guards.js";
+import { newProxy } from "./newProxy.js";
+import type { Registry } from "./registry.js";
+import { proxyKey, serviceSymbol } from "./symbols.js";
+import { isPBinJKey, pbjKey, pbjKeyName } from "./pbjKey.js";
 import type {
   Args,
   CKey,
@@ -23,8 +23,8 @@ import type {
   Returns,
   ServiceDescriptorI,
   ValueOf,
-} from "./types";
-import { asString } from "./pbjKey";
+} from "./types.js";
+import { asString } from "./pbjKey.js";
 
 const EMPTY = [] as const;
 

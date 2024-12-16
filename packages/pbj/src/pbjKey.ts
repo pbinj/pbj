@@ -1,5 +1,5 @@
-import { isFn, isSymbol } from "./guards";
-import type { Fn, PBinJKey, PBinJKeyType } from "./types";
+import { isFn, isSymbol } from "./guards.js";
+import type { Fn, PBinJKey, PBinJKeyType } from "./types.js";
 
 const pbjKeyMap = new WeakMap<{}, string>();
 const anonymousMap = new WeakMap<Fn, string>();

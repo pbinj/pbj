@@ -1,6 +1,6 @@
-import { context } from "./context";
-import { pbjKey } from "./pbjKey";
-import { pathOf } from "./helpers";
+import { context } from "./context.js";
+import { pbjKey } from "./pbjKey.js";
+import { pathOf } from "./helpers.js";
 
 export const Default = {
   env: process.env,
@@ -17,16 +17,16 @@ context.register(envPBinJKey, () => Default.env);
 
 export function env<K extends keyof PBinJEnv & string, D extends string>(
   envKey: K,
-  defaultValue?: D,
+  defaultValue?: D
 ): string | D {
   return context.register(
     Symbol.for(`@pbj/env/${envKey}`),
-    pathOf(envPBinJKey, envKey, defaultValue as any),
+    pathOf(envPBinJKey, envKey, defaultValue as any)
   ).proxy;
 }
 
 export function envRequired<K extends keyof PBinJEnv & string>(
-  envKey: K,
+  envKey: K
 ): string {
   return context
     .register(Symbol.for(`@pbj/env/${envKey}`), pathOf(envPBinJKey, envKey))

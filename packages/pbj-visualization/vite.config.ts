@@ -14,6 +14,9 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
+  build: {
+      outDir: "./web",
+  },
   server: {
     proxy: {
       "/api/services": {

@@ -1,12 +1,12 @@
-import { has, hasA, nullableSymbol } from "./guards";
-import { proxyKey, serviceSymbol } from "./symbols";
-import type { Constructor, Fn, ServiceDescriptorI } from "./types";
+import { has, hasA, nullableSymbol } from "./guards.js";
+import { proxyKey, serviceSymbol } from "./symbols.js";
+import type { Constructor, Fn, ServiceDescriptorI } from "./types.js";
 
 export const serviceDescriptorKey = Symbol("@pbj/service-descriptor");
 
 export function newProxy<T extends Constructor>(
   key: unknown,
-  service: ServiceDescriptorI<any, any>,
+  service: ServiceDescriptorI<any, any>
 ) {
   return new Proxy({} as InstanceType<T>, {
     get(_target, prop) {
@@ -82,13 +82,13 @@ export function newProxy<T extends Constructor>(
 }
 
 function isServiceDescriptor<T extends Fn | Constructor | unknown>(
-  v: unknown,
+  v: unknown
 ): v is ServiceDescriptorI<any, T> {
   return has(v, serviceSymbol);
 }
 
 export const serviceDesciptor = <T extends Fn | Constructor | unknown>(
-  v: T,
+  v: T
 ): ServiceDescriptorI<any, T> | undefined => {
   if (hasA(v, serviceDescriptorKey, isServiceDescriptor)) {
     return v[serviceDescriptorKey] as any;
