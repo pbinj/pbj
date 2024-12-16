@@ -62,7 +62,7 @@ The database configuration is managed through the `ClientConfig` class:
 class ClientConfig {
   constructor(
     private _url = envRequired("DATABASE_URL"),
-    public _authToken = envRequired("DATABASE_AUTH_TOKEN"),
+    public _authToken = envRequired("DATABASE_AUTH_TOKEN")
   ) {}
 }
 ```
