@@ -1,0 +1,6 @@
+src/__test__
+dist/__test__
+.github
+.gitattributes
+.gitignore
+.vscode

@@ -1,5 +1,5 @@
-import { pbj } from "../../context";
-import { DBService } from "./db";
+import { pbj } from "../../context.js";
+import { DBService } from "./db.js";
 
 export const authServiceSymbol = Symbol("auth-service-type");
 

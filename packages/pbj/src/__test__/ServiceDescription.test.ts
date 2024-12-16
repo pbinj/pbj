@@ -1,6 +1,6 @@
 import { it, describe, expect } from "vitest";
-import { pbjKey } from "../pbjKey";
-import { ServiceDescriptor } from "../ServiceDescriptor";
+import { pbjKey } from "../pbjKey.js";
+import { ServiceDescriptor } from "../ServiceDescriptor.js";
 describe("ServiceDescription", () => {
   describe("ServiceDescription#name", () => {
     it("should name it with pbjkey", () => {
