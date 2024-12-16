@@ -132,7 +132,7 @@ describe("context", () => {
       constructor(
         readonly a = pbj(TA),
         readonly b = pbj(TB),
-        readonly c = pbj(TC)
+        readonly c = pbj(TC),
       ) {}
       toString() {
         return [this.a, this.b, this.c].join("-");
@@ -243,7 +243,7 @@ describe("context", () => {
     class TestA {
       constructor(
         readonly a: number,
-        public b = pbj(pkey)
+        public b = pbj(pkey),
       ) {}
     }
     ctx.register(pkey, () => "test");
@@ -257,7 +257,7 @@ describe("context", () => {
         readonly a: number,
         public b: string,
         public c: string,
-        public d: string
+        public d: string,
       ) {}
     }
     const result = ctx.resolve(TestAlot, 2, "b", "c", "d");
