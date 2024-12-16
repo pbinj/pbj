@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { pathOf } from "../helpers";
-import { context, pbjKey } from "../index";
+import { pathOf } from "../helpers.js";
+import { context, pbjKey } from "../index.js";
 
 describe("helpers", () => {
   describe("toPath", () => {

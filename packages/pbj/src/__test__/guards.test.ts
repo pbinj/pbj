@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { isConstructor, isPrimitive, isPrimitiveType } from "../guards";
+import { isConstructor, isPrimitive, isPrimitiveType } from "../guards.js";
 
 describe("guards test", () => {
   it("should be a constructor", () => {

@@ -8,9 +8,9 @@ import {
   type RegistryType,
   serviceSymbol,
 } from "@pbinj/pbj";
-import { EmailService } from "./sample-services/email";
-import { AuthService, authServiceSymbol } from "./sample-services/auth";
-import { connectionPBinJKey, DBService } from "./sample-services/db";
+import { EmailService } from "./sample-services/email.js";
+import { AuthService, authServiceSymbol } from "./sample-services/auth.js";
+import { connectionPBinJKey, DBService } from "./sample-services/db.js";
 
 const aiSymbol = Symbol("a");
 const abSymbol = Symbol("b");
