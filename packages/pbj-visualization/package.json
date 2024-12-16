@@ -1,0 +1,87 @@
+{
+  "name": "@pbinj/pbj-visualization",
+  "version": "0.0.0",
+  "type": "module",
+  "typings": "./dist/esm/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pbinj/pbj.git"
+  },
+  "description": "A lightweight Dependency Injection (DI) framework for Node.js, based on proxies.",
+  "bin": {
+    "pbj-visualization": "./dist/cli.js"
+  },
+  "author": "Justin Spears <speajus@gmail.com>",
+  "license": "MIT",
+  "keywords": [
+    "dependency injection",
+    "di",
+    "injection",
+    "proxy",
+    "typescript"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist",
+    "web"
+  ],
+  "main": "dist/index.js",
+  "scripts": {
+    "clean": "rm -rf dist && rm -rf web",
+    "dev": "pnpm run start & vite",
+    "build": "run-p type-check \"build-only {@}\" build-server  --",
+    "preview": "vite preview",
+    "test:unit": "vitest",
+    "build-only": "vite build",
+    "build-server": "tsc -p ./server/tsconfig.json && tsc -p ./server/tsconfig.cjs.json",
+    "type-check": "vue-tsc --build",
+    "start": "tsx --tsconfig ./server/tsconfig.node.json ./server/index.ts ",
+    "lint:check": "prettier --check --ignore-path ../../.prettierignore .",
+    "lint": "prettier --ignore-path ../../.prettierignore --write  ."
+  },
+  "peerDependencies": {
+    "@pbinj/pbj": "workspace:*"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "vite-tsconfig-paths": "^5.1.2"
+  },
+  "devDependencies": {
+    "@mdi/font": "^7.4.47",
+    "@pbinj/pbj": "workspace:*",
+    "@tsconfig/node22": "^22.0.0",
+    "@types/d3": "^7.4.3",
+    "@types/express": "^5.0.0",
+    "@types/jsdom": "^21.1.7",
+    "@types/node": "^22.9.3",
+    "@types/ws": "^8.5.13",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vitejs/plugin-vue-jsx": "^4.1.1",
+    "@vue/test-utils": "^2.4.6",
+    "@vue/tsconfig": "^0.7.0",
+    "d3": "^7.9.0",
+    "d3-force": "^3.0.0",
+    "jsdom": "^25.0.1",
+    "npm-run-all2": "^7.0.1",
+    "pinia": "^2.2.6",
+    "tsx": "^4.19.2",
+    "typescript": "~5.6.3",
+    "v-network-graph": "^0.9.18",
+    "vite": "^6.0.1",
+    "vite-plugin-vue-devtools": "^7.6.5",
+    "vite-plugin-vuetify": "^2.0.4",
+    "vitest": "^2.1.5",
+    "vue": "^3.5.13",
+    "vue-router": "^4.4.5",
+    "vue-tsc": "^2.1.10",
+    "vuetify": "^3.7.5"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "include": ["env.d.ts", "src/**/*", "src/**/*.vue", "server/pbj.ts"],
+  "exclude": ["src/**/__tests__/*"],
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+
+    "paths": {
+      "@/*": ["./src/*"],
+      "@pbinj/pbj/*": ["./node_modules/@pbinj/pbj/src/*.ts"],
+      "@pbinj/pbj": ["./node_modules/@pbinj/pbj/src/index.ts"]
+    }
+  }
+}
