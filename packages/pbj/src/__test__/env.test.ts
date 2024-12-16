@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { env } from "../env";
+import { env } from "../env.js";
 
 describe("env", () => {
   it("should return the value of the environment variable", () => {

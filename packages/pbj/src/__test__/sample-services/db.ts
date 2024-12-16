@@ -1,5 +1,5 @@
 import { pbjKey, serviceSymbol } from "@pbinj/pbj";
-import { pbj } from "../../context";
+import { pbj } from "../../context.js";
 
 export const dbServiceSymbol = pbjKey<typeof DBService>("db-service-type");
 

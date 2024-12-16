@@ -1,5 +1,5 @@
-import { authServiceSymbol } from "./auth";
-import { DBService, IDBService } from "./db";
+import { authServiceSymbol } from "./auth.js";
+import { DBService, IDBService } from "./db.js";
 import { pbj, serviceSymbol } from "@pbinj/pbj";
 declare module "@pbinj/pbj" {
   interface Registry {

@@ -1,7 +1,6 @@
 import { it, describe, expect } from "vitest";
-import { pbj, pbjKey, createNewContext } from "../index";
-import { a } from "vitest/dist/chunks/suite.B2jumIFP";
-import { env } from "../env";
+import { pbjKey, createNewContext } from "../index.js";
+
 const wait = (ms: number = 10) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 describe("onServiceAdded", () => {
@@ -26,10 +25,8 @@ describe("onServiceAdded", () => {
     // Initial registration
     ctx.register(pbjKey<string>("intital"), "initial");
 
-    ctx.onServiceAdded((...services) => {
-      for (const service of services) {
-        events.push(`changed: ${service.name}`);
-      }
+    ctx.onServiceAdded((service) => {
+      events.push(`changed: ${service.name}`);
     });
 
     // Update service
