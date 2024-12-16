@@ -110,6 +110,5 @@
       "@pbinj/pbj": ["./src/index.ts"]
     }
   },
-  "include": ["src"],
-  "exclude": ["**/__test__/**"]
+  "include": ["src"]
 }
