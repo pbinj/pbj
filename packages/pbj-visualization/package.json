@@ -9,7 +9,7 @@
   },
   "description": "A lightweight Dependency Injection (DI) framework for Node.js, based on proxies.",
   "bin": {
-    "pbj-visualization": "./server/server.ts"
+    "pbj-visualization": "./dist/cli.js"
   },
   "author": "Justin Spears <speajus@gmail.com>",
   "license": "MIT",
