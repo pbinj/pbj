@@ -1,4 +1,4 @@
-import { destroySymbol, removeSymbol, serviceSymbol } from "./symbols";
+import { destroySymbol, removeSymbol, serviceSymbol } from "./symbols.js";
 
 export type Constructor<T = any> = new (...args: any[]) => T;
 export type Fn<T = any> = (...args: any[]) => T;

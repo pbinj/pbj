@@ -1,5 +1,5 @@
-import { type Registry } from "./registry";
-import { isConstructor, isFn, isSymbol, PBinJError } from "./guards";
+import { type Registry } from "./registry.js";
+import { isConstructor, isFn, isSymbol, PBinJError } from "./guards.js";
 import type {
   Constructor,
   ValueOf,
@@ -11,13 +11,13 @@ import type {
   ServiceArgs,
   PBinJKeyType,
   Service,
-} from "./types";
+} from "./types.js";
 import {
   ServiceDescriptor,
   type ServiceDescriptorListener,
-} from "./ServiceDescriptor";
-import { filterMap, isInherited, keyOf } from "./util";
-import { pbjKey, isPBinJKey } from "./pbjKey";
+} from "./ServiceDescriptor.js";
+import { filterMap, isInherited, keyOf } from "./util.js";
+import { pbjKey, isPBinJKey } from "./pbjKey.js";
 
 export interface Context<TRegistry extends RegistryType = Registry> {
   register<TKey extends PBinJKey<TRegistry>>(

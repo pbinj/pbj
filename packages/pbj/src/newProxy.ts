@@ -1,6 +1,6 @@
-import { has, hasA, nullableSymbol } from "./guards";
-import { proxyKey, serviceSymbol } from "./symbols";
-import type { Constructor, Fn, ServiceDescriptorI } from "./types";
+import { has, hasA, nullableSymbol } from "./guards.js";
+import { proxyKey, serviceSymbol } from "./symbols.js";
+import type { Constructor, Fn, ServiceDescriptorI } from "./types.js";
 
 export const serviceDescriptorKey = Symbol("@pbj/service-descriptor");
 

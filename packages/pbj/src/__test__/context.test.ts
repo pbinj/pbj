@@ -1,16 +1,16 @@
 import { it, describe, expect } from "vitest";
 import {
   context as ctx,
+  createNewContext,
   destroySymbol,
   pbj,
   pbjKey,
-  RegistryType,
+  type RegistryType,
   serviceSymbol,
 } from "@pbinj/pbj";
 import { EmailService } from "./sample-services/email";
 import { AuthService, authServiceSymbol } from "./sample-services/auth";
 import { connectionPBinJKey, DBService } from "./sample-services/db";
-import { createNewContext } from "@pbinj/pbj";
 
 const aiSymbol = Symbol("a");
 const abSymbol = Symbol("b");

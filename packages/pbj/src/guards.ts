@@ -1,11 +1,5 @@
-import { serviceSymbol, proxyKey } from "./symbols";
-import type {
-  Constructor,
-  Fn,
-  PBinJKeyType,
-  Primitive,
-  PrimitiveType,
-} from "./types";
+import { serviceSymbol, proxyKey } from "./symbols.js";
+import type { Constructor, Fn, Primitive, PrimitiveType } from "./types.js";
 
 export function isSymbol(x: unknown): x is symbol {
   return typeof x === "symbol";

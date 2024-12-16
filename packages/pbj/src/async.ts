@@ -1,10 +1,10 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import { has, hasA, isFn, isSymbol, PBinJError } from "./guards";
-import { Context } from "./context";
-import { ServiceDescriptor } from "./ServiceDescriptor";
-import { keyOf } from "./util";
-import { type PBinJKey, type ServiceDescriptorI } from "./types";
-import { pbjKey } from "./pbjKey";
+import { has, hasA, isFn, isSymbol, PBinJError } from "./guards.js";
+import { Context } from "./context.js";
+import { ServiceDescriptor } from "./ServiceDescriptor.js";
+import { keyOf } from "./util.js";
+import { type PBinJKey, type ServiceDescriptorI } from "./types.js";
+import { pbjKey } from "./pbjKey.js";
 
 //borrowed from https://eytanmanor.medium.com/should-you-use-asynclocalstorage-2063854356bb
 const asyncLocalStorage = new AsyncLocalStorage<
