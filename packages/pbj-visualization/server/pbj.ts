@@ -18,7 +18,7 @@ export class ServerConfig {
   constructor(
     private _port = env("PJB_PORT", "3000"),
     private _host = env("PJB_HOST", "localhost"),
-    private _path = env("PJB_PATH", "/")
+    private _path = env("PJB_PATH", "/"),
   ) {}
   get host() {
     return this._host + "";
