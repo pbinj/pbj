@@ -15,6 +15,7 @@
   - [Path Of](path-of.md)
 - Plugins
   - [Metrics](./plugins/metrics.md)
+  - [Visualization](./plugins/visualization.md)
   - [🚧 Drizzle](./plugins/drizzle.md)
   - [🚧 Express](./plugins/express.md)
   - [🚧 Authjs](./plugins/authjs.md)
