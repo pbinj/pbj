@@ -48,19 +48,21 @@ PBJ_PATH=/pbj        # Base path for the visualization UI
 Or programmatically:
 
 ```typescript
-import { register, VisualizationConfig } from "@pbinj/pbj-visualization";
+import { register, VisualizationConfig, visualizationConfigKey } from "@pbinj/pbj-visualization";
 import { context } from "@pbinj/pbj";
 
-context.register(VisualizationConfig, {
-  port: 4000,
-  host: "0.0.0.0",
-  path: "/debug"
-});
+context.register(visualizationConfigKey,  new VisualizationConfig(4000, "0.0.0.0", "/debug"));
 register(context);
 
 ```
 
-## Features
+## Running as a Server
+PBJ also provides a CLI to run the visualization server standalone. It does however need to load
+your context, so you will need to provide a file to import from.  You can supply multiple files.
+
+```bash
+pnpm pbj-visualization ./path/to/your/pea.ts
+```
 
 ### Network View
 
