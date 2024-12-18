@@ -1,6 +1,6 @@
 import { ExpressAuth, getSession } from "@auth/express";
 import express, { Express } from "express";
-import "@pbinj/pbj/async";
+import "@pbinj/pbj/scope";
 import { context, pbj } from "@pbinj/pbj";
 import { sessionPBinJKey } from "./pbj";
 import { ExpressAuthConfigClass } from "./auth.config";

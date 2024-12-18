@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { context, createNewContext, Fn, pbjKey } from "../index.js";
-import "../async.js";
+import "../scope.js";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 describe("resolveAsync", () => {
