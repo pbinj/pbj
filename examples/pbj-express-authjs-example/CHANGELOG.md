@@ -1,5 +1,14 @@
 # @pbinj/pbj-express-authjs-example
 
+## 1.0.6
+
+### Patch Changes
+
+- 5987271: Adds async support and renames the existing async thing to scope for better accuracy
+- Updated dependencies [5987271]
+  - @pbinj/pbj@1.0.1
+  - pbj-drizzle-example@1.0.6
+
 ## 1.0.5
 
 ### Patch Changes
