@@ -1,6 +1,6 @@
 {
   "name": "pbj-express-authjs-example",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "type": "module",
   "private": true,
   "scripts": {
@@ -21,7 +21,7 @@
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "vite-tsconfig-paths": "^5.1.2",
-    "vitest": "^2.1.5"
+    "vitest": "^2.1.8"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.7.4",

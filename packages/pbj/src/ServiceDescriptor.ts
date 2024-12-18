@@ -1,16 +1,12 @@
-import { keyOf } from "./util";
-import {
-  has,
-  isConstructor,
-  isFn,
-  isPrimitive,
-  isSymbol,
-  PBinJError,
-} from "./guards";
-import { newProxy, proxyKey } from "./newProxy";
-import type { Registry } from "./registry";
-import { isPBinJKey, pbjKeyName, serviceSymbol } from "./symbols";
+import { keyOf } from "./util.js";
+import { has, isConstructor, isFn, isPrimitive, isSymbol } from "./guards.js";
+import { newProxy } from "./newProxy.js";
+import type { Registry } from "./registry.js";
+import { proxyKey, serviceSymbol } from "./symbols.js";
+import { isPBinJKey, pbjKey, pbjKeyName } from "./pbjKey.js";
+import { PBinJError } from "./errors.js";
 import type {
+  Args,
   CKey,
   Constructor,
   Fn,
@@ -18,27 +14,20 @@ import type {
   PBinJKey,
   PBinJKeyType,
   RegistryType,
+  Returns,
+  ServiceDescriptorI,
   ValueOf,
-} from "./types";
+} from "./types.js";
+import { asString } from "./pbjKey.js";
+import { PBinJAsyncError } from "./errors.js";
 
 const EMPTY = [] as const;
-type EmptyTuple = typeof EMPTY;
-
-type Args<T> = T extends Constructor
-  ? ConstructorParameters<T>
-  : T extends Fn
-    ? Parameters<T>
-    : EmptyTuple;
-type Returns<T> = T extends Constructor
-  ? InstanceType<T>
-  : T extends Fn
-    ? ReturnType<T>
-    : T;
 
 export class ServiceDescriptor<
   TRegistry extends RegistryType,
   T extends Constructor | Fn | unknown,
-> {
+> implements ServiceDescriptorI<TRegistry, T>
+{
   static #dependencies = new Set<CKey>();
 
   static value<
@@ -49,14 +38,14 @@ export class ServiceDescriptor<
   }
 
   static singleton<T extends Constructor | Fn>(service: T, ...args: Args<T>) {
-    return new ServiceDescriptor(service, service, args);
+    return new ServiceDescriptor(service, service, args, true);
   }
 
   static factory<T extends Constructor | Fn>(service: T, ...args: Args<T>) {
     return new ServiceDescriptor(service, service, args, false);
   }
 
-  public readonly [serviceSymbol]: PBinJKey<TRegistry>;
+  //  public readonly [serviceSymbol]: PBinJKey<TRegistry>;
   dependencies?: Set<CKey>;
   private _instance?: Returns<T>;
   public invoked = false;
@@ -73,6 +62,7 @@ export class ServiceDescriptor<
 
   public tags: PBinJKeyType<T>[] = [];
   private _name: string | undefined;
+  [serviceSymbol]: PBinJKey<TRegistry>;
   constructor(
     key: PBinJKey<TRegistry>,
     service: T | undefined = undefined,
@@ -93,18 +83,7 @@ export class ServiceDescriptor<
   }
 
   get name() {
-    if (this._name) return this._name;
-
-    if (isSymbol(this[serviceSymbol])) {
-      this._name = isPBinJKey(this[serviceSymbol])
-        ? pbjKeyName(this[serviceSymbol])
-        : this[serviceSymbol].description;
-    } else if (isFn(this[serviceSymbol])) {
-      if (this[serviceSymbol].name) {
-        this._name = this[serviceSymbol].name;
-      }
-    }
-    return this._name || "<anonymous>";
+    return this._name ?? asString(this[serviceSymbol]);
   }
 
   set name(name: string | undefined) {
@@ -293,7 +272,9 @@ export class ServiceDescriptor<
     }
     return this;
   }
-
+  hasTag(tag: PBinJKeyType<any>) {
+    return this.tags.includes(tag);
+  }
   invalidate = () => {
     if (this.invoked === false) {
       return;
@@ -318,10 +299,15 @@ export class ServiceDescriptor<
       );
       return invoke.call(this);
     }
+
     return this._invoke();
   };
 
+  private _promise?: Promise<T>;
   _invoke = (): Returns<T> => {
+    if (this._promise) {
+      throw new PBinJAsyncError(this[serviceSymbol], this._promise);
+    }
     if (!this.invokable) {
       return this.service as Returns<T>;
     }
@@ -334,9 +320,26 @@ export class ServiceDescriptor<
       );
     }
     ServiceDescriptor.#dependencies.clear();
-    const resp = this._factory
-      ? this.service(...this.args)
-      : new (this.service as any)(...this.args);
+    let resp;
+    if (this._factory) {
+      const val = this.service(...this.args);
+      this.addDependency(...ServiceDescriptor.#dependencies);
+
+      if (val instanceof Promise) {
+        this._promise = val;
+        this._promise.then((v) => {
+          this._promise = undefined;
+          this.invalid = false;
+          this.invoked = true;
+          this._instance = v as any;
+        });
+        throw new PBinJAsyncError(this[serviceSymbol], val);
+      }
+      resp = val;
+    } else {
+      resp = new (this.service as any)(...this.args);
+    }
+
     this.addDependency(...ServiceDescriptor.#dependencies);
     this.invoked = true;
     this.primitive = isPrimitive(resp);
@@ -346,7 +349,7 @@ export class ServiceDescriptor<
       );
     }
     if (this.cacheable) {
-      return (this._instance = resp);
+      this._instance = resp;
     }
 
     return resp;
@@ -354,6 +357,21 @@ export class ServiceDescriptor<
   asArray() {
     this._isListOf = true;
     return this;
+  }
+  toJSON() {
+    return {
+      name: this.name,
+      description: this.description,
+      cacheable: this.cacheable,
+      invokable: this.invokable,
+      optional: this.optional,
+      tags: this.tags.map(asString),
+      invoked: this.invoked,
+      invalid: this.invalid,
+      primitive: this.primitive,
+      listOf: this._isListOf,
+      dependencies: Array.from(this.dependencies ?? [], asString as any),
+    };
   }
 }
 /**
@@ -363,5 +381,5 @@ export class ServiceDescriptor<
 type InterceptFn<T> = (invoke: () => T) => T;
 
 export type ServiceDescriptorListener = (
-  ...args: ServiceDescriptor<any, any>[]
+  service: ServiceDescriptor<any, any>,
 ) => void;

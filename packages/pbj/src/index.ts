@@ -1,7 +1,9 @@
-export type { RegistryType, VisitFn } from "./types";
-export * from "./symbols";
-export * from "./context";
-export * from "./registry";
-export * from "./helpers";
-export * from "./types";
-export { serviceDesciptor } from "./newProxy";
+export type { RegistryType, VisitFn } from "./types.js";
+export * from "./symbols.js";
+export * from "./context.js";
+export * from "./registry.js";
+export * from "./helpers.js";
+export * from "./types.js";
+export * from "./pbjKey.js";
+
+export { serviceDesciptor } from "./newProxy.js";

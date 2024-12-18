@@ -1,6 +1,6 @@
 # [PBinJ](https://github.com/pbinj/pbj)
 
-(*P*roxy *B*ased *In*jection for *J*avascript)
+(**P**roxy **B**ased **Inj**ection pronounced 🫛Pea 🐝Bee And 🐦Jay)
 
 A lightweight, proxy-based Dependency Injection (DI) framework for Node.js with full TypeScript support.
 

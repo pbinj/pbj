@@ -1,6 +1,6 @@
-import { Registry } from "./registry";
-import { pbj } from "./context";
-import { PBinJKey, RegistryType, ValueOf } from "./types";
+import { type Registry } from "./registry.js";
+import { pbj } from "./context.js";
+import type { PBinJKey, RegistryType, ValueOf } from "./types.js";
 
 type PathOf<
   T,

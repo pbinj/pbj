@@ -1,5 +1,23 @@
 # @pbinj/pbj-metrics-example
 
+## 1.0.6
+
+### Patch Changes
+
+- 5987271: Adds async support and renames the existing async thing to scope for better accuracy
+- Updated dependencies [5987271]
+  - @pbinj/pbj@1.0.1
+  - @pbinj/pbj-prometheus@1.0.1
+
+## 1.0.5
+
+### Patch Changes
+
+- Updated dependencies [c9efd95]
+- Updated dependencies [cb5246a]
+  - @pbinj/pbj@1.0.0
+  - @pbinj/pbj-prometheus@1.0.0
+
 ## 1.0.4
 
 ### Patch Changes

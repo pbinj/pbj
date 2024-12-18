@@ -1,3 +1,3 @@
-import { RegistryType } from "./types";
+import { type RegistryType } from "./types.js";
 
 export interface Registry extends RegistryType {}

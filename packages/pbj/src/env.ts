@@ -1,6 +1,6 @@
-import { context } from "./context";
-import { pbjKey } from "./symbols";
-import { pathOf } from "./helpers";
+import { context } from "./context.js";
+import { pbjKey } from "./pbjKey.js";
+import { pathOf } from "./helpers.js";
 
 export const Default = {
   env: process.env,

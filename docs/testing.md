@@ -64,7 +64,7 @@ describe("UserService", () => {
 ### Testing Async Contexts
 
 ```typescript
-import "@pbinj/pbj/async";
+import "@pbinj/pbj/scope";
 
 describe("AuthService", () => {
   it("should handle session-scoped dependencies", async () => {

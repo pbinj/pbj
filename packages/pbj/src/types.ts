@@ -1,8 +1,8 @@
-import type { ServiceDescriptor } from "./ServiceDescriptor";
-import { destroySymbol, removeSymbol, serviceSymbol } from "./symbols";
+import { destroySymbol, removeSymbol, serviceSymbol } from "./symbols.js";
 
 export type Constructor<T = any> = new (...args: any[]) => T;
-export type Fn<T = any> = (...args: any[]) => T;
+
+export type Fn<T = any> = (...args: any[]) => T | Promise<T>;
 
 //This is just a fake type to make key tracking easier.
 export type CKey = { __brand: "ContextKey" };
@@ -27,6 +27,7 @@ export type ValueOf<TRegistry extends RegistryType, T> =
         : T extends keyof TRegistry
           ? TRegistry[T]
           : never;
+
 export type Primitive = string | number | boolean | symbol | bigint;
 export type PrimitiveType = String | Number | Boolean | Symbol | BigInt;
 export type PrimitiveValue<T extends PrimitiveType> = T extends String
@@ -45,7 +46,7 @@ export type VisitFn<
   TRegistry extends RegistryType,
   T extends PBinJKey<TRegistry>,
 > = (
-  value: ServiceDescriptor<TRegistry, T>,
+  value: ServiceDescriptorI<TRegistry, T>,
 ) => unknown | typeof destroySymbol | typeof removeSymbol;
 
 export interface RegistryType {
@@ -76,3 +77,128 @@ type ParamArr<
   TFn extends Fn<T> = Fn<T>,
   TCon extends Constructor<T> = Constructor<T>,
 > = [TFn, ...Parameters<TFn>] | [TCon, ...ConstructorParameters<TCon>] | [T];
+
+const EMPTY = [] as const;
+type EmptyTuple = typeof EMPTY;
+
+export type Args<T> = T extends Constructor
+  ? ConstructorParameters<T>
+  : T extends Fn
+    ? Parameters<T>
+    : EmptyTuple;
+export type Returns<T> = T extends Constructor
+  ? InstanceType<T>
+  : T extends Fn
+    ? ReturnType<T>
+    : T;
+
+export interface ServiceDescriptorI<
+  TRegistry extends RegistryType,
+  T extends Constructor | Fn | unknown,
+> {
+  [serviceSymbol]: PBinJKey<TRegistry>;
+  dependencies?: Set<CKey>;
+  invoked: boolean;
+  primitive?: boolean;
+  invalid: boolean;
+  optional: boolean;
+  tags: PBinJKeyType<T>[];
+  invokable: boolean;
+  description?: string;
+  name?: string;
+  cacheable: boolean;
+  proxy: Returns<T>;
+  service: OfA<T> | undefined;
+  args: Args<T>;
+  /**
+   * Set the args to be used with the service.   These can be other pbjs, or any other value.
+   * @param args
+   * @returns
+   */
+  withArgs(...args: Args<T>): this;
+  /**
+   * Change the service implementation.
+   * @param service
+   * @returns
+   */
+  withService(service: T): this;
+  /**
+   * You can turn off response caching by setting this to false.
+   * This is useful for things taht can not be cached.   Any pbj depending on a non-cacheable,
+   * will be not cached.
+   *
+   * @param cacheable
+   * @returns
+   */
+  withCacheable(cacheable?: boolean): this;
+  withInvokable(invokable?: boolean): this;
+  /**
+   * Sets the service as optional.
+   * This will not throw an error if the service is not found. The proxy however
+   * will continue to exist, just any access to it will return undefined.
+   *
+   * You can use `isNullish` from the guards to check if the service if a proxy is actually
+   * nullish.
+   *
+   * @param optional
+   * @returns
+   */
+  withOptional(optional?: boolean): this;
+  /**
+   * This is used to set a value.  This is useful for things like constants.  This will not be invoked.
+   * @param value
+   * @returns
+   */
+  withValue(value: ValueOf<TRegistry, T>): this;
+  /**
+   * Tags are used to group services.  This is useful for finding all services of a certain type.
+   * @param tags
+   * @returns
+   */
+  withTags(...tags: PBinJKeyType<any>[]): this;
+  /**
+   * A description of the service.  This is useful for debugging.
+   * @param description
+   * @returns
+   */
+  withDescription(description: string): this;
+  /**
+   * Interceptors allow you to intercept the invocation of a service.  This is useful for things like logging, or
+   * metrics.
+   * @param interceptors
+   * @returns
+   */
+  withInterceptors(...interceptors: InterceptFn<Returns<T>>[]): this;
+  withName(name: string): this;
+  /**
+   * Check to see if the current service has a dependency.
+   * @param key
+   * @returns
+   */
+  hasDependency(key: CKey): boolean;
+  /**
+   * Add a dependency to the service.  This is used to track dependencies.
+   * @param keys
+   * @returns
+   */
+  addDependency(...keys: CKey[]): this;
+  hasTag(tag: PBinJKeyType<any>): boolean;
+
+  /**
+   * Invokes the service and returns the value.  This is where the main resolution happens.
+   *
+   * @returns
+   */
+  invoke(): Returns<T>;
+
+  asArray(): this;
+}
+/**
+ * The interceptor function, allows you to intercept the invocation of a service.  The
+ * invocation may be a previous interceptor.
+ */
+type InterceptFn<T> = (invoke: () => T) => T;
+
+export type ServiceDescriptorListener = (
+  service: ServiceDescriptorI<any, any>,
+) => void;
