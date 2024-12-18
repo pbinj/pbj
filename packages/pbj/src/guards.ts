@@ -62,12 +62,7 @@ export function isPrimitiveType(v: unknown): v is PrimitiveType {
 export function isPBinJ(v: unknown): v is { [proxyKey]: symbol } {
   return hasA(v, proxyKey, isSymbol);
 }
-export class PBinJError extends Error {
-  constructor(message: string) {
-    super(message);
-    Object.setPrototypeOf(this, Error);
-  }
-}
+
 export const nullableSymbol = Symbol("@pbj/nullable");
 
 export function isBoolean(v: unknown): v is boolean {

@@ -114,7 +114,7 @@ class ConfigService {
 For web applications, PBinJ supports request-scoped dependencies:
 
 ```typescript
-import "@pbinj/pbj/async";
+import "@pbinj/pbj/scope";
 
 const sessionKey = pbjKey<Session>("session");
 

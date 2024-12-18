@@ -1,16 +1,10 @@
 import { keyOf } from "./util.js";
-import {
-  has,
-  isConstructor,
-  isFn,
-  isPrimitive,
-  isSymbol,
-  PBinJError,
-} from "./guards.js";
+import { has, isConstructor, isFn, isPrimitive, isSymbol } from "./guards.js";
 import { newProxy } from "./newProxy.js";
 import type { Registry } from "./registry.js";
 import { proxyKey, serviceSymbol } from "./symbols.js";
 import { isPBinJKey, pbjKey, pbjKeyName } from "./pbjKey.js";
+import { PBinJError } from "./errors.js";
 import type {
   Args,
   CKey,
@@ -25,6 +19,7 @@ import type {
   ValueOf,
 } from "./types.js";
 import { asString } from "./pbjKey.js";
+import { PBinJAsyncError } from "./errors.js";
 
 const EMPTY = [] as const;
 
@@ -304,10 +299,15 @@ export class ServiceDescriptor<
       );
       return invoke.call(this);
     }
+
     return this._invoke();
   };
 
+  private _promise?: Promise<T>;
   _invoke = (): Returns<T> => {
+    if (this._promise) {
+      throw new PBinJAsyncError(this[serviceSymbol], this._promise);
+    }
     if (!this.invokable) {
       return this.service as Returns<T>;
     }
@@ -320,9 +320,26 @@ export class ServiceDescriptor<
       );
     }
     ServiceDescriptor.#dependencies.clear();
-    const resp = this._factory
-      ? this.service(...this.args)
-      : new (this.service as any)(...this.args);
+    let resp;
+    if (this._factory) {
+      const val = this.service(...this.args);
+      this.addDependency(...ServiceDescriptor.#dependencies);
+
+      if (val instanceof Promise) {
+        this._promise = val;
+        this._promise.then((v) => {
+          this._promise = undefined;
+          this.invalid = false;
+          this.invoked = true;
+          this._instance = v as any;
+        });
+        throw new PBinJAsyncError(this[serviceSymbol], val);
+      }
+      resp = val;
+    } else {
+      resp = new (this.service as any)(...this.args);
+    }
+
     this.addDependency(...ServiceDescriptor.#dependencies);
     this.invoked = true;
     this.primitive = isPrimitive(resp);

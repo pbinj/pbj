@@ -1,7 +1,8 @@
 import { destroySymbol, removeSymbol, serviceSymbol } from "./symbols.js";
 
 export type Constructor<T = any> = new (...args: any[]) => T;
-export type Fn<T = any> = (...args: any[]) => T;
+
+export type Fn<T = any> = (...args: any[]) => T | Promise<T>;
 
 //This is just a fake type to make key tracking easier.
 export type CKey = { __brand: "ContextKey" };
@@ -26,6 +27,7 @@ export type ValueOf<TRegistry extends RegistryType, T> =
         : T extends keyof TRegistry
           ? TRegistry[T]
           : never;
+
 export type Primitive = string | number | boolean | symbol | bigint;
 export type PrimitiveType = String | Number | Boolean | Symbol | BigInt;
 export type PrimitiveValue<T extends PrimitiveType> = T extends String

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { context, pbj, pbjKey } from "../index.js";
-import "../async.js";
+import "../scope.js";
 
 const MAX_ITER = 100;
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

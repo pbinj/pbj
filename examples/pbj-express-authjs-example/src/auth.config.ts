@@ -4,7 +4,7 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import GitHub from "@auth/express/providers/github";
 import { env } from "@pbinj/pbj/env";
 import { drizzlePBinJKey, register } from "pbj-drizzle-example";
-import "@pbinj/pbj/async";
+import "@pbinj/pbj/scope";
 
 register();
 

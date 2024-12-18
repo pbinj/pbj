@@ -1,5 +1,6 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import { has, hasA, isFn, isSymbol, PBinJError } from "./guards.js";
+import { has, hasA, isFn, isSymbol } from "./guards.js";
+import { PBinJError } from "./errors.js";
 import { Context } from "./context.js";
 import { ServiceDescriptor } from "./ServiceDescriptor.js";
 import { keyOf } from "./util.js";

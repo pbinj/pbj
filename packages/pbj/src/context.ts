@@ -1,5 +1,6 @@
 import { type Registry } from "./registry.js";
-import { isConstructor, isFn, isSymbol, PBinJError } from "./guards.js";
+import { isConstructor, isFn, isSymbol } from "./guards.js";
+import { PBinJError } from "./errors.js";
 import type {
   Constructor,
   ValueOf,
@@ -10,7 +11,6 @@ import type {
   RegistryType,
   ServiceArgs,
   PBinJKeyType,
-  Service,
 } from "./types.js";
 import {
   ServiceDescriptor,
@@ -18,6 +18,7 @@ import {
 } from "./ServiceDescriptor.js";
 import { filterMap, isInherited, keyOf } from "./util.js";
 import { pbjKey, isPBinJKey } from "./pbjKey.js";
+import { isAsyncError } from "./errors.js";
 
 export interface Context<TRegistry extends RegistryType = Registry> {
   register<TKey extends PBinJKey<TRegistry>>(
@@ -40,6 +41,10 @@ export interface Context<TRegistry extends RegistryType = Registry> {
     fn: ServiceDescriptorListener,
     noInitial?: boolean,
   ): () => void;
+  resolveAsync<T extends PBinJKey<TRegistry>>(
+    tkey: T,
+    ...args: ServiceArgs<T, TRegistry> | []
+  ): Promise<ValueOf<TRegistry, T>>;
 }
 export class Context<TRegistry extends RegistryType = Registry>
   implements Context<TRegistry>
@@ -166,16 +171,16 @@ export class Context<TRegistry extends RegistryType = Registry>
   }
 
   register<TKey extends PBinJKey<TRegistry>>(
-    tkey: TKey,
+    serviceKey: TKey,
     ...origArgs: ServiceArgs<TKey, TRegistry> | []
   ): ServiceDescriptor<TRegistry, ValueOf<TRegistry, TKey>> {
-    const key = keyOf(tkey);
+    const key = keyOf(serviceKey);
 
-    let serv: Constructor | Fn | unknown = tkey;
+    let service: Constructor | Fn | unknown = serviceKey;
     let args: any[] = [...origArgs];
 
-    if (isSymbol(tkey)) {
-      serv = args.shift();
+    if (isSymbol(serviceKey)) {
+      service = args.shift();
     }
 
     let inst = this.map.get(key);
@@ -183,7 +188,7 @@ export class Context<TRegistry extends RegistryType = Registry>
     if (inst) {
       if (origArgs?.length) {
         inst.args = args;
-        inst.service = serv;
+        inst.service = service;
       }
       if (inst.invalid) {
         this.invalidate(key);
@@ -191,11 +196,11 @@ export class Context<TRegistry extends RegistryType = Registry>
       return inst;
     }
     const newInst = new ServiceDescriptor<TRegistry, ValueOf<TRegistry, TKey>>(
-      tkey,
-      serv as any,
+      serviceKey,
+      service as any,
       args as any,
       true,
-      isFn(serv),
+      isFn(service),
     );
 
     this.map.set(key, newInst);
@@ -228,7 +233,7 @@ export class Context<TRegistry extends RegistryType = Registry>
     _key: TKey,
   ): (next: () => R, ...args: ServiceArgs<TKey, TRegistry>) => R {
     throw new PBinJError(
-      "async not enabled, please add 'import \"@pbinj/pbj/async\";' to your module to enable async support",
+      "async not enabled, please add 'import \"@pbinj/pbj/scope\";' to your module to enable async support",
     );
   }
   protected *_listOf<T extends PBinJKey<TRegistry>>(
@@ -286,6 +291,19 @@ export class Context<TRegistry extends RegistryType = Registry>
   }
   toJSON() {
     return Array.from(this.map.values()).map((v) => v.toJSON());
+  }
+  async resolveAsync<T extends PBinJKey<TRegistry>>(
+    key: T,
+  ): Promise<ValueOf<TRegistry, T>> {
+    try {
+      return this.resolve(key);
+    } catch (e) {
+      if (isAsyncError(e)) {
+        await e.promise;
+        return this.resolveAsync(key);
+      }
+      throw e;
+    }
   }
 }
 
