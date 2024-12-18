@@ -15,6 +15,8 @@ export async function main(imports: string[] = process.argv.slice(2)) {
   }
   register();
 }
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  main();
-}
+main().catch((e) => {
+  console.trace(e);
+  process.exit(1);
+})
+

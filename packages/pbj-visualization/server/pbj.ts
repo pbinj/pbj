@@ -19,7 +19,7 @@ export class ServerConfig {
     private _port = env("PJB_PORT", "3000"),
     private _host = env("PJB_HOST", "localhost"),
     private _path = env("PJB_PATH", "/"),
-  ) {}
+  ) { }
   get host() {
     return this._host + "";
   }
@@ -33,9 +33,10 @@ export class ServerConfig {
     return this._path + "";
   }
 }
-context.register(serverConfigPBinJKey, ServerConfig);
 
-export async function register(ctx = context) {
+export async function register(ctx = context, start = true): Promise<express.Express> {
+  ctx.register(serverConfigPBinJKey, ServerConfig);
+
   const app = express();
   const config = ctx.resolve(serverConfigPBinJKey);
   const index = `${dirname}/../web/index.html`;
@@ -47,7 +48,9 @@ export async function register(ctx = context) {
     res.send(JSON.stringify(ctx.toJSON()));
   });
 
-  app.listen(config.port, config.host, () => {
+  if (start) {
+    await new Promise<void>((resolve) => app.listen(config.port, config.host, resolve));
     console.log("PBinJ visualization server started at: %s", config.url);
-  });
+  }
+  return app;
 }

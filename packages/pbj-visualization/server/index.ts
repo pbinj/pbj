@@ -1,1 +1,1 @@
-export * from "./pbj";
+export * from "./pbj.js";
