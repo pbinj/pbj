@@ -20,6 +20,12 @@
   - [🚧 Drizzle](./plugins/drizzle.md)
   - [🚧 Express](./plugins/express.md)
   - [🚧 Authjs](./plugins/authjs.md)
+- Advanced
+  - [Interceptors](advanced/interceptors.md)
+  - [Caching](advanced/caching.md)
+  - [Tags](advanced/tags.md)
+  - [Events](advanced/service-events.md)
+  - [Naming](advanced/name.md)
 - [Caveats](caveats.md)
 - [Testing](testing.md)
 - [Examples](https://github.com/spbjjus/pbj/tree/main/examples)
