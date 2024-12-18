@@ -79,7 +79,7 @@ class ServiceB {
 }
 ```
 
-### Async Initialization
+### Scope Initialization
 
 Services are initialized lazily, which can lead to unexpected async behavior:
 
