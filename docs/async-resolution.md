@@ -73,3 +73,7 @@ const analytics = await context.resolveAsync(analyticsKey);
 ```
 
 In this example, `resolveAsync` ensures that both the `userDataKey` and `analyticsKey` services are resolved in the correct order, waiting for each async operation to complete.
+
+
+## How it works.
+When a service returns a promise, the `invoke` function will throw an error.  This error will be caught by the `resolveAsync` function and the promise will be awaited.  Once the promise is resolved, the `resolveAsync` function will be called again.  This will continue until all the promises are resolved.  This allows for the resolution of async dependencies.  This is a very simple way to handle async dependencies.  This is not a performant way to resolve services.
