@@ -1,5 +1,6 @@
-# PBinJ
-Proxy Based Injection for JavaScript (PB-in-J)
+# [PBinJ](https://github.com/pbinj/pbj)
+
+(**P**roxy **B**ased **Inj**ection pronounced 🫛Pea 🐝Bee And 🐦Jay)
 
 > A lightweight, proxy-based Dependency Injection (DI) framework for Node.js with full TypeScript support.
 
@@ -31,7 +32,6 @@ Using pnpm:
 ```bash
 pnpm add @pbinj/pbj
 ```
-
 
 ## Quick Start
 

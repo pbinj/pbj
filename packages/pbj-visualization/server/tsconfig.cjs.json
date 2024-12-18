@@ -6,6 +6,5 @@
     "outDir": "../dist/cjs",
     "target": "ES2019",
     "declaration": false
-  },
-  "exclude": ["cli.ts"]
+  }
 }
