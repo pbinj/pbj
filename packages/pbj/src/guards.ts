@@ -27,7 +27,7 @@ export function isObjectish(x: unknown): x is object {
 
 export function has(
   x: unknown,
-  k: PropertyKey,
+  k: PropertyKey
 ): x is { [k in PropertyKey]: unknown } {
   return isObjectish(x) && k in x;
 }
@@ -35,7 +35,7 @@ export function has(
 export function hasA<V>(
   x: unknown,
   k: PropertyKey,
-  guard: isA<V>,
+  guard: isA<V>
 ): x is { [k in PropertyKey]: V } {
   return has(x, k) ? guard(x[k]) : false;
 }
@@ -62,12 +62,7 @@ export function isPrimitiveType(v: unknown): v is PrimitiveType {
 export function isPBinJ(v: unknown): v is { [proxyKey]: symbol } {
   return hasA(v, proxyKey, isSymbol);
 }
-export class PBinJError extends Error {
-  constructor(message: string) {
-    super(message);
-    Object.setPrototypeOf(this, Error);
-  }
-}
+
 export const nullableSymbol = Symbol("@pbj/nullable");
 
 export function isBoolean(v: unknown): v is boolean {

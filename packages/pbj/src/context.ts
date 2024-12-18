@@ -18,6 +18,7 @@ import {
 } from "./ServiceDescriptor.js";
 import { filterMap, isInherited, keyOf } from "./util.js";
 import { pbjKey, isPBinJKey } from "./pbjKey.js";
+import { isAsyncError, PBinJAsyncError } from "./errors.js";
 
 export interface Context<TRegistry extends RegistryType = Registry> {
   register<TKey extends PBinJKey<TRegistry>>(
@@ -34,12 +35,16 @@ export interface Context<TRegistry extends RegistryType = Registry> {
   visit(fn: VisitFn<TRegistry, any>): void;
   visit<T extends PBinJKey<TRegistry>>(
     service: T,
-    fn: VisitFn<TRegistry, T>,
+    fn: VisitFn<TRegistry, T>
   ): void;
   onServiceAdded(
     fn: ServiceDescriptorListener,
-    noInitial?: boolean,
+    noInitial?: boolean
   ): () => void;
+  resolveAsync<T extends PBinJKey<TRegistry>>(
+    tkey: T,
+    ...args: ServiceArgs<T, TRegistry> | []
+  ): Promise<ValueOf<TRegistry, T>>;
 }
 export class Context<TRegistry extends RegistryType = Registry>
   implements Context<TRegistry>
@@ -51,7 +56,7 @@ export class Context<TRegistry extends RegistryType = Registry>
 
   public onServiceAdded(
     fn: ServiceDescriptorListener,
-    intitialize = true,
+    intitialize = true
   ): () => void {
     if (intitialize) {
       for (const service of this.map.values()) {
@@ -92,11 +97,11 @@ export class Context<TRegistry extends RegistryType = Registry>
   visit(fn: VisitFn<TRegistry, any>): void;
   visit<T extends PBinJKey<TRegistry>>(
     service: T,
-    fn: VisitFn<TRegistry, T>,
+    fn: VisitFn<TRegistry, T>
   ): void;
   visit<T extends PBinJKey<TRegistry>>(
     service: T | VisitFn<TRegistry, any>,
-    fn?: VisitFn<TRegistry, T> | undefined,
+    fn?: VisitFn<TRegistry, T> | undefined
   ) {
     const key = keyOf(service);
     if (isFn(fn)) {
@@ -113,7 +118,7 @@ export class Context<TRegistry extends RegistryType = Registry>
   private _visit(
     service: CKey,
     fn: VisitFn<TRegistry, any>,
-    seen = new Set<CKey>(),
+    seen = new Set<CKey>()
   ) {
     if (seen.size === seen.add(service).size) {
       return;
@@ -144,7 +149,7 @@ export class Context<TRegistry extends RegistryType = Registry>
   private invalidate(
     key: CKey,
     ctx?: ServiceDescriptor<TRegistry, any>,
-    seen = new Set<CKey>(),
+    seen = new Set<CKey>()
   ) {
     if (seen.size === seen.add(key).size) {
       return;
@@ -166,16 +171,16 @@ export class Context<TRegistry extends RegistryType = Registry>
   }
 
   register<TKey extends PBinJKey<TRegistry>>(
-    tkey: TKey,
+    serviceKey: TKey,
     ...origArgs: ServiceArgs<TKey, TRegistry> | []
   ): ServiceDescriptor<TRegistry, ValueOf<TRegistry, TKey>> {
-    const key = keyOf(tkey);
+    const key = keyOf(serviceKey);
 
-    let serv: Constructor | Fn | unknown = tkey;
+    let service: Constructor | Fn | unknown = serviceKey;
     let args: any[] = [...origArgs];
 
-    if (isSymbol(tkey)) {
-      serv = args.shift();
+    if (isSymbol(serviceKey)) {
+      service = args.shift();
     }
 
     let inst = this.map.get(key);
@@ -183,7 +188,7 @@ export class Context<TRegistry extends RegistryType = Registry>
     if (inst) {
       if (origArgs?.length) {
         inst.args = args;
-        inst.service = serv;
+        inst.service = service;
       }
       if (inst.invalid) {
         this.invalidate(key);
@@ -191,11 +196,11 @@ export class Context<TRegistry extends RegistryType = Registry>
       return inst;
     }
     const newInst = new ServiceDescriptor<TRegistry, ValueOf<TRegistry, TKey>>(
-      tkey,
-      serv as any,
+      serviceKey,
+      service as any,
       args as any,
       true,
-      isFn(serv),
+      isFn(service)
     );
 
     this.map.set(key, newInst);
@@ -210,7 +215,7 @@ export class Context<TRegistry extends RegistryType = Registry>
           resolve();
         },
         0,
-        this.listeners,
+        this.listeners
       );
     });
   }
@@ -225,29 +230,29 @@ export class Context<TRegistry extends RegistryType = Registry>
     return new Context<TTRegistry>(this);
   }
   scoped<R, TKey extends PBinJKeyType | (keyof TRegistry & symbol)>(
-    _key: TKey,
+    _key: TKey
   ): (next: () => R, ...args: ServiceArgs<TKey, TRegistry>) => R {
     throw new PBinJError(
-      "async not enabled, please add 'import \"@pbinj/pbj/async\";' to your module to enable async support",
+      "async not enabled, please add 'import \"@pbinj/pbj/async\";' to your module to enable async support"
     );
   }
   protected *_listOf<T extends PBinJKey<TRegistry>>(
-    service: T,
+    service: T
   ): Generator<ValueOf<TRegistry, T>> {
     const sym = isPBinJKey(service);
 
     if (sym) {
       yield* filterMap(this.map.values(), (v) =>
-        v.tags.includes(service as any) ? v.proxy : undefined,
+        v.tags.includes(service as any) ? v.proxy : undefined
       );
     } else if (isFn(service)) {
       if (isConstructor(service)) {
         yield* filterMap(this.map.values(), (v) =>
-          isInherited(v.service, service) ? v.proxy : undefined,
+          isInherited(v.service, service) ? v.proxy : undefined
         );
       } else {
         yield* filterMap(this.map.values(), (v) =>
-          v.service && v.service === service ? v.proxy : undefined,
+          v.service && v.service === service ? v.proxy : undefined
         );
       }
     }
@@ -269,11 +274,11 @@ export class Context<TRegistry extends RegistryType = Registry>
    * @returns
    */
   listOf<T extends PBinJKey<TRegistry>>(
-    service: T,
+    service: T
   ): Array<ValueOf<TRegistry, T>> {
     const ret = this.register(
       isPBinJKey(service) ? service : pbjKey(String(service)),
-      () => Array.from(this._listOf(service)),
+      () => Array.from(this._listOf(service))
     ).withCacheable(false);
 
     //any time a new item is added invalidate the list, this should allow for things to be cached.
@@ -286,6 +291,19 @@ export class Context<TRegistry extends RegistryType = Registry>
   }
   toJSON() {
     return Array.from(this.map.values()).map((v) => v.toJSON());
+  }
+  async resolveAsync<T extends PBinJKey<TRegistry>>(
+    key: T
+  ): Promise<ValueOf<TRegistry, T>> {
+    try {
+      return this.resolve(key);
+    } catch (e) {
+      if (isAsyncError(e)) {
+        await e.promise;
+        return this.resolveAsync(key);
+      }
+      throw e;
+    }
   }
 }
 

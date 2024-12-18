@@ -25,6 +25,7 @@ import type {
   ValueOf,
 } from "./types.js";
 import { asString } from "./pbjKey.js";
+import { PBinJAsyncError } from "./errors.js";
 
 const EMPTY = [] as const;
 
@@ -75,7 +76,7 @@ export class ServiceDescriptor<
     cacheable = true,
     public invokable = true,
     public description?: string,
-    private onChange?: () => void,
+    private onChange?: () => void
   ) {
     this[serviceSymbol] = key;
     this.args = args as Args<T>;
@@ -300,14 +301,19 @@ export class ServiceDescriptor<
         (next: () => Returns<T>, interceptor) => {
           return () => interceptor.call(this, next);
         },
-        this._invoke,
+        this._invoke
       );
       return invoke.call(this);
     }
+
     return this._invoke();
   };
 
+  private _promise?: Promise<Returns<T>>;
   _invoke = (): Returns<T> => {
+    if (this._promise) {
+      throw new PBinJAsyncError(this[serviceSymbol], this._promise);
+    }
     if (!this.invokable) {
       return this.service as Returns<T>;
     }
@@ -316,19 +322,36 @@ export class ServiceDescriptor<
     }
     if (!isFn(this.service)) {
       throw new PBinJError(
-        `service '${String(this.service)}' is not a function and is not configured as a value, to configure as a value set invokable to false on the service description`,
+        `service '${String(this.service)}' is not a function and is not configured as a value, to configure as a value set invokable to false on the service description`
       );
     }
     ServiceDescriptor.#dependencies.clear();
-    const resp = this._factory
-      ? this.service(...this.args)
-      : new (this.service as any)(...this.args);
+    let resp;
+    if (this._factory) {
+      const val = this.service(...this.args);
+      this.addDependency(...ServiceDescriptor.#dependencies);
+
+      if (val instanceof Promise) {
+        this._promise = val;
+        this._promise.then((v) => {
+          this._promise = undefined;
+          this.invalid = false;
+          this.invoked = true;
+          this._instance = v;
+        });
+        throw new PBinJAsyncError(this[serviceSymbol], val);
+      }
+      resp = val;
+    } else {
+      resp = new (this.service as any)(...this.args);
+    }
+
     this.addDependency(...ServiceDescriptor.#dependencies);
     this.invoked = true;
     this.primitive = isPrimitive(resp);
     if (resp == null && !this.optional) {
       throw new PBinJError(
-        `service '${String(this[serviceSymbol])}' is not optional and returned null`,
+        `service '${String(this[serviceSymbol])}' is not optional and returned null`
       );
     }
     if (this.cacheable) {
@@ -364,5 +387,5 @@ export class ServiceDescriptor<
 type InterceptFn<T> = (invoke: () => T) => T;
 
 export type ServiceDescriptorListener = (
-  service: ServiceDescriptor<any, any>,
+  service: ServiceDescriptor<any, any>
 ) => void;
