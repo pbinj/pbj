@@ -46,7 +46,7 @@ export type VisitFn<
   TRegistry extends RegistryType,
   T extends PBinJKey<TRegistry>,
 > = (
-  value: ServiceDescriptorI<TRegistry, T>
+  value: ServiceDescriptorI<TRegistry, T>,
 ) => unknown | typeof destroySymbol | typeof removeSymbol;
 
 export interface RegistryType {
@@ -200,5 +200,5 @@ export interface ServiceDescriptorI<
 type InterceptFn<T> = (invoke: () => T) => T;
 
 export type ServiceDescriptorListener = (
-  service: ServiceDescriptorI<any, any>
+  service: ServiceDescriptorI<any, any>,
 ) => void;

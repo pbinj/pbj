@@ -70,7 +70,7 @@ export class ServiceDescriptor<
     cacheable = true,
     public invokable = true,
     public description?: string,
-    private onChange?: () => void
+    private onChange?: () => void,
   ) {
     this[serviceSymbol] = key;
     this.args = args as Args<T>;
@@ -295,7 +295,7 @@ export class ServiceDescriptor<
         (next: () => Returns<T>, interceptor) => {
           return () => interceptor.call(this, next);
         },
-        this._invoke
+        this._invoke,
       );
       return invoke.call(this);
     }
@@ -316,7 +316,7 @@ export class ServiceDescriptor<
     }
     if (!isFn(this.service)) {
       throw new PBinJError(
-        `service '${String(this.service)}' is not a function and is not configured as a value, to configure as a value set invokable to false on the service description`
+        `service '${String(this.service)}' is not a function and is not configured as a value, to configure as a value set invokable to false on the service description`,
       );
     }
     ServiceDescriptor.#dependencies.clear();
@@ -345,7 +345,7 @@ export class ServiceDescriptor<
     this.primitive = isPrimitive(resp);
     if (resp == null && !this.optional) {
       throw new PBinJError(
-        `service '${String(this[serviceSymbol])}' is not optional and returned null`
+        `service '${String(this[serviceSymbol])}' is not optional and returned null`,
       );
     }
     if (this.cacheable) {
@@ -381,5 +381,5 @@ export class ServiceDescriptor<
 type InterceptFn<T> = (invoke: () => T) => T;
 
 export type ServiceDescriptorListener = (
-  service: ServiceDescriptor<any, any>
+  service: ServiceDescriptor<any, any>,
 ) => void;
