@@ -1,7 +1,8 @@
 import { destroySymbol, removeSymbol, serviceSymbol } from "./symbols.js";
 
 export type Constructor<T = any> = new (...args: any[]) => T;
-export type Fn<T = any> = (...args: any[]) => Awaited<T>;
+
+export type Fn<T = any> = (...args: any[]) => T | Promise<T>;
 
 //This is just a fake type to make key tracking easier.
 export type CKey = { __brand: "ContextKey" };

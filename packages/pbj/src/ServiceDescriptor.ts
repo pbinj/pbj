@@ -1,16 +1,10 @@
 import { keyOf } from "./util.js";
-import {
-  has,
-  isConstructor,
-  isFn,
-  isPrimitive,
-  isSymbol,
-  PBinJError,
-} from "./guards.js";
+import { has, isConstructor, isFn, isPrimitive, isSymbol } from "./guards.js";
 import { newProxy } from "./newProxy.js";
 import type { Registry } from "./registry.js";
 import { proxyKey, serviceSymbol } from "./symbols.js";
 import { isPBinJKey, pbjKey, pbjKeyName } from "./pbjKey.js";
+import { PBinJError } from "./errors.js";
 import type {
   Args,
   CKey,
@@ -309,7 +303,7 @@ export class ServiceDescriptor<
     return this._invoke();
   };
 
-  private _promise?: Promise<Returns<T>>;
+  private _promise?: Promise<T>;
   _invoke = (): Returns<T> => {
     if (this._promise) {
       throw new PBinJAsyncError(this[serviceSymbol], this._promise);
@@ -337,7 +331,7 @@ export class ServiceDescriptor<
           this._promise = undefined;
           this.invalid = false;
           this.invoked = true;
-          this._instance = v;
+          this._instance = v as any;
         });
         throw new PBinJAsyncError(this[serviceSymbol], val);
       }

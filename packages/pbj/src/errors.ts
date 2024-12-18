@@ -7,9 +7,11 @@ export class PBinJAsyncError extends Error {
   [symbol] = true;
   constructor(
     public key: PBinJKey<any>,
-    public promise: Promise<any>
+    public promise: Promise<any>,
   ) {
-    super(`[${asString(key)} pending]`);
+    super(
+      `[${asString(key)} pending]: you have a async return from a service, please use context.resolveAsync`,
+    );
     Object.setPrototypeOf(this, Error);
   }
 }

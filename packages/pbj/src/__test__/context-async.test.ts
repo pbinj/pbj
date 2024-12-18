@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { context, createNewContext, pbjKey } from "../index.js";
+import { context, createNewContext, Fn, pbjKey } from "../index.js";
 import "../async.js";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
