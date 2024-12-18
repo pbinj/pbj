@@ -59,4 +59,25 @@ describe("resolveAsync", () => {
 
     await expect(ctx.resolveAsync(errorKey)).rejects.toThrow("test error");
   });
+  it("should throw an error when async is not enabled", () => {
+    const ctx = createNewContext();
+    const asyncKey = pbjKey<string>("async-value");
+    const dependentKey = pbjKey<string>("dependent-value");
+
+    // Register an async service
+    ctx.register(asyncKey, async () => {
+      await wait(10);
+      return "async result";
+    });
+
+    // Register a dependent service
+    ctx.register(dependentKey, (asyncValue = ctx.pbj(asyncKey)) => {
+      return `dependent: ${asyncValue}`;
+    });
+
+    // Test async resolution
+    expect(() => ctx.resolve(dependentKey)).toThrowError(
+      "[async-value pending]: you have a async return from a service, please use context.resolveAsync"
+    );
+  });
 });
