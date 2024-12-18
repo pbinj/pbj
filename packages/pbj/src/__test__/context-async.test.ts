@@ -77,7 +77,7 @@ describe("resolveAsync", () => {
 
     // Test async resolution
     expect(() => ctx.resolve(dependentKey)).toThrowError(
-      "[async-value pending]: you have a async return from a service, please use context.resolveAsync"
+      "[async-value pending]: you have a async return from a service, please use context.resolveAsync",
     );
   });
 });
