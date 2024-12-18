@@ -77,3 +77,18 @@ In this example, `resolveAsync` ensures that both the `userDataKey` and `analyti
 
 ## How it works.
 When a service returns a promise, the `invoke` function will throw an error.  This error will be caught by the `resolveAsync` function and the promise will be awaited.  Once the promise is resolved, the `resolveAsync` function will be called again.  This will continue until all the promises are resolved.  This allows for the resolution of async dependencies.  This is a very simple way to handle async dependencies.  This is not a performant way to resolve services.
+
+The performance could be increased by having a 'strict' mode where all services are resolved in a single pass, and are marked as `async` if they return a promise.  This would allow for the resolution of all services in a single pass.  
+
+```ts
+//TBD
+
+context.register(asyncKey, async () => {
+  // Simulating an async operation
+  await new Promise(resolve => setTimeout(resolve, 100));
+  return "Async Result";
+}).withAsync();
+
+
+
+```
