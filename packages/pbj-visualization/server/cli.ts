@@ -18,5 +18,4 @@ export async function main(imports: string[] = process.argv.slice(2)) {
 main().catch((e) => {
   console.trace(e);
   process.exit(1);
-})
-
+});
