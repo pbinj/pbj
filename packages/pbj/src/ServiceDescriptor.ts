@@ -26,8 +26,7 @@ const EMPTY = [] as const;
 export class ServiceDescriptor<
   TRegistry extends RegistryType,
   T extends Constructor | Fn | unknown,
-> implements ServiceDescriptorI<TRegistry, T>
-{
+> implements ServiceDescriptorI<TRegistry, T> {
   static #dependencies = new Set<CKey>();
 
   static value<
@@ -59,6 +58,7 @@ export class ServiceDescriptor<
   public primitive?: boolean;
   public invalid = false;
   public optional = true;
+  public error?: { message: string };
 
   public tags: PBinJKeyType<T>[] = [];
   private _name: string | undefined;
@@ -337,7 +337,14 @@ export class ServiceDescriptor<
       }
       resp = val;
     } else {
-      resp = new (this.service as any)(...this.args);
+      try {
+        resp = new (this.service as any)(...this.args);
+        this.error = undefined;
+      } catch (e) {
+        this.invalidate();
+        this.error = { message: String(e) };
+        throw e;
+      }
     }
 
     this.addDependency(...ServiceDescriptor.#dependencies);
@@ -370,6 +377,7 @@ export class ServiceDescriptor<
       invalid: this.invalid,
       primitive: this.primitive,
       listOf: this._isListOf,
+      error: this.error,
       dependencies: Array.from(this.dependencies ?? [], asString as any),
     };
   }

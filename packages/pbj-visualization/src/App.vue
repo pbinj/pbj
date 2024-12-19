@@ -1,15 +1,20 @@
 <script setup lang="ts">
 import { reactive, ref, watch } from "vue";
 import ServiceTable from "./components/ServiceTable.vue";
-import ServiceGraph from "./components/ServiceGraph.vue";
+import ServiceDrawer from "./components/ServiceDrawer.vue";
+import { ServiceNetwork, graphDrawerData,graphDrawerShow, parseGraphRawData } from "./components/ServiceNetwork";
 import type { ServiceI } from "./types";
-
+import { useRoute } from 'vue-router'
+ 
+const route = useRoute()
 const View = ["network", "table"] as const;
 
 const loading = ref(false);
 const error = ref<string | null>(null);
 const services = ref([] as ServiceI[]);
-const view = ref(0);
+const view = ref(route.name || 'network');
+let service: ServiceI | undefined = undefined;
+
 // watch the params of the route to fetch the data again
 //watch(fetchData, { immediate: true })
 
@@ -17,27 +22,32 @@ async function fetchData() {
   error.value = null;
   loading.value = true;
   try {
-    services.value = await (await fetch("/api/services")).json();
+    const resp = services.value = await (await fetch("/api/services")).json();
+    parseGraphRawData(resp);
   } catch (err) {
     error.value = String(err);
   } finally {
     loading.value = false;
   }
 }
-
+watch(
+  () => route.params.id,
+  (newId, oldId) => {
+    // react to route changes...
+  }
+)
 fetchData();
 </script>
 
 <template>
-  <v-responsive class="border rounded" min-height="700">
-    <v-app>
+    <v-app full-height full-width>
       <v-app-bar color="info" title="PBinJ Visualization">
         <template v-slot:append>
           <v-btn-toggle v-model="view" mandatory>
-            <v-btn>
+            <v-btn value="network" to="/network">
               <v-icon icon="mdi-graph-outline" size="small" />Network</v-btn
             >
-            <v-btn>
+            <v-btn value="table" to="/table">
               <v-icon icon="mdi-table" size="small" />
               Table</v-btn
             >
@@ -47,25 +57,29 @@ fetchData();
           </v-btn>
         </template>
       </v-app-bar>
-      <v-main min-width="100%">
+      
+      <ServiceDrawer :service="graphDrawerData?.service" v-if="graphDrawerShow"/>
+
+      <v-main min-width="100%" class="">
         <v-container>
           <div v-if="loading">
             <v-skeleton-loader
-              :type="view == 0 ? 'image' : 'table'"
+              :type="view == 'network' ? 'image' : view"
             ></v-skeleton-loader>
           </div>
           <div v-if="error">Error: {{ error }}</div>
           <div v-if="!loading">
-            <ServiceGraph
+            <ServiceNetwork
               :services="services"
-              v-if="View[view] === 'network'"
+              v-if="view === 'network'"
             />
-            <ServiceTable :services="services" v-if="View[view] === 'table'" />
+            <ServiceTable :services="services" v-if="view === 'table'" />
           </div>
+
         </v-container>
+       
       </v-main>
     </v-app>
-  </v-responsive>
 </template>
 
 <style>
