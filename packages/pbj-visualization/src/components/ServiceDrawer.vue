@@ -1,38 +1,44 @@
-
 <script setup lang="ts">
 import type { ServiceI } from "../types";
-import Invoke from './Invoke.vue';
+import Invoke from "./Invoke.vue";
 import { closeDrawer } from "./ServiceNetwork/graph";
 const props = defineProps(["service"]);
 </script>
 
 <template>
-<v-navigation-drawer location="right" temporary absolute>
-          <v-list>
-
-          <v-list-item :title="'Service: '  + props.service?.name" :subtitle="props.service.description">
-            <v-btn class="close" icon="mdi-close" size="x-small" @click="closeDrawer"></v-btn>
-          </v-list-item>
-          <v-divider></v-divider>
-          <v-list-item link title="Dependencies">
-            {{ props.service.dependencies }}
-          </v-list-item>
-          <v-list-item title="Invalid">{{ props.service.invalid }}</v-list-item>
-          <v-list-item title="Tags">{{ props.service.tags }}</v-list-item>
-          <v-list-item title="Invokable">{{ props.service.invokable }}</v-list-item>
-          <v-list-item title="Cacheable">{{ props.service.cacheable }}</v-list-item>
-          <v-list-item title="Primitive">{{ props.service.primitive }}</v-list-item>
-          <v-list-item title="List">{{ props.service.listOf }}</v-list-item>
-           <v-list-item>
-              <Invoke :service="props.service" />
-          </v-list-item>
-          </v-list>
-      </v-navigation-drawer>  
+  <v-navigation-drawer location="right" temporary absolute>
+    <v-list>
+      <v-list-item
+        :title="'Service: ' + props.service?.name"
+        :subtitle="props.service.description"
+      >
+        <v-btn
+          class="close"
+          icon="mdi-close"
+          size="x-small"
+          @click="closeDrawer"
+        ></v-btn>
+      </v-list-item>
+      <v-divider></v-divider>
+      <v-list-item link title="Dependencies">
+        {{ props.service.dependencies }}
+      </v-list-item>
+      <v-list-item title="Invalid">{{ props.service.invalid }}</v-list-item>
+      <v-list-item title="Tags">{{ props.service.tags }}</v-list-item>
+      <v-list-item title="Invokable">{{ props.service.invokable }}</v-list-item>
+      <v-list-item title="Cacheable">{{ props.service.cacheable }}</v-list-item>
+      <v-list-item title="Primitive">{{ props.service.primitive }}</v-list-item>
+      <v-list-item title="List">{{ props.service.listOf }}</v-list-item>
+      <v-list-item>
+        <Invoke :service="props.service" />
+      </v-list-item>
+    </v-list>
+  </v-navigation-drawer>
 </template>
 <style>
 .close {
-    position: absolute;
-    right: 0;
-    top: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 </style>

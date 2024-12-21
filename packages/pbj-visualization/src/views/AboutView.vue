@@ -3,7 +3,10 @@
     <h1>About PBinJ Visualization</h1>
     <p>This is a simple about page for the PBinJ Visualization tool.</p>
     <p>It provides a visual representation of your PBinJ context.</p>
-    <p>Explore the network and table views to understand your dependencies better.</p>
+    <p>
+      Explore the network and table views to understand your dependencies
+      better.
+    </p>
   </div>
 </template>
 

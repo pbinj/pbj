@@ -1,9 +1,8 @@
 import { keyOf } from "./util.js";
-import { has, isConstructor, isFn, isPrimitive, isSymbol } from "./guards.js";
+import { has, isConstructor, isFn, isPrimitive } from "./guards.js";
 import { newProxy } from "./newProxy.js";
 import type { Registry } from "./registry.js";
 import { proxyKey, serviceSymbol } from "./symbols.js";
-import { isPBinJKey, pbjKey, pbjKeyName } from "./pbjKey.js";
 import { PBinJError } from "./errors.js";
 import type {
   Args,
@@ -379,6 +378,7 @@ export class ServiceDescriptor<
       listOf: this._isListOf,
       error: this.error,
       dependencies: Array.from(this.dependencies ?? [], asString as any),
+      args: this.args?.map(asString as any),
     };
   }
 }

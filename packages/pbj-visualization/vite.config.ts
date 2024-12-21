@@ -26,7 +26,7 @@ export default defineConfig({
       "/api/": {
         target: config.url,
         changeOrigin: true,
-      }
+      },
     },
   },
 });

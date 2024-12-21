@@ -1,8 +1,7 @@
 import { has, hasA, nullableSymbol } from "./guards.js";
-import { proxyKey, serviceSymbol } from "./symbols.js";
+import { proxyKey, serviceDescriptorKey, serviceSymbol } from "./symbols.js";
 import type { Constructor, Fn, ServiceDescriptorI } from "./types.js";
 
-export const serviceDescriptorKey = Symbol("@pbj/service-descriptor");
 
 export function newProxy<T extends Constructor>(
   key: unknown,

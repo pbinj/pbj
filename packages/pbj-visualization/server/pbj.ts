@@ -1,4 +1,11 @@
-import { pbjKey, context, asString, type ServiceDescriptorI, Registry } from "@pbinj/pbj";
+import {
+  pbjKey,
+  context,
+  asString,
+  type ServiceDescriptorI,
+  Registry,
+  serviceSymbol,
+} from "@pbinj/pbj";
 import { env } from "@pbinj/pbj/env";
 import express from "express";
 import { Server } from "http";
@@ -20,8 +27,8 @@ export class ServerConfig {
   constructor(
     private _port = env("PJB_PORT", "0"),
     private _host = env("PJB_HOST", "localhost"),
-    private _path = env("PJB_PATH", "/"),
-  ) { }
+    private _path = env("PJB_PATH", "/")
+  ) {}
   get host() {
     return this._host + "";
   }
@@ -47,7 +54,7 @@ export class ServerConfig {
 
 export async function register(
   ctx = context,
-  start = true,
+  start = true
 ): Promise<express.Express> {
   ctx.register(serverConfigPBinJKey, ServerConfig);
 
@@ -69,14 +76,14 @@ export async function register(
       });
       if (service) {
         try {
-          const resp = await ctx.resolveAsync((service as any).name);
+          const resp = await ctx.resolveAsync(service[serviceSymbol]);
           res.send(JSON.stringify(resp));
         } catch (e) {
           res.send({ error: String(e) });
         }
       }
     } else {
-      res.send({ error: "Service was not found" })
+      res.send({ error: "Service was not found" });
     }
   });
   app.get("/api/services", (_, res) => {
