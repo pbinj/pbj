@@ -436,7 +436,7 @@ export type SchemaObject = {
   /** Use of this keyword is functionally equivalent to an "enum" (Section 6.1.2) with a single value. */
   const?: unknown;
   default?: unknown;
-  format?: string;
+  format?: StringFormat;
   /** @deprecated in 3.1 (still valid for 3.0) */
   nullable?: boolean;
   oneOf?: (SchemaObject | ReferenceObject)[];

@@ -1,13 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  array,
-  guardType,
-  toSchema,
-  allOf,
-  required,
-  shape,
-  $ref,
-} from "./schema";
+import { array, toSchemaNested, allOf, required, shape, $ref } from "./schema";
 import { isString, isNumber, isBoolean } from "../guard";
 
 describe("schema functions", () => {
@@ -23,7 +15,7 @@ describe("schema functions", () => {
     it("should work with required", () => {
       const objectRequiredProp = shape({ key: required(isString) });
 
-      expect(toSchema(objectRequiredProp)).toMatchObject({
+      expect(toSchemaNested(objectRequiredProp)).toMatchObject({
         type: "object",
         properties: {
           key: { type: "string" },
@@ -34,7 +26,7 @@ describe("schema functions", () => {
 
     it("should generate correct schema", () => {
       const numberArrayGuard = array(isNumber);
-      const schema = toSchema(numberArrayGuard);
+      const schema = toSchemaNested(numberArrayGuard);
 
       expect(schema).toMatchObject({
         type: "array",
@@ -50,7 +42,7 @@ describe("schema functions", () => {
         age: isNumber,
       });
 
-      const schema = toSchema(personGuard);
+      const schema = toSchemaNested(personGuard);
       expect(schema).toMatchObject({
         type: "object",
         properties: {
@@ -69,7 +61,7 @@ describe("schema functions", () => {
         }),
       });
 
-      const schema = toSchema(nestedGuard);
+      const schema = toSchemaNested(nestedGuard);
       expect(schema).toMatchObject({
         type: "object",
         properties: {
@@ -91,7 +83,7 @@ describe("schema functions", () => {
   describe("allOf", () => {
     it("should work", () => {
       const allOfGuard = shape({ stuff: allOf(isString, isNumber) });
-      const schema = toSchema(allOfGuard);
+      const schema = toSchemaNested(allOfGuard);
       console.log(JSON.stringify(schema, null, 2));
       expect(schema).toMatchObject({
         type: "object",
@@ -135,8 +127,7 @@ describe("schema functions", () => {
       stuff,
     });
     it("should ref", () => {
-      const result = toSchema(guard);
-      console.log(JSON.stringify(result, null, 2));
+      const result = toSchemaNested(guard);
       expect(result).toMatchObject({
         type: "object",
         properties: {

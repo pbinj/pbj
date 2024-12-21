@@ -25,7 +25,8 @@ const EMPTY = [] as const;
 export class ServiceDescriptor<
   TRegistry extends RegistryType,
   T extends Constructor | Fn | unknown,
-> implements ServiceDescriptorI<TRegistry, T> {
+> implements ServiceDescriptorI<TRegistry, T>
+{
   static #dependencies = new Set<CKey>();
 
   static value<

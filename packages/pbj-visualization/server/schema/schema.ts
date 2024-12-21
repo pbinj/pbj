@@ -16,6 +16,7 @@ import {
   isRequired,
   isString,
 } from "../guard";
+
 export const guardType = Symbol("@pbj/visualization/guardType");
 
 type Config<T> = Partial<Omit<T, "type">>;
@@ -57,7 +58,7 @@ export function allOf<T extends readonly Guard<any>[]>(...guards: T) {
     return true;
   }
   allOfGuard.toSchema = (ctx: SchemaObject, key: string) => {
-    const allOf = guards.map((g) => toSchema(g, ctx, key));
+    const allOf = guards.map((g) => toSchemaNested(g, ctx, key));
     return {
       allOf,
     };
@@ -72,7 +73,7 @@ export function $ref(ref: string, guard: Guard<any>) {
   }
   isRefGuard.toSchema = (ctx: Schema, key: string) => {
     const defs = ctx.definitions || (ctx.definitions = {});
-    defs[ref] = toSchema(guard, ctx, ref);
+    defs[ref] = toSchemaNested(guard, ctx, ref);
 
     return { $ref: `#/definitions/${ref}` };
   };
@@ -90,7 +91,7 @@ export function required(guard: Guard<any>) {
       ctx.required = [];
     }
     ctx.required.push(key);
-    return toSchema(guard, ctx, key);
+    return toSchemaNested(guard, ctx, key);
   };
 
   return isRequiredGuard;
@@ -122,7 +123,7 @@ export function shape<T extends Record<string, Guard<any>>>(
       properties: {} as Record<string, Schema>,
     };
     for (const [k, v] of entries) {
-      cur.properties![k] = toSchema(v, cur, k);
+      cur.properties![k] = toSchemaNested(v, cur, k);
     }
     return cur;
   };
@@ -206,7 +207,7 @@ export function exactShape<T extends Record<string, Guard<any>>>(obj: T) {
       properties: {} as Record<string, Schema>,
     };
     for (const [k, v] of entries) {
-      cur.properties![k] = toSchema(v, cur, k);
+      cur.properties![k] = toSchemaNested(v, cur, k);
     }
     return cur;
   };
@@ -252,14 +253,25 @@ export function array(
   };
   ret.toSchema = (ctx: SchemaObject, key: string): ArraySubtype => ({
     type: "array",
-    items: guard ? toSchema(guard, ctx, key) : undefined,
+    items: guard ? toSchemaNested(guard, ctx, key) : undefined,
     ...options,
   });
 
   return ret;
 }
 
-export const toSchema = (
+export function toSchema(
+  v: Guard<any>,
+  config: Config<SchemaObject> = {},
+): SchemaObject {
+  return {
+    $schema: "https://json-schema.org/draft/2020-12/schema",
+    ...config,
+    ...toSchemaNested(v),
+  } as SchemaObject;
+}
+
+export const toSchemaNested = (
   v: Guard<any>,
   ctx: SchemaObject = {
     type: "object",
