@@ -469,10 +469,31 @@ export interface TransformObject {
   schema: ts.TypeNode;
   questionToken: boolean;
 }
-
+export type StringFormat =
+  | "date"
+  | "date-time"
+  | "email"
+  | "idn-email"
+  | "hostname"
+  | "idn-hostname"
+  | "ipv4"
+  | "ipv6"
+  | "uuid"
+  | "uri"
+  | "uri-reference"
+  | "iri"
+  | "iri-reference"
+  | "uri-template"
+  | "json-pointer"
+  | "relative-json-pointer"
+  | "regex"
+  | "uuid";
 export interface StringSubtype {
   type: "string" | ["string", "null"];
-  enum?: (string | ReferenceObject)[];
+  pattern?: string;
+  minLength?: number;
+  maxLength?: number;
+  format?: StringFormat;
 }
 
 export interface NumberSubtype {
@@ -658,12 +679,12 @@ export interface OpenAPITSOptions {
   /** Manually transform certain Schema Objects with a custom TypeScript type */
   transform?: (
     schemaObject: SchemaObject,
-    options: TransformNodeOptions
+    options: TransformNodeOptions,
   ) => ts.TypeNode | TransformObject | undefined;
   /** Modify TypeScript types built from Schema Objects */
   postTransform?: (
     type: ts.TypeNode,
-    options: TransformNodeOptions
+    options: TransformNodeOptions,
   ) => ts.TypeNode | undefined;
   /** Add readonly properties and readonly arrays? (default: false) */
   immutable?: boolean;

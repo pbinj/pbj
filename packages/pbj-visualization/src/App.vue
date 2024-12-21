@@ -39,7 +39,7 @@ watch(
   () => route.params.id,
   (newId, oldId) => {
     // react to route changes...
-  }
+  },
 );
 fetchData();
 </script>

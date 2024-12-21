@@ -1,5 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { array, guardType, toSchema, allOf, required, shape } from "./schema";
+import {
+  array,
+  guardType,
+  toSchema,
+  allOf,
+  required,
+  shape,
+  $ref,
+} from "./schema";
 import { isString, isNumber, isBoolean } from "../guard";
 
 describe("schema functions", () => {
@@ -35,26 +43,6 @@ describe("schema functions", () => {
     });
   });
 
-  // describe('$ref', () => {
-  //     it('should work', () => {
-  //         const refGuard = $ref('MyRef', isString);
-  //         const schema = toSchema(shape({ myRef: refGuard }));
-  //         expect(schema).toMatchObject({
-  //             type: 'object',
-  //             properties: {
-  //                 myRef: {
-  //                     $ref: '#/definitions/MyRef'
-  //                 }
-  //             },
-
-  //             definitions: {
-  //                 MyRef: {
-  //                     type: 'string'
-  //                 }
-  //             }
-  //         });
-  //     })
-  // })
   describe("toSchema function", () => {
     it("should handle shape guards", () => {
       const personGuard = shape({
@@ -133,6 +121,39 @@ describe("schema functions", () => {
       expect(guard({ name: "John", age: "30" })).toBe(false);
       expect(guard({ name: "John" })).toBe(false);
       expect(guard(null)).toBe(false);
+    });
+  });
+  describe("$ref", () => {
+    const stuff = $ref(
+      "Stuff",
+      shape({
+        name: isString,
+        age: isNumber,
+      }),
+    );
+    const guard = shape({
+      stuff,
+    });
+    it("should ref", () => {
+      const result = toSchema(guard);
+      console.log(JSON.stringify(result, null, 2));
+      expect(result).toMatchObject({
+        type: "object",
+        properties: {
+          stuff: {
+            $ref: "#/definitions/Stuff",
+          },
+        },
+        definitions: {
+          Stuff: {
+            type: "object",
+            properties: {
+              name: { type: "string" },
+              age: { type: "number" },
+            },
+          },
+        },
+      });
     });
   });
 });

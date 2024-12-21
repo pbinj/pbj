@@ -1,4 +1,7 @@
-export type Guard<T> = (value: unknown) => value is T;
+export const guardType = Symbol("@pbj/visualization/guardType");
+export type Guard<T> = ((value: unknown) => value is T) & {
+  [guardType]?: string;
+};
 
 export function isRequired<V>(v: V): v is Exclude<V, null | undefined> {
   return v != null;
@@ -35,7 +38,7 @@ export function isArray<T>(v: unknown, guard?: Guard<T>): v is T[] {
 }
 export type AllOf<T> = T extends [
   Guard<infer U>,
-  ...infer Rest extends readonly Guard<any>[]
+  ...infer Rest extends readonly Guard<any>[],
 ]
   ? Rest["length"] extends 0
     ? U
