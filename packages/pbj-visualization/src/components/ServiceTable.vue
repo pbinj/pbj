@@ -24,7 +24,7 @@ let search = "";
 <template>
   <v-card>
     <title>Services</title>
-    <v-data-table
+    <v-data-table-virtual
       :headers="headers"
       :items="services"
       :search="search"
@@ -46,7 +46,7 @@ let search = "";
           >
         </v-list>
       </template>
-    </v-data-table>
+    </v-data-table-virtual>
   </v-card>
 </template>
 
