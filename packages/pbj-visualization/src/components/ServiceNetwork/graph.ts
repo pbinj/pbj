@@ -10,9 +10,9 @@ import colors from "vuetify/util/colors";
 const deepClone = <T>(obj: T): T => JSON.parse(JSON.stringify(obj));
 
 export const groups = {
-  '@pbj': {
+  "@pbj": {
     color: colors.purple.accent3,
-    label: 'PBinJ nodes'
+    label: "PBinJ nodes",
   },
   vue: {
     color: "#42b883",
@@ -325,9 +325,11 @@ export function parseGraphRawData(modules: ServiceI[]) {
         size: determineNodeSize(mod.dependencies.length),
         shape: mod.name.includes("/node_modules/")
           ? "hexagon"
-          : mod.error ? "box" : mod.invoked
-            ? "diamond"
-            : "dot",
+          : mod.error
+          ? "box"
+          : mod.invoked
+          ? "diamond"
+          : "dot",
       },
       edges: [],
     };

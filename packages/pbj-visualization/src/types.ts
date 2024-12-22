@@ -12,7 +12,6 @@ export interface ServiceI {
   listOf: boolean;
   error?: {
     message: string;
-  }
+  };
   args: unknown[];
-
 }
