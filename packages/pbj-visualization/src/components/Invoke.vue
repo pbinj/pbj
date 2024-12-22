@@ -2,7 +2,7 @@
 import { type ServiceI } from "../types";
 import { ref } from "vue";
 const props = defineProps(["service"]);
-let service = props.sevice as ServiceI;
+let service = props.service as ServiceI;
 let invoked = ref(false);
 let busy = ref(false);
 let resp = ref("");

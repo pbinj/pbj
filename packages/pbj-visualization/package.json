@@ -40,7 +40,7 @@
   "main": "dist/index.js",
   "scripts": {
     "clean": "rm -rf dist && rm -rf web",
-    "dev": "vite",
+    "dev": "DEV=1 vite",
     "build": "run-p type-check \"build-only {@}\" build-server  --",
     "preview": "vite preview",
     "test": "vitest run",

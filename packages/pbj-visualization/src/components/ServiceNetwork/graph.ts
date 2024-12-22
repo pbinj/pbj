@@ -1,5 +1,4 @@
-//import type { ModuleInfo } from '@vue/devtools-core'
-import type { ServiceI } from "@/types";
+import type { ServiceI } from "../../types";
 import { type Edge, type Node, type Options } from "vis-network";
 import { DataSet } from "vis-network/standalone";
 import { computed, ref, shallowRef, watch } from "vue";
@@ -41,7 +40,7 @@ export const groups = {
   other: {
     color: "#B86542",
   },
-} satisfies Record<string, { color: string }>;
+} satisfies Record<string, { color: string, label?: string }>;
 
 // #endregion
 
@@ -326,10 +325,10 @@ export function parseGraphRawData(modules: ServiceI[]) {
         shape: mod.name.includes("/node_modules/")
           ? "hexagon"
           : mod.error
-          ? "box"
-          : mod.invoked
-          ? "diamond"
-          : "dot",
+            ? "box"
+            : mod.invoked
+              ? "diamond"
+              : "dot",
       },
       edges: [],
     };
@@ -400,7 +399,7 @@ export function updateGraphDrawerData(nodeId: string): DrawerData | undefined {
   const node = modulesMap.get(nodeId);
   if (!node) return;
 
-  const deps = node.mod.dependencies.reduce<DrawerData["deps"]>((prev, dep) => {
+  const deps = node.mod.dependencies.reduce<DrawerData["deps"]>((prev: { path: string, displayPath: string }[], dep: string) => {
     const moduleData = modulesMap.get(dep);
     if (!moduleData) return prev;
     if (checkIsValidModule(moduleData.mod)) {
@@ -460,7 +459,7 @@ function recursivelyGetGraphNodeData(
   depth += 1;
   if (!node || depth > 20) return [];
   const result = [node];
-  node.mod.dependencies.forEach((dep) => {
+  node.mod.dependencies.forEach((dep: string) => {
     const node = modulesMap.get(dep);
     if (node) result.push(...recursivelyGetGraphNodeData(node.mod.name, depth));
   });

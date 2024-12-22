@@ -9,10 +9,8 @@ import tsConfigPaths from "vite-tsconfig-paths";
 import { context } from "@pbinj/pbj";
 import { register, serverConfigPBinJKey } from "./server/pbj.js";
 
-if (!process.env.VITEST) {
-  await register(context);
-}
-const config = context.resolve(serverConfigPBinJKey);
+const isDev = process.env.DEV === "1";
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [tsConfigPaths(), vue(), vueJsx(), vueDevTools(), vuetify()],
@@ -24,12 +22,17 @@ export default defineConfig({
   build: {
     outDir: "./web",
   },
-  server: {
-    proxy: {
-      "/api/": {
-        target: new URL(config?.url),
-        changeOrigin: true,
+  server: process.env.DEV ? (() => {
+    register(context);
+    const config = context.resolve(serverConfigPBinJKey);
+
+    return {
+      proxy: {
+        "/api/": {
+          target: new URL(config?.url),
+          changeOrigin: true,
+        },
       },
-    },
-  },
+    }
+  })() : {},
 });

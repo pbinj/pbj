@@ -3,13 +3,13 @@ import {
   context,
   asString,
   type ServiceDescriptorI,
-  Registry,
+  type Registry,
   serviceSymbol,
 } from "@pbinj/pbj";
 import { env } from "@pbinj/pbj/env";
 import express from "express";
 import { Server } from "http";
-import { AddressInfo } from "net";
+import type { AddressInfo } from "net";
 
 /**
  * CJS / ESM madness.
@@ -28,7 +28,7 @@ export class ServerConfig {
     private _port = env("PJB_PORT", "0"),
     private _host = env("PJB_HOST", "localhost"),
     private _path = env("PJB_PATH", "/")
-  ) {}
+  ) { }
   get host() {
     return this._host + "";
   }
