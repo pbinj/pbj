@@ -6,7 +6,7 @@
     "cypress.config.*",
     "nightwatch.conf.*",
     "playwright.config.*",
-    "server/pbj.ts"
+    "server/**/*.ts"
   ],
   "compilerOptions": {
     "composite": true,

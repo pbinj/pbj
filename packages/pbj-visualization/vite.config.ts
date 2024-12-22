@@ -9,8 +9,7 @@ import tsConfigPaths from "vite-tsconfig-paths";
 import { context } from "@pbinj/pbj";
 import { register, serverConfigPBinJKey } from "./server/pbj.js";
 
-// https://vite.dev/config/
-export default defineConfig(async () => ({
+export const CONFIG = {
   plugins: [tsConfigPaths(), vue(), vueJsx(), vueDevTools(), vuetify()],
   resolve: {
     alias: {
@@ -20,12 +19,17 @@ export default defineConfig(async () => ({
   build: {
     outDir: "./web",
   },
-  ...(process.env.DEV
-    ? await (async () => {
+};
+// https://vite.dev/config/
+export default defineConfig(
+  !process.env.DEV
+    ? CONFIG
+    : async () => {
         await register(context);
         const config = context.resolve(serverConfigPBinJKey);
 
         return {
+          ...CONFIG,
           server: {
             proxy: {
               "/api/": {
@@ -35,6 +39,5 @@ export default defineConfig(async () => ({
             },
           },
         };
-      })()
-    : undefined),
-}));
+      },
+);
