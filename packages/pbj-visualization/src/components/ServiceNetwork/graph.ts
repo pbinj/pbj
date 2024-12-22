@@ -5,15 +5,15 @@ import { DataSet } from "vis-network/standalone";
 import { computed, ref, shallowRef, watch } from "vue";
 import { useTheme } from "vuetify";
 import { useToggle } from "@vueuse/core";
+import colors from "vuetify/util/colors";
 
 const deepClone = <T>(obj: T): T => JSON.parse(JSON.stringify(obj));
 
-// import { deepClone } from '@vue/devtools-shared'
-// import { useDevToolsColorMode } from '@vue/devtools-ui'
-// import { DataSet } from 'vis-network/standalone'
-
-// #region file types
-export const fileTypes = {
+export const groups = {
+  '@pbj': {
+    color: colors.purple.accent3,
+    label: 'PBinJ nodes'
+  },
   vue: {
     color: "#42b883",
   },
@@ -66,7 +66,7 @@ export const graphOptions = computed<Options>(() => ({
       iterations: 200,
     },
   },
-  groups: fileTypes,
+  groups,
 }));
 // #endregion
 
@@ -131,6 +131,7 @@ const uniqueNodes = (nodes: Node[]) =>
     if (!prev.some((n) => n.id === node.id)) prev.push(node);
     return prev;
   }, []);
+
 const uniqueEdges = (edges: Edge[]) =>
   edges.reduce<Edge[]>((prev, edge) => {
     if (!prev.some((e) => e.from === edge.from && e.to === edge.to))
@@ -187,7 +188,7 @@ function updateGraph() {
       matchedNodes.push(node);
       matchedSearchNodes.push({
         // only search the exactly name(last 3 segments), instead of full path
-        id: mod.name.match(EXTRACT_LAST_THREE_MOD_ID_RE)?.[0] ?? mod.name,
+        id: mod.name,
         fullId: mod.name,
         node,
         edges,
@@ -264,19 +265,6 @@ function getEdge(modId: string, dep: string) {
   };
 }
 
-function removeVerbosePath(path: string) {
-  // remove query, hash, and duplicate slash
-  return path
-    .replace(/\?.*$/, "")
-    .replace(/#.*$/, "")
-    .replace(/\/{2,}/g, "/");
-}
-
-function isVueStyleFile(path: string) {
-  // TODO: [check vue style file in graph] need consider edge case, let's leave it before someone report the issue
-  return path.includes("vue&type=style");
-}
-
 function determineNodeSize(depsLen: number) {
   return 15 + Math.min(depsLen / 2, 8);
 }
@@ -286,8 +274,6 @@ function getUniqueDeps(deps: string[], processEachDep?: (dep: string) => void) {
   // don't use `mod.deps.filter`, will save filter overhead(for performance)
   const uniqueDeps: string[] = [];
   deps.forEach((dep) => {
-    if (isVueStyleFile(dep)) return;
-    dep = removeVerbosePath(dep);
     // skip duplicate dep
     if (uniqueDeps.includes(dep)) return;
     uniqueDeps.push(dep);
@@ -305,9 +291,6 @@ export function parseGraphRawData(modules: ServiceI[]) {
   const totalNode: Node[] = [];
 
   modules.forEach((mod) => {
-    // skip vue style file, a Vue file will have 2 modules(if has a style tag), one is script, one is style, we don't need style
-    if (isVueStyleFile(mod.name)) return;
-    mod.name = removeVerbosePath(mod.name);
     // skip duplicate module, merge their deps
     if (totalNode.some((node) => node.id === mod.name)) {
       const nodeData = modulesMap.get(mod.name)!;
@@ -338,13 +321,13 @@ export function parseGraphRawData(modules: ServiceI[]) {
       node: {
         id: mod.name,
         label: displayName,
-        group: path.match(/\.(\w+)$/)?.[1] || "unknown",
+        group: path.match(/^(@\w+)\//)?.[1] || "unknown",
         size: determineNodeSize(mod.dependencies.length),
         shape: mod.name.includes("/node_modules/")
           ? "hexagon"
-          : mod.invoked
-          ? "diamond"
-          : "dot",
+          : mod.error ? "box" : mod.invoked
+            ? "diamond"
+            : "dot",
       },
       edges: [],
     };

@@ -77,8 +77,10 @@ onUnmounted(() => {
   height: 100%;
   width: 100%;
   position: relative;
+  min-width: 500px;
+  min-height: 800px;
 }
-.container {
+.absolute {
   height: 100%;
   width: 100%;
   position: absolute;
