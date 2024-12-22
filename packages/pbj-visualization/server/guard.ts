@@ -36,18 +36,18 @@ export function isArray<T>(v: unknown, guard?: Guard<T>): v is T[] {
 
   return isArr;
 }
+
 export type AllOf<T> = T extends [
   Guard<infer U>,
-  ...infer Rest extends readonly Guard<any>[],
+  ...infer Rest extends readonly Guard<any>[]
 ]
   ? Rest["length"] extends 0
     ? U
     : U & AllOf<Rest>
   : never;
-export function asserts<T extends readonly Guard<any>[]>(
-  ...guards: T
-): (value: unknown) => asserts value is AllOf<T> {
-  return function (value: unknown) {
+
+export function asserts<T extends readonly Guard<any>[]>(...guards: T) {
+  return function assertsGuard(value: unknown): asserts value is AllOf<T> {
     for (const guard of guards) {
       if (!guard(value)) {
         throw new GuardError(`Value '${value}' does not match guard`);

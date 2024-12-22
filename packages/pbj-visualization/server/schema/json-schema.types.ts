@@ -1,5 +1,4 @@
 import type { PathLike } from "node:fs";
-import type ts from "typescript";
 
 // Many types allow for true “any” for inheritance to work
 
@@ -465,10 +464,6 @@ export type SchemaObject = {
     }
 );
 
-export interface TransformObject {
-  schema: ts.TypeNode;
-  questionToken: boolean;
-}
 export type StringFormat =
   | "date"
   | "date-time"
@@ -661,93 +656,4 @@ export type SecurityRequirementObject = {
   [P in keyof ComponentsObject["securitySchemes"]]?: string[];
 };
 
-export interface OpenAPITSOptions {
-  /** Treat all objects as if they have `additionalProperties: true` by default (default: false) */
-  additionalProperties?: boolean;
-  /** Alphabetize all keys? (default: false) */
-  alphabetize?: boolean;
-  /** (optional) Generate tuples using array minItems / maxItems */
-  arrayLength?: boolean;
-  /** Allow schema objects with no specified properties to have additional properties if not expressly forbidden? (default: false) */
-  emptyObjectsUnknown?: boolean;
-  /** Provide current working directory (cwd) which helps resolve relative remote schemas */
-  cwd?: PathLike;
-  /** Should schema objects with a default value not be considered optional? */
-  defaultNonNullable?: boolean;
-  /** Exclude deprecated fields from types? (default: false) */
-  excludeDeprecated?: boolean;
-  /** Manually transform certain Schema Objects with a custom TypeScript type */
-  transform?: (
-    schemaObject: SchemaObject,
-    options: TransformNodeOptions,
-  ) => ts.TypeNode | TransformObject | undefined;
-  /** Modify TypeScript types built from Schema Objects */
-  postTransform?: (
-    type: ts.TypeNode,
-    options: TransformNodeOptions,
-  ) => ts.TypeNode | undefined;
-  /** Add readonly properties and readonly arrays? (default: false) */
-  immutable?: boolean;
-  /** (optional) Should logging be suppressed? (necessary for STDOUT) */
-  silent?: boolean;
-  /** (optional) OpenAPI version. Must be present if parsing raw schema */
-  version?: number;
-  /** (optional) Export type instead of interface */
-  exportType?: boolean;
-  /** Export true TypeScript enums instead of unions */
-  enum?: boolean;
-  /** Export union values as arrays */
-  enumValues?: boolean;
-  /** Dedupe enum values */
-  dedupeEnums?: boolean;
-  /** (optional) Substitute path parameter names with their respective types */
-  pathParamsAsTypes?: boolean;
-  /** Treat all objects as if they have \`required\` set to all properties by default (default: false) */
-  propertiesRequiredByDefault?: boolean;
-  /** (optional) Generate schema types at root level */
-  rootTypes?: boolean;
-  /** (optional) Do not add Schema prefix to types at root level */
-  rootTypesNoSchemaPrefix?: boolean;
-
-  /** Inject arbitrary TypeScript types into the start of the file */
-  inject?: string;
-}
-
-/** Context passed to all submodules */
-export interface GlobalContext {
-  // user options
-  additionalProperties: boolean;
-  alphabetize: boolean;
-  arrayLength: boolean;
-  defaultNonNullable: boolean;
-  discriminators: {
-    objects: Record<string, DiscriminatorObject>;
-    refsHandled: string[];
-  };
-  emptyObjectsUnknown: boolean;
-  enum: boolean;
-  enumValues: boolean;
-  dedupeEnums: boolean;
-  excludeDeprecated: boolean;
-  exportType: boolean;
-  immutable: boolean;
-  injectFooter: ts.Node[];
-  pathParamsAsTypes: boolean;
-  postTransform: OpenAPITSOptions["postTransform"];
-  propertiesRequiredByDefault: boolean;
-  rootTypes: boolean;
-  rootTypesNoSchemaPrefix: boolean;
-  silent: boolean;
-  transform: OpenAPITSOptions["transform"];
-  /** retrieve a node by $ref */
-  resolve<T>($ref: string): T | undefined;
-  inject?: string;
-}
-
 export type $defs = Record<string, SchemaObject>;
-
-/** generic options for most internal transform* functions */
-export interface TransformNodeOptions {
-  path?: string;
-  ctx: GlobalContext;
-}

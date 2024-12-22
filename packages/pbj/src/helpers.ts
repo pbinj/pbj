@@ -15,7 +15,11 @@ declare module "./context.js" {
       R,
       T extends PBinJKey<TRegistry>,
       TRegistry extends RegistryType = Registry,
-    >(this: Context, service: T, transformer: (v: ValueOf<TRegistry, T>) => R): R;
+    >(
+      this: Context,
+      service: T,
+      transformer: (v: ValueOf<TRegistry, T>) => R,
+    ): R;
 
     pathOf<
       T extends PBinJKey<TRegistry>,
@@ -26,10 +30,9 @@ declare module "./context.js" {
       service: T,
       path: TPath,
       defaultValue?: PathOf<ValueOf<TRegistry, T>, TPath> | undefined,
-    ): () => PathOf<ValueOf<TRegistry, T>, TPath>;
+    ): (v?: ValueOf<TRegistry, T>) => PathOf<ValueOf<TRegistry, T>, TPath>;
   }
 }
-
 
 type PathOf<
   T,
@@ -55,7 +58,7 @@ Context.prototype.value = function get<T, TKey extends string>(
     return (acc as any)?.[part];
   }, obj) as any;
   return value ?? defaultValue;
-}
+};
 
 Context.prototype.pathOf = function pathOf<
   T extends PBinJKey<TRegistry>,
@@ -69,7 +72,7 @@ Context.prototype.pathOf = function pathOf<
 ) {
   return (ctx = this.pbj(service)) =>
     this.value(ctx as ValueOf<TRegistry, T>, path, defaultValue);
-}
+};
 
 Context.prototype.transform = function transform<
   R,
@@ -77,7 +80,7 @@ Context.prototype.transform = function transform<
   TRegistry extends RegistryType = Registry,
 >(this: Context, service: T, transformer: (v: ValueOf<TRegistry, T>) => R): R {
   return this.pbj(() => transformer(this.resolve(service as any)));
-}
+};
 
 export const transform = context.transform.bind(context);
 export const get = context.value.bind(context);

@@ -116,7 +116,6 @@ interface GraphNodesTotalData {
   edges: Edge[];
 }
 
-export const projectRoot = ref("");
 export const graphNodes = new DataSet<Node>([]);
 export const graphEdges = new DataSet<Edge>([]);
 const graphNodesTotal = shallowRef<GraphNodesTotalData[]>([]);
@@ -203,7 +202,7 @@ function updateGraph() {
   const searchText = graphSearchText.value;
   if (searchText.trim().length) {
     const result = matchedSearchNodes.filter(({ id }) =>
-      id.includes(searchText),
+      id.includes(searchText)
     );
     matchedEdges.length = 0;
     matchedNodes.length = 0;
@@ -235,10 +234,10 @@ function recursivelyGetNodeByDep(node: SearcherNode[]) {
         allNodes.set(node.mod.name, node.node);
         allEdges.set(
           `${n.fullId}-${node.mod.name}`,
-          getEdge(node.mod.name, n.fullId),
+          getEdge(node.mod.name, n.fullId)
         );
         node.edges.forEach((edge) =>
-          allEdges.set(`${edge.from}-${edge.to}`, edge),
+          allEdges.set(`${edge.from}-${edge.to}`, edge)
         );
       }
     });
@@ -278,10 +277,6 @@ function isVueStyleFile(path: string) {
   return path.includes("vue&type=style");
 }
 
-export function removeRootPath(path: string) {
-  return path.replace(projectRoot.value, "");
-}
-
 function determineNodeSize(depsLen: number) {
   return 15 + Math.min(depsLen / 2, 8);
 }
@@ -301,9 +296,8 @@ function getUniqueDeps(deps: string[], processEachDep?: (dep: string) => void) {
   return uniqueDeps;
 }
 
-export function parseGraphRawData(modules: ServiceI[], root: string) {
+export function parseGraphRawData(modules: ServiceI[]) {
   if (!modules) return;
-  projectRoot.value = root;
   graphNodes.clear();
   graphEdges.clear();
 
@@ -318,14 +312,14 @@ export function parseGraphRawData(modules: ServiceI[], root: string) {
     if (totalNode.some((node) => node.id === mod.name)) {
       const nodeData = modulesMap.get(mod.name)!;
       nodeData.node.size = determineNodeSize(
-        nodeData.edges.length + mod.dependencies.length,
+        nodeData.edges.length + mod.dependencies.length
       );
       const edges: Edge[] = [];
       const uniqueDeps = getUniqueDeps(mod.dependencies, (dep) => {
         edges.push(getEdge(mod.name, dep));
       });
       const incrementalDeps = uniqueDeps.filter(
-        (dep) => !nodeData.mod.dependencies.includes(dep),
+        (dep) => !nodeData.mod.dependencies.includes(dep)
       );
       if (!incrementalDeps.length) return;
       nodeData.mod.dependencies.push(...incrementalDeps);
@@ -333,9 +327,8 @@ export function parseGraphRawData(modules: ServiceI[], root: string) {
       return;
     }
     const path = mod.name;
-    const pathSegments = path.split("/");
-    const displayName = pathSegments.at(-1) ?? "";
-    const displayPath = removeRootPath(path);
+    const displayPath = path;
+    const displayName = mod.name;
     const node: GraphNodesTotalData = {
       mod,
       info: {
@@ -350,8 +343,8 @@ export function parseGraphRawData(modules: ServiceI[], root: string) {
         shape: mod.name.includes("/node_modules/")
           ? "hexagon"
           : mod.invoked
-            ? "diamond"
-            : "dot",
+          ? "diamond"
+          : "dot",
       },
       edges: [],
     };
@@ -361,12 +354,12 @@ export function parseGraphRawData(modules: ServiceI[], root: string) {
       // save references
       if (!moduleReferences.has(dep)) moduleReferences.set(dep, []);
       const moduleReferencesValue = moduleReferences.get(dep)!;
-      const displayPath = removeRootPath(path);
+      const displayPath = path;
       const isExist = !!moduleReferencesValue.find(
         (item) =>
           item.path === path &&
           item.displayPath === displayPath &&
-          item.mod.name === mod.name,
+          item.mod.name === mod.name
       );
       if (isExist) return;
 
@@ -428,7 +421,7 @@ export function updateGraphDrawerData(nodeId: string): DrawerData | undefined {
     if (checkIsValidModule(moduleData.mod)) {
       prev.push({
         path: dep,
-        displayPath: removeRootPath(removeVerbosePath(dep)),
+        displayPath: dep,
       });
     }
     return prev;
@@ -476,7 +469,7 @@ export function getGraphFilterDataset() {
 // max depth is 20
 function recursivelyGetGraphNodeData(
   nodeId: string,
-  depth = 0,
+  depth = 0
 ): GraphNodesTotalData[] {
   const node = modulesMap.get(nodeId);
   depth += 1;

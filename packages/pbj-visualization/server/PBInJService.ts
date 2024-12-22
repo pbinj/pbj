@@ -5,11 +5,9 @@ import {
   type RegistryType,
   context,
   serviceSymbol,
-  PBinJKeyType,
-  PBinJKey,
 } from "@pbinj/pbj";
-import { allOf, asserts, isRequired, shape } from "./guard";
-
+import { asserts, isString } from "./guard";
+import { exactShape } from "./schema/schema";
 export class PBinJService<TRegistry extends RegistryType = Registry> {
   constructor(private ctx = context) {}
   #findNyName(name: string): ServiceDescriptorI<TRegistry, any> {
@@ -35,7 +33,7 @@ export class PBinJService<TRegistry extends RegistryType = Registry> {
     }
   }
   async invalidate(arg: { name: string }) {
-    hasName(arg);
+    //    assertShape(arg);
     const service = this.#findNyName(arg.name);
     if (service) {
       try {
@@ -59,7 +57,7 @@ export class PBinJService<TRegistry extends RegistryType = Registry> {
         | undefined
         ? ServiceDescriptorI<TRegistry, any>[K]
         : never;
-    }>,
+    }>
   ) {
     const service = this.#findNyName(id);
     if (service) {
@@ -72,8 +70,8 @@ export class PBinJService<TRegistry extends RegistryType = Registry> {
           "cacheable",
           "description",
           "optional",
-          "tags",
-        ),
+          "tags"
+        )
       );
     }
     return service;
@@ -85,20 +83,12 @@ function allow<T extends { [k: PropertyKey]: any }, K extends (keyof T)[]>(
   ...keys: K
 ): Omit<T, K[number]> {
   return Object.fromEntries(
-    Object.entries(obj).filter(([k, v]) => !keys.includes(k)),
+    Object.entries(obj).filter(([k, v]) => !keys.includes(k))
   ) as any;
 }
-function isString(v: unknown): v is string {
-  return typeof v === "string";
-}
-const hasName = asserts(
-  shape({
-    name: allOf(isRequired, (v: unknown): v is string => typeof v === "string"),
-  }),
-);
 
-const assertString = asserts(isRequired, isString);
-const b: unknown = "1";
-assertString(b);
-
-hasName({ name: "" });
+// const assertShape = asserts(
+//   exactShape({
+//     name: isString,
+//   }),
+// );
