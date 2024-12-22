@@ -17,7 +17,7 @@ const View = ["network", "table"] as const;
 const loading = ref(false);
 const error = ref<string | null>(null);
 const services = ref([] as ServiceI[]);
-const view = ref<"network" | "table">(route.name as any || "network");
+const view = ref<"network" | "table">((route.name as any) || "network");
 let service: ServiceI | undefined = undefined;
 
 // watch the params of the route to fetch the data again
@@ -39,7 +39,7 @@ watch(
   () => route.params.id,
   (newId, oldId) => {
     // react to route changes...
-  }
+  },
 );
 fetchData();
 </script>

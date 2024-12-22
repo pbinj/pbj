@@ -25,7 +25,7 @@ function invoke() {
       busy.value = false;
       invoked.value = false;
       resp.value = "Error invoking service";
-    }
+    },
   );
 }
 </script>

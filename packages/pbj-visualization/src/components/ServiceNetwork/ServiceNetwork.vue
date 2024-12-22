@@ -30,7 +30,7 @@ function mountNetwork() {
       nodes: graphNodes,
       edges: graphEdges,
     },
-    graphOptions.value
+    graphOptions.value,
   ));
 
   watch(
@@ -38,7 +38,7 @@ function mountNetwork() {
     (options) => {
       network.setOptions(options);
     },
-    { immediate: true }
+    { immediate: true },
   );
 
   network.on("selectNode", (options) => {
@@ -54,7 +54,7 @@ function mountNetwork() {
     () => graphFilterNodeId.value,
     (id) => {
       if (id) network.moveTo({ position: { x: 0, y: 0 } });
-    }
+    },
   );
 }
 

@@ -22,17 +22,19 @@ export default defineConfig({
   build: {
     outDir: "./web",
   },
-  server: process.env.DEV ? (() => {
-    register(context);
-    const config = context.resolve(serverConfigPBinJKey);
+  server: process.env.DEV
+    ? (() => {
+        register(context);
+        const config = context.resolve(serverConfigPBinJKey);
 
-    return {
-      proxy: {
-        "/api/": {
-          target: new URL(config?.url),
-          changeOrigin: true,
-        },
-      },
-    }
-  })() : {},
+        return {
+          proxy: {
+            "/api/": {
+              target: new URL(config?.url),
+              changeOrigin: true,
+            },
+          },
+        };
+      })()
+    : {},
 });

@@ -39,7 +39,7 @@ export function isArray<T>(v: unknown, guard?: Guard<T>): v is T[] {
 
 export type AllOf<T> = T extends [
   Guard<infer U>,
-  ...infer Rest extends readonly Guard<any>[]
+  ...infer Rest extends readonly Guard<any>[],
 ]
   ? Rest["length"] extends 0
     ? U

@@ -121,7 +121,7 @@ describe("schema functions", () => {
       shape({
         name: isString,
         age: isNumber,
-      })
+      }),
     );
     const guard = shape({
       stuff,

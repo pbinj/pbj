@@ -5,7 +5,7 @@ export async function main(imports: string[] = process.argv.slice(2)) {
   console.log("Running server");
   if (imports.length === 0) {
     console.log(
-      "No imports provided, please give a file to import context from"
+      "No imports provided, please give a file to import context from",
     );
     return;
   }

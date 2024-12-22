@@ -57,7 +57,7 @@ export class PBinJService<TRegistry extends RegistryType = Registry> {
         | undefined
         ? ServiceDescriptorI<TRegistry, any>[K]
         : never;
-    }>
+    }>,
   ) {
     const service = this.#findNyName(id);
     if (service) {
@@ -70,8 +70,8 @@ export class PBinJService<TRegistry extends RegistryType = Registry> {
           "cacheable",
           "description",
           "optional",
-          "tags"
-        )
+          "tags",
+        ),
       );
     }
     return service;
@@ -83,7 +83,7 @@ function allow<T extends { [k: PropertyKey]: any }, K extends (keyof T)[]>(
   ...keys: K
 ): Omit<T, K[number]> {
   return Object.fromEntries(
-    Object.entries(obj).filter(([k, v]) => !keys.includes(k))
+    Object.entries(obj).filter(([k, v]) => !keys.includes(k)),
   ) as any;
 }
 
