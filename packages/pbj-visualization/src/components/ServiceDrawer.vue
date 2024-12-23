@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Invoke from "./Invoke.vue";
+import Invoke from "./InvokeButton.vue";
 import { closeDrawer } from "./ServiceNetwork/graph";
 const props = defineProps(["service"]);
 </script>

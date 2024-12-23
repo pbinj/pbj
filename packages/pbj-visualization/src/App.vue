@@ -6,36 +6,26 @@ import {
   ServiceNetwork,
   graphDrawerData,
   graphDrawerShow,
-  parseGraphRawData,
 } from "./components/ServiceNetwork";
-import type { ServiceI } from "./types";
 import { useRoute } from "vue-router";
+import {
+  fetchServiceData,
+  graphLoading,
+  services,
+} from "./components/ServiceNetwork/graph";
 
 const route = useRoute();
-const loading = ref(false);
 const error = ref<string | null>(null);
-const services = ref([] as ServiceI[]);
 const view = ref<"network" | "table">(
   (route.name as "network" | "table") || "network",
 );
 
 // watch the params of the route to fetch the data again
 //watch(fetchData, { immediate: true })
-
-async function fetchData() {
-  error.value = null;
-  loading.value = true;
-  try {
-    const resp = (services.value = await (await fetch("/api/services")).json());
-    parseGraphRawData(resp);
-  } catch (err) {
-    error.value = String(err);
-  } finally {
-    loading.value = false;
-  }
-}
-
-fetchData();
+fetchServiceData().catch((e) => {
+  error.value = String(e);
+  console.error(e);
+});
 </script>
 
 <template>
@@ -51,7 +41,7 @@ fetchData();
             Table</v-btn
           >
         </v-btn-toggle>
-        <v-btn @click="fetchData">
+        <v-btn @click="fetchServiceData">
           <v-icon icon="mdi-refresh" size="large" />
         </v-btn>
       </template>
@@ -61,13 +51,13 @@ fetchData();
 
     <v-main min-width="100%" class="">
       <v-container>
-        <div v-if="loading">
+        <div v-if="graphLoading">
           <v-skeleton-loader
             :type="view == 'network' ? 'image' : view"
           ></v-skeleton-loader>
         </div>
         <div v-if="error">Error: {{ error }}</div>
-        <div v-if="!loading">
+        <div v-if="!graphLoading">
           <ServiceNetwork :services="services" v-if="view === 'network'" />
           <ServiceTable :services="services" v-if="view === 'table'" />
         </div>

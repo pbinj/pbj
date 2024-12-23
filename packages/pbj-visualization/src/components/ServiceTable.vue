@@ -7,14 +7,6 @@ const headers = [
   { title: "Name", key: "name", sortable: true },
   { title: "Description", key: "description" },
   { title: "Dependencies", key: "dependencies" },
-  // { title: "Invoked", key: "invoked" },
-  // { title: "Invalid", key: "invalid" },
-  // { title: "Optional", key: "optional" },
-  // { title: "Tags", key: "tags" },
-  // { title: "Invokable", key: "invokable" },
-  // { title: "Cacheable", key: "cacheable" },
-  // { title: "Primitive", key: "primitive" },
-  // { title: "Is List", key: "listOf" },
 ];
 
 const search = "";

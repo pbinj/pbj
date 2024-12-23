@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref } from "vue";
-const props = defineProps(["service"]);
-const endpoint = "/api/invoke";
-const label = "Invoke";
+import { fetchServiceData } from "./ServiceNetwork/graph";
+const props = defineProps(["service", "label", "endpoint"]);
+const endpoint = props.endpoint ?? "/api/invoke";
+const label = props.label ?? "Invoke";
 const invoked = ref(false);
 const busy = ref(false);
 const resp = ref("");
@@ -20,6 +21,7 @@ function invoke() {
       resp.value = JSON.stringify(data, null, 2);
       invoked.value = true;
       busy.value = false;
+      return fetchServiceData();
     },
     () => {
       busy.value = false;

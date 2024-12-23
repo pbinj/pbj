@@ -1,21 +1,21 @@
 import { has, hasA, isFn, isObjectish } from "@pbinj/pbj/guards";
-import {
+import type {
   ArraySubtype,
   NumberSubtype,
   ObjectSubtype,
   SchemaObject,
   StringSubtype,
-} from "./json-schema.types";
+} from "./json-schema.types.js";
 import {
-  AllOf,
-  Guard,
+  type AllOf,
+  type Guard,
   isArray,
   isBoolean,
   isInteger,
   isNumber,
   isRequired,
   isString,
-} from "../guard";
+} from "../guard.js";
 
 export const guardType = Symbol("@pbj/visualization/guardType");
 
@@ -34,20 +34,44 @@ addGuard(isInteger, "integer");
 addGuard(isNumber, "number");
 addGuard(isString, "string");
 
-function root(v: Schema): Schema {
-  return v?.[parent] ? root(v[parent]) : v;
+/**Only one can be matched, more than one or less than one fails. */
+export function oneOf<T extends readonly Guard<any>[]>(...guards: T) {
+  function oneOfGuard(value: unknown): value is AnyOf<T> {
+    let hasTrue = false;
+    for (const guard of guards) {
+      if (guard(value)) {
+        if (hasTrue) {
+          return false;
+        }
+        hasTrue = true;
+      }
+    }
+    return hasTrue;
+  }
+  oneOfGuard.toSchema = (ctx: SchemaObject, key: string) => {
+    return {
+      oneOf: guards.map((g) => toSchemaNested(g, ctx, key)),
+    };
+  };
+  return oneOfGuard;
 }
-
 export function anyOf<T extends readonly Guard<any>[]>(...guards: T) {
-  return function (value: unknown): value is AnyOf<T> {
+  function anyOfGuard(value: unknown): value is AnyOf<T> {
     for (const guard of guards) {
       if (guard(value)) {
         return true;
       }
     }
     return false;
+  }
+  anyOfGuard.toSchema = (ctx: SchemaObject, key: string) => {
+    return {
+      anyOf: guards.map((g) => toSchemaNested(g, ctx, key)),
+    };
   };
+  return anyOfGuard;
 }
+
 export function allOf<T extends readonly Guard<any>[]>(...guards: T) {
   function allOfGuard(value: unknown): value is AllOf<T> {
     for (const guard of guards) {
@@ -58,9 +82,8 @@ export function allOf<T extends readonly Guard<any>[]>(...guards: T) {
     return true;
   }
   allOfGuard.toSchema = (ctx: SchemaObject, key: string) => {
-    const allOf = guards.map((g) => toSchemaNested(g, ctx, key));
     return {
-      allOf,
+      allOf: guards.map((g) => toSchemaNested(g, ctx, key)),
     };
   };
   return allOfGuard;
@@ -96,11 +119,13 @@ export function required(guard: Guard<any>) {
 
   return isRequiredGuard;
 }
-export function shape<T extends Record<string, Guard<any>>>(
+export function shape<T extends Record<PropertyKey, Guard<any>>>(
   obj: T,
   config: Config<ObjectSubtype> = {},
 ) {
   const entries = Object.entries(obj);
+
+  const additionalProperties = config.additionalProperties ?? true;
 
   const ret = function isShapeGuard(
     value: unknown,
@@ -113,7 +138,9 @@ export function shape<T extends Record<string, Guard<any>>>(
         return false;
       }
     }
-    return true;
+    return additionalProperties
+      ? true
+      : Object.keys(value).length === entries.length;
   };
   ret.toSchema = (ctx: Schema) => {
     const cur: Schema = {
@@ -130,7 +157,7 @@ export function shape<T extends Record<string, Guard<any>>>(
   return ret;
 }
 
-export function eq<T>(v: T) {
+export function eq<T>(v: T): Guard<T> {
   function isEq(value: unknown): value is T {
     return value == v;
   }
@@ -304,4 +331,25 @@ export function tuple(...values: (string | number)[]) {
     };
   };
   return isTupleGuard;
+}
+
+export function literal<T extends PropertyKey>(v: T) {
+  function isConst(value: unknown): value is keyof { [k in T]: unknown } {
+    return value === v;
+  }
+  isConst.toSchema = () => ({ const: v });
+  return isConst;
+}
+
+export function enums<T extends PropertyKey>(...values: T[]) {
+  function isEnum(value: unknown): value is keyof { [k in T]: unknown } {
+    for (const v of values) {
+      if (value === v) {
+        return true;
+      }
+    }
+    return false;
+  }
+  isEnum.toSchema = () => ({ enum: values });
+  return isEnum;
 }

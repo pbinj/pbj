@@ -17,6 +17,10 @@
     "./scope": {
       "import": "./dist/esm/scope.js",
       "require": "./dist/cjs/scope.js"
+    },
+    "./guards": {
+      "import": "./dist/esm/guards.js",
+      "require": "./dist/cjs/guards.js"
     }
   },
   "files": [

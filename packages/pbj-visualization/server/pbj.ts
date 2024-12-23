@@ -10,7 +10,9 @@ import { env } from "@pbinj/pbj/env";
 import express from "express";
 import { Server } from "http";
 import type { AddressInfo } from "net";
-import { route } from "./framework";
+import { anyOf, enums } from "./schema/schema.js";
+
+const isAction = anyOf(enums("invoke", "invalidate"));
 
 /**
  * CJS / ESM madness.
@@ -67,62 +69,68 @@ export async function register(
   app.get("/", (_, res) => {
     res.sendFile(index);
   });
-  app.post("/api/invoke", async (req, res) => {
-    if (req.body.name) {
-      let service: ServiceDescriptorI<Registry, any> | undefined = undefined;
-      ctx.visit((v) => {
-        if (v?.name && asString(v.name) === req.body.name) {
-          service = v;
-        }
-      });
-      if (service) {
-        try {
-          const resp = await ctx.resolveAsync(service[serviceSymbol]);
-          res.send(JSON.stringify(resp));
-        } catch (e) {
-          res.send({ error: String(e) });
-        }
-      }
-    } else {
-      res.send({ error: "Service was not found" });
-    }
-  });
-  app.post("/api/invalidate", async (req, res) => {
-    if (req.body.name) {
-      let service: ServiceDescriptorI<Registry, any> | undefined = undefined;
-      ctx.visit((v) => {
-        if (v?.name && asString(v.name) === req.body.name) {
-          service = v;
-        }
-      });
-      if (service) {
-        try {
-          (
-            ctx.resolve(service[serviceSymbol]) as ServiceDescriptorI<
-              Registry,
-              any
-            >
-          )?.invalidate();
-          res.send(
-            JSON.stringify({
-              success: true,
-              message: "Service invalidated",
-              service,
-            }),
-          );
-        } catch (e) {
-          res.send({ error: String(e) });
-        }
-      }
-    } else {
-      res.send({ error: "Service was not found" });
-    }
-  });
 
   app.get("/api/services", (_, res) => {
     res.send(JSON.stringify(ctx.toJSON()));
   });
 
+  app.post("/api/:action", async (req, res) => {
+    const action = req.params.action;
+    if (!isAction(action)) {
+      res.send({ error: "Invalid action" });
+      return;
+    }
+    if (!req.body.name) {
+      res.send({ error: "name required." });
+    }
+
+    let service: ServiceDescriptorI<Registry, any> | undefined = undefined;
+    ctx.visit((v) => {
+      if (v?.name && asString(v.name) === req.body.name) {
+        service = v;
+      }
+    });
+
+    if (!service) {
+      res.send({ error: "Service was not found" });
+      return;
+    }
+    let value: any;
+    let perf = performance.now();
+    let message: string;
+    try {
+      switch (action) {
+        case "invalidate": {
+          value = (
+            ctx.register(service[serviceSymbol]) as ServiceDescriptorI<
+              Registry,
+              any
+            >
+          )?.invalidate();
+          message = "Service invalidated";
+          break;
+        }
+        case "invoke": {
+          value = await ctx.resolveAsync(service[serviceSymbol] as any);
+          message = "Service invoked";
+          break;
+        }
+      }
+
+      res.send(
+        JSON.stringify({
+          success: true,
+          action,
+          value,
+          timing: performance.now() - perf,
+          message,
+          service,
+        }),
+      );
+    } catch (e) {
+      res.send({ error: String(e) });
+    }
+  });
   if (start) {
     const server = await new Promise<Server>((resolve) => {
       const _server = app.listen(config.port, config.host, () => {

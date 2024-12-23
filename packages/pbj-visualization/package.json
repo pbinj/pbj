@@ -50,7 +50,7 @@
     "start": "node ./dist/esm/server.js",
     "test:watch": "vitest",
     "lint:check": "prettier --check --ignore-path ../../.prettierignore .",
-    "lint": "prettier --ignore-path ../../.prettierignore --write  . && eslint --ext .js,.vue --ignore-path .gitignore --fix src"
+    "lint": "prettier --ignore-path ../../.prettierignore --write  . && eslint  --fix src"
   },
   "peerDependencies": {
     "@pbinj/pbj": "workspace:*"

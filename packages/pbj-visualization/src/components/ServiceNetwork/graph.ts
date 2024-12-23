@@ -6,12 +6,26 @@ import { useTheme } from "vuetify";
 import { useToggle } from "@vueuse/core";
 import colors from "vuetify/util/colors";
 
+export const graphLoading = ref(false);
+export const services = ref([] as ServiceI[]);
+
 const deepClone = <T>(obj: T): T => JSON.parse(JSON.stringify(obj));
+export async function fetchServiceData() {
+  graphLoading.value = true;
+  const resp = await (await fetch("/api/services")).json();
+  cleanupGraphRelatedStates();
+  parseGraphRawData(resp);
+  graphLoading.value = false;
+  services.value = resp;
+  return resp;
+}
 
 export const groups = {
   "@pbj": {
     color: colors.purple.accent3,
     label: "PBinJ nodes",
+    shape: "box",
+    font: "12px arial rgba(255,255,255,.8)",
   },
   vue: {
     color: "#42b883",
@@ -40,7 +54,7 @@ export const groups = {
   other: {
     color: "#B86542",
   },
-} satisfies Record<string, { color: string; label?: string }>;
+};
 
 // #endregion
 
