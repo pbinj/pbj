@@ -8,6 +8,10 @@ import {
 } from "@pbinj/pbj";
 import { asserts, isString } from "./guard";
 import { exactShape } from "./schema/schema";
+
+const hasName = exactShape({
+  name: isString,
+});
 export class PBinJService<TRegistry extends RegistryType = Registry> {
   constructor(private ctx = context) {}
   #findNyName(name: string): ServiceDescriptorI<TRegistry, any> {
@@ -32,8 +36,10 @@ export class PBinJService<TRegistry extends RegistryType = Registry> {
       }
     }
   }
-  async invalidate(arg: { name: string }) {
-    //    assertShape(arg);
+  async invalidate(arg: unknown) {
+    if (!hasName(arg)) {
+      throw Error("Invalid argument");
+    }
     const service = this.#findNyName(arg.name);
     if (service) {
       try {
@@ -86,9 +92,3 @@ function allow<T extends { [k: PropertyKey]: any }, K extends (keyof T)[]>(
     Object.entries(obj).filter(([k, v]) => !keys.includes(k)),
   ) as any;
 }
-
-// const assertShape = asserts(
-//   exactShape({
-//     name: isString,
-//   }),
-// );

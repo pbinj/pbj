@@ -10,6 +10,7 @@ import { env } from "@pbinj/pbj/env";
 import express from "express";
 import { Server } from "http";
 import type { AddressInfo } from "net";
+import { route } from "./framework";
 
 /**
  * CJS / ESM madness.
@@ -86,6 +87,38 @@ export async function register(
       res.send({ error: "Service was not found" });
     }
   });
+  app.post("/api/invalidate", async (req, res) => {
+    if (req.body.name) {
+      let service: ServiceDescriptorI<Registry, any> | undefined = undefined;
+      ctx.visit((v) => {
+        if (v?.name && asString(v.name) === req.body.name) {
+          service = v;
+        }
+      });
+      if (service) {
+        try {
+          (
+            ctx.resolve(service[serviceSymbol]) as ServiceDescriptorI<
+              Registry,
+              any
+            >
+          )?.invalidate();
+          res.send(
+            JSON.stringify({
+              success: true,
+              message: "Service invalidated",
+              service,
+            }),
+          );
+        } catch (e) {
+          res.send({ error: String(e) });
+        }
+      }
+    } else {
+      res.send({ error: "Service was not found" });
+    }
+  });
+
   app.get("/api/services", (_, res) => {
     res.send(JSON.stringify(ctx.toJSON()));
   });

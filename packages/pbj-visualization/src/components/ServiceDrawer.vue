@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { ServiceI } from "../types";
 import Invoke from "./Invoke.vue";
 import { closeDrawer } from "./ServiceNetwork/graph";
 const props = defineProps(["service"]);
@@ -31,6 +30,13 @@ const props = defineProps(["service"]);
       <v-list-item title="List">{{ props.service.listOf }}</v-list-item>
       <v-list-item>
         <Invoke :service="props.service" />
+      </v-list-item>
+      <v-list-item>
+        <Invoke
+          :service="props.service"
+          endpoint="/api/invalidate"
+          label="Invalidate"
+        />
       </v-list-item>
     </v-list>
   </v-navigation-drawer>

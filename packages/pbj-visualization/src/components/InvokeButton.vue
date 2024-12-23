@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { type ServiceI } from "../types";
 import { ref } from "vue";
 const props = defineProps(["service"]);
-let service = props.service as ServiceI;
-let invoked = ref(false);
-let busy = ref(false);
-let resp = ref("");
+const endpoint = "/api/invoke";
+const label = "Invoke";
+const invoked = ref(false);
+const busy = ref(false);
+const resp = ref("");
 function invoke() {
   busy.value = true;
-  fetch("/api/invoke", {
+  fetch(endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -38,7 +38,7 @@ function invoke() {
       :loading="busy"
       :color="invoked ? 'success' : 'primary'"
     >
-      Invoke
+      {{ label }}
     </v-btn>
     <div v-if="busy">
       <v-progress-circular color="primary" indeterminate></v-progress-circular>

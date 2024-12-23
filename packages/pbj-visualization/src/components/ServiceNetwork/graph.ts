@@ -148,14 +148,6 @@ export function cleanupGraphRelatedStates() {
 }
 
 function checkIsValidModule(module: ServiceI) {
-  // node_module will also marked as a virtual module, so virtual module need filter non-`nodeModules` modules
-  // const isNodeModule = module.id.includes('node_modules')
-  // if (!graphSettings.value.node_modules && isNodeModule)
-  //     return false
-  // if (!graphSettings.value.virtual && module.virtual && !isNodeModule)
-  //     return false
-  // if (!graphSettings.value.lib && !module.id.includes(projectRoot!.value) && !module.virtual)
-  //     return false
   return !!module.name;
 }
 
@@ -164,9 +156,6 @@ function checkReferenceIsValid(modId: string) {
   const refer = moduleReferences.get(modId);
   return refer ? refer.some((ref) => checkIsValidModule(ref.mod)) : true;
 }
-
-// eslint-disable-next-line regexp/no-super-linear-backtracking
-const EXTRACT_LAST_THREE_MOD_ID_RE = /(?:.*\/){3}([^/]+$)/;
 
 function updateGraph() {
   graphNodes.clear();
@@ -322,13 +311,8 @@ export function parseGraphRawData(modules: ServiceI[]) {
         label: displayName,
         group: path.match(/^(@\w+)\//)?.[1] || "unknown",
         size: determineNodeSize(mod.dependencies.length),
-        shape: mod.name.includes("/node_modules/")
-          ? "hexagon"
-          : mod.error
-            ? "box"
-            : mod.invoked
-              ? "diamond"
-              : "dot",
+        shape:
+          mod.invalid || mod.error ? "box" : mod.invoked ? "diamond" : "dot",
       },
       edges: [],
     };
@@ -472,4 +456,3 @@ function recursivelyGetGraphNodeData(
     return prev;
   }, []);
 }
-// #endregion

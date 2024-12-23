@@ -2,21 +2,13 @@
 import { Network } from "vis-network";
 import { ref, shallowRef, onMounted, onUnmounted, watch } from "vue";
 import {
-  parseGraphRawData,
   graphOptions,
   graphNodes,
   graphEdges,
   graphFilterNodeId,
   updateGraphDrawerData,
   toggleGraphDrawer,
-  cleanupGraphRelatedStates,
 } from "./graph";
-//import { graphOptions, graphFilterNodeId, updateGraphDrawerData, toggleGraphDrawer, cleanupGraphRelatedStates } from '../store/graph'
-const props = defineProps(["services"]);
-parseGraphRawData(props.services);
-function onModuleUpdated() {
-  parseGraphRawData(props.services);
-}
 
 const container = ref<HTMLDivElement>();
 const networkRef = shallowRef<Network>();
@@ -46,9 +38,9 @@ function mountNetwork() {
     toggleGraphDrawer(true);
   });
 
-  //   network.on('deselectNode', () => {
-  //     toggleGraphDrawer(false)
-  //   })
+  network.on("deselectNode", () => {
+    toggleGraphDrawer(false);
+  });
 
   watch(
     () => graphFilterNodeId.value,
@@ -58,9 +50,7 @@ function mountNetwork() {
   );
 }
 
-onMounted(() => {
-  mountNetwork();
-});
+onMounted(mountNetwork);
 
 onUnmounted(() => {
   networkRef.value?.destroy();

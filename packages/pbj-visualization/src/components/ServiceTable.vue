@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { openDrawer } from "./ServiceNetwork/graph";
-import { type ServiceI } from "../types";
-import { reactive } from "vue";
+
 const props = defineProps(["services"]);
 
 const headers = [
@@ -18,7 +17,7 @@ const headers = [
   // { title: "Is List", key: "listOf" },
 ];
 
-let search = "";
+const search = "";
 </script>
 
 <template>
@@ -26,16 +25,18 @@ let search = "";
     <title>Services</title>
     <v-data-table-virtual
       :headers="headers"
-      :items="services"
+      :items="props.services"
       :search="search"
       height="400px"
       item-value="name"
     >
+      <!-- eslint-disable-next-line vue/valid-v-slot -->
       <template v-slot:item.name="{ value }">
         <v-list-item-action @click="openDrawer(value)">{{
           value
         }}</v-list-item-action>
       </template>
+      <!-- eslint-disable-next-line vue/valid-v-slot -->
       <template v-slot:item.dependencies="{ value }">
         <v-list>
           <v-list-item-action

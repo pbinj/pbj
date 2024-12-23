@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref, watch } from "vue";
+import { ref } from "vue";
 import ServiceTable from "./components/ServiceTable.vue";
 import ServiceDrawer from "./components/ServiceDrawer.vue";
 import {
@@ -12,13 +12,12 @@ import type { ServiceI } from "./types";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
-const View = ["network", "table"] as const;
-
 const loading = ref(false);
 const error = ref<string | null>(null);
 const services = ref([] as ServiceI[]);
-const view = ref<"network" | "table">((route.name as any) || "network");
-let service: ServiceI | undefined = undefined;
+const view = ref<"network" | "table">(
+  (route.name as "network" | "table") || "network",
+);
 
 // watch the params of the route to fetch the data again
 //watch(fetchData, { immediate: true })
@@ -35,12 +34,7 @@ async function fetchData() {
     loading.value = false;
   }
 }
-watch(
-  () => route.params.id,
-  (newId, oldId) => {
-    // react to route changes...
-  },
-);
+
 fetchData();
 </script>
 

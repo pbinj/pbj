@@ -184,7 +184,6 @@ export function number(v: Partial<Omit<NumberSubtype, "type">>) {
 
 export function exactShape<T extends Record<string, Guard<any>>>(obj: T) {
   const entries = Object.entries(obj);
-  const required = Object.keys(obj);
   function isShapeGuard(
     value: unknown,
   ): value is { [K in keyof T]: T[K] extends Guard<infer U> ? U : never } {
