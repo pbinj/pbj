@@ -19,14 +19,14 @@ import type {
 } from "./types.js";
 import { asString } from "./pbjKey.js";
 import { PBinJAsyncError } from "./errors.js";
+import { Logger } from "./logger.js";
 
 const EMPTY = [] as const;
 
 export class ServiceDescriptor<
   TRegistry extends RegistryType,
   T extends Constructor | Fn | unknown,
-> implements ServiceDescriptorI<TRegistry, T>
-{
+> implements ServiceDescriptorI<TRegistry, T> {
   static #dependencies = new Set<CKey>();
 
   static value<
@@ -71,6 +71,7 @@ export class ServiceDescriptor<
     public invokable = true,
     public description?: string,
     private onChange?: () => void,
+    private logger = new Logger(),
   ) {
     this[serviceSymbol] = key;
     this.args = args as Args<T>;
@@ -82,11 +83,13 @@ export class ServiceDescriptor<
     this.service = service;
   }
 
+
   get name() {
     return this._name ?? asString(this[serviceSymbol]);
   }
 
   set name(name: string | undefined) {
+    this.logger.debug('renamed service', { to: name, from: this._name });
     this._name = name;
   }
 
@@ -100,6 +103,7 @@ export class ServiceDescriptor<
     if (this._cacheable === _cacheable) {
       return;
     }
+    this.logger.debug('changed cacheable', { to: _cacheable, from: this._cacheable });
     this.invalidate();
     this._cacheable = _cacheable;
   }
@@ -119,6 +123,8 @@ export class ServiceDescriptor<
     this.invokable = isFn(_service);
     this._service = _service;
     this._factory = this.invokable && !isConstructor(_service as Fn<T>);
+    this.logger.debug('changed service');
+
   }
 
   get service() {
@@ -303,7 +309,7 @@ export class ServiceDescriptor<
     return this._invoke();
   };
 
-  private _promise?: Promise<T>;
+  private _promise?: Promise<T> & { resolved?: boolean };
   _invoke = (): Returns<T> => {
     if (this._promise) {
       throw new PBinJAsyncError(this[serviceSymbol], this._promise);

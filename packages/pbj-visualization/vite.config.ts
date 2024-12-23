@@ -25,19 +25,23 @@ export default defineConfig(
   !process.env.DEV
     ? CONFIG
     : async () => {
-        await register(context);
-        const config = context.resolve(serverConfigPBinJKey);
+      await register(context);
+      const config = context.resolve(serverConfigPBinJKey);
 
-        return {
-          ...CONFIG,
-          server: {
-            proxy: {
-              "/api/": {
-                target: new URL(config?.url),
-                changeOrigin: true,
-              },
+      return {
+        ...CONFIG,
+        server: {
+          proxy: {
+            "/api/": {
+              target: new URL(config?.url),
+              changeOrigin: true,
+            },
+            '/socket.io': {
+              target: new URL(config?.url),
+              changeOrigin: true,
             },
           },
-        };
-      },
+        },
+      };
+    },
 );

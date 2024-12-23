@@ -11,6 +11,8 @@ import express from "express";
 import { Server } from "http";
 import type { AddressInfo } from "net";
 import { anyOf, enums } from "./schema/schema.js";
+import { Server as ServerIO, Socket } from "socket.io";
+
 
 const isAction = anyOf(enums("invoke", "invalidate"));
 
@@ -31,7 +33,7 @@ export class ServerConfig {
     private _port = env("PJB_PORT", "0"),
     private _host = env("PJB_HOST", "localhost"),
     private _path = env("PJB_PATH", "/"),
-  ) {}
+  ) { }
   get host() {
     return this._host + "";
   }
@@ -135,6 +137,18 @@ export async function register(
     const server = await new Promise<Server>((resolve) => {
       const _server = app.listen(config.port, config.host, () => {
         resolve(_server);
+      });
+    });
+    const io = new ServerIO(server, { path: '/socket.io' });
+    io.on('connection', (socket) => {
+      console.log('connected', socket.id);
+      socket.emit('connected', `Connected ${socket.id}`);
+      const unsub = ctx.logger.onLogMessage((msg) => {
+        socket.emit('log', msg);
+      });
+      socket.on('disconnect', () => {
+        unsub?.();
+        console.log('disconnected');
       });
     });
     //In dev mode the os will assign a port (0) and then we will assign it back to the config.

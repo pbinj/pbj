@@ -13,11 +13,12 @@ import {
   graphLoading,
   services,
 } from "./components/ServiceNetwork/graph";
+import LogView from "./components/LogView/LogView.vue";
 
 const route = useRoute();
 const error = ref<string | null>(null);
-const view = ref<"network" | "table">(
-  (route.name as "network" | "table") || "network",
+const view = ref<"network" | "table" | "logs">(
+  (route.name as "network" | "table" | "logs") || "network",
 );
 
 // watch the params of the route to fetch the data again
@@ -40,6 +41,10 @@ fetchServiceData().catch((e) => {
             <v-icon icon="mdi-table" size="small" />
             Table</v-btn
           >
+            <v-btn value="logs" to="/logs">
+            <v-icon icon="mdi-text" size="small" />
+            Log</v-btn
+          >
         </v-btn-toggle>
         <v-btn @click="fetchServiceData">
           <v-icon icon="mdi-refresh" size="large" />
@@ -53,13 +58,14 @@ fetchServiceData().catch((e) => {
       <v-container>
         <div v-if="graphLoading">
           <v-skeleton-loader
-            :type="view == 'network' ? 'image' : view"
+            :type="view == 'network' ? 'image' : 'table'"
           ></v-skeleton-loader>
         </div>
         <div v-if="error">Error: {{ error }}</div>
         <div v-if="!graphLoading">
           <ServiceNetwork :services="services" v-if="view === 'network'" />
           <ServiceTable :services="services" v-if="view === 'table'" />
+          <LogView v-if="view === 'logs'" />
         </div>
       </v-container>
     </v-main>
