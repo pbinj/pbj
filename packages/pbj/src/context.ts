@@ -164,7 +164,7 @@ export class Context<TRegistry extends RegistryType = Registry>
       return;
     }
     ctx.invalidate();
-    this.logger.warn('invalidating service', key);
+    this.logger.warn('invalidating service {key}', { key });
     for (const [k, v] of this.map) {
       if (v.hasDependency(key)) {
         this.invalidate(k, v, seen);
@@ -189,7 +189,7 @@ export class Context<TRegistry extends RegistryType = Registry>
 
     if (inst) {
       if (origArgs?.length) {
-        this.logger.info('modifying registered service', { key: asString(serviceKey) });
+        this.logger.info('modifying registered service {key}', { key: asString(serviceKey) });
 
         inst.args = args;
         inst.service = service;
@@ -214,7 +214,7 @@ export class Context<TRegistry extends RegistryType = Registry>
 
     this.map.set(key, newInst);
     void this.notifyAdd(newInst);
-    this.logger.info('registering service', { key: asString(serviceKey) });
+    this.logger.info('registering service {key}', { key: asString(serviceKey) });
     return newInst;
   }
   private notifyAdd(inst: ServiceDescriptor<TRegistry, any>) {
@@ -312,11 +312,11 @@ export class Context<TRegistry extends RegistryType = Registry>
       return this.resolve(key);
     } catch (e) {
       if (isAsyncError(e)) {
-        this.logger.debug("waiting for promise", { key: asString(key), waitKey: asString(e.key) });
+        this.logger.debug("waiting for promise[{waitKey}] for {key}", { key: asString(key), waitKey: asString(e.key) });
         await e.promise;
         return this.resolveAsync(key);
       }
-      this.logger.error("error resolving async", { key: asString(key), error: e });
+      this.logger.error("error resolving async {key} {error}", { key: asString(key), error: e });
       throw e;
     }
   }

@@ -7,6 +7,9 @@ const anonymousMap = new WeakMap<Fn, string>();
 
 export const pbjKey = <T>(name: string): PBinJKeyType<T> => {
   const sym = Symbol();
+  sym.toString = () => {
+    return name;
+  }
   pbjKeyMap.set(sym, name);
   return sym as any;
 };

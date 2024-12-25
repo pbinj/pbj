@@ -11,7 +11,7 @@ import express from "express";
 import { Server } from "http";
 import type { AddressInfo } from "net";
 import { anyOf, enums } from "./schema/schema.js";
-import { Server as ServerIO, Socket } from "socket.io";
+import { Server as ServerIO } from "socket.io";
 
 
 const isAction = anyOf(enums("invoke", "invalidate"));
@@ -79,6 +79,7 @@ export async function register(
   app.post("/api/:action", async (req, res) => {
     const action = req.params.action;
     if (!isAction(action)) {
+      ctx.logger.error(`{error} {action} service`, { error: "invalid action", action });
       res.send({ error: "Invalid action" });
       return;
     }
@@ -94,6 +95,7 @@ export async function register(
     });
 
     if (!service) {
+      ctx.logger.error(`{error} {action} {service}`, { error: "not found", action, service });
       res.send({ error: "Service was not found" });
       return;
     }
@@ -130,6 +132,7 @@ export async function register(
         }),
       );
     } catch (e) {
+      ctx.logger.error(`error {action} {service}`, { error: e, action, service });
       res.send({ error: String(e) });
     }
   });
@@ -154,6 +157,7 @@ export async function register(
     //In dev mode the os will assign a port (0) and then we will assign it back to the config.
     //this should allow vite to
     config.port = (server.address() as AddressInfo)?.port!;
+    ctx.logger.info("PBinJ visualization server started at: {url}", config);
     console.log("PBinJ visualization server started at: %s", config.url);
   }
   return app;

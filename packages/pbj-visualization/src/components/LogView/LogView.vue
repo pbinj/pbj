@@ -40,7 +40,7 @@ socket.on('log', (data) => {
   <code class="log-view">
     <pre class="log-line" v-for="log in logs">
         <span class="log-level">{{ log.level }}</span> 
-        <span class="log-timestamp" :title="log.timestamp">{{ new Date(log.timestamp).toISOString()}}</span>
+        <span class="log-timestamp" :title="log.timestamp + ''">{{ new Date(log.timestamp).toISOString()}}</span>
         <span class="log-name">{{ log.name }}</span>
         <span class="log-message">{{ log.message }}</span>
     </pre>

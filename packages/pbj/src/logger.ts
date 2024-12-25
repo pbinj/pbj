@@ -1,3 +1,4 @@
+import { get } from "./helpers.js";
 import { pbjKey } from "./pbjKey.js";
 import { serviceSymbol } from "./symbols.js";
 
@@ -10,14 +11,22 @@ export type LogMessage = {
     context?: unknown;
     timestamp: number;
 }
+export type LoggerI = {
+    [k in LogLevel]: (<T extends object>(message: MessageFormat<T>, obj: T) => void) | ((message: MessageFormat<{}>) => void);
+}
 export const loggerPBinJKey = pbjKey<Logger>("@pbj/logger");
 
-export interface OnLogMessage {
+export function formatStr(fmt: string, obj: unknown) {
+    return fmt.replace(/{([^}]+)}/g, (match, key) => {
+        return get(obj, key) ?? match;
+    });
+}
+interface OnLogMessage {
     (msg: LogMessage[]): void;
 }
 
 
-export class Logger {
+export class Logger implements LoggerI {
 
     [serviceSymbol] = loggerPBinJKey;
 
@@ -26,25 +35,32 @@ export class Logger {
     _level: LogLevel = 'debug';
     _maxBuffer = 1000;
     _buffer: LogMessage[] = [];
+    _listeners: OnLogMessage[] = [];
 
-    constructor(public console = true, level: LogLevel = "info", public name = '@pbj/context',
-        public format = (msg: LogMessage) => `${this.name} ${msg.level} ${msg.name} ${msg.message}`,
+    constructor(public console = true, level: LogLevel = "info",
+        public name = '@pbj/context',
+        private meta = {},
+        public format = formatStr,
         maxBuffer = 1000,
-        private listeners: OnLogMessage[] = []
+        private parent: Logger | undefined = undefined,
     ) {
         this.level = level;
         this.maxBuffer = maxBuffer;
 
     }
-    createChild(name: string) {
-        return new Logger(this.console, this.level, name, this.format, this.maxBuffer, this.listeners);
+    createChild(name: string, meta = {}) {
+        return new Logger(this.console, this.level, name, ({ ...this.meta, ...meta }), this.format, this.maxBuffer, this);
+    }
+    private resizeBuffer() {
+        if (this._buffer.length > this._maxBuffer) {
+            this._buffer = this._buffer.slice(this._buffer.length - this._maxBuffer);
+        }
     }
     set maxBuffer(maxBuffer: number) {
         this._maxBuffer = maxBuffer;
-        if (this._buffer.length > maxBuffer) {
-            this._buffer = this._buffer.slice(this._buffer.length - maxBuffer);
-        }
+        this.resizeBuffer();
     }
+
     get maxBuffer() {
         return this._maxBuffer;
     }
@@ -55,36 +71,60 @@ export class Logger {
     get level() {
         return this._level;
     }
-
-    _log(level: LogLevel, message: string, context: unknown = {}) {
-        const mesg = { name: this.name, level, message, context, timestamp: Date.now() };
-        this.listeners.forEach(v => v([mesg]));
-
-        if (this.console && this._levelIndex >= levels.indexOf(level)) {
-            console.log(this.format(mesg));
-        }
-        this._buffer.push(mesg);
-        if (this._buffer.length > this.maxBuffer) {
-            this._buffer.shift();
+    fire(...e: LogMessage[]) {
+        this._listeners.forEach(v => v(e));
+        if (this.parent) {
+            this.parent.fire(...e);
+        } else {
+            if (this.console) {
+                e.forEach(v => console.log(
+                    `[${v.level}] ${v.name} ${v.timestamp}: ${this.format(v.message, v.context)}`));
+            }
+            this._buffer.push(...e);
+            this.resizeBuffer();
         }
     }
-    public onLogMessage(fn: (msg: LogMessage[]) => void) {
-        fn(this._buffer);
-        this.listeners.push(fn);
+    _log(level: LogLevel, message: string, context: object = {}) {
+        this.fire({ name: this.name, level, message, context: { ...this.meta, ...context }, timestamp: Date.now() });
+    }
+    public onLogMessage(fn: (msg: LogMessage[]) => void, init = true) {
+        init && fn(this._buffer);
+        this._listeners.push(fn);
         return () => {
-            this.listeners = this.listeners.filter((v) => v !== fn);
+            this._listeners = this._listeners.filter((v) => v !== fn);
         }
     }
-    debug<T extends unknown>(message: string, obj = {}) {
+    debug<T extends object>(...[message, obj]: [MessageFormat<T>, obj: T] | [message: MessageFormat<undefined>]) {
         this._log("debug", message, obj);
     }
-    error(message: string, obj: unknown = {}) {
+    error<T extends object>(...[message, obj]: [MessageFormat<T>, obj: T] | [message: MessageFormat<undefined>]) {
         this._log("error", message, obj);
     }
-    warn(message: string, obj: unknown = {}) {
+    warn<T extends object>(...[message, obj]: [MessageFormat<T>, obj: T] | [message: MessageFormat<undefined>]) {
         this._log("warn", message, obj);
     }
-    info(message: string, obj: unknown = {}) {
+    info<T extends object>(...[message, obj]: [MessageFormat<T>, obj: T] | [message: MessageFormat<undefined>]) {
         this._log("info", message, obj);
     }
 }
+
+
+type Primitive = string | number | boolean | null | undefined;
+
+type PathImpl<T, Key extends keyof T> = Key extends string
+    ? T[Key] extends Primitive
+    ? `${Key}`
+    : T[Key] extends object
+    ? `${Key}.${PathImpl<T[Key], keyof T[Key]> & string}`
+    : never
+    : never;
+
+type Path<T> = PathImpl<T, keyof T> | keyof T;
+
+type AllowedPaths<T> = Path<T> extends string ? `{${Path<T>}}` : string;
+
+type MessageFormat<T> =
+    T extends undefined ? string :
+    T extends object
+    ? `${string}${AllowedPaths<T>}${string}` | never
+    : never;

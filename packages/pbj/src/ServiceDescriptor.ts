@@ -89,7 +89,7 @@ export class ServiceDescriptor<
   }
 
   set name(name: string | undefined) {
-    this.logger.debug('renamed service', { to: name, from: this._name });
+    this.logger.debug('renamed service {from}->{to}', { to: name, from: this._name });
     this._name = name;
   }
 
@@ -103,7 +103,7 @@ export class ServiceDescriptor<
     if (this._cacheable === _cacheable) {
       return;
     }
-    this.logger.debug('changed cacheable', { to: _cacheable, from: this._cacheable });
+    this.logger.debug('changed cacheable {from} -> {to}', { to: _cacheable, from: this._cacheable });
     this.invalidate();
     this._cacheable = _cacheable;
   }
@@ -285,6 +285,7 @@ export class ServiceDescriptor<
     if (this.invoked === false) {
       return;
     }
+    this.logger.debug('invalidating service');
     this.invalid = true;
     this.invoked = false;
     this._instance = undefined;
@@ -321,6 +322,7 @@ export class ServiceDescriptor<
       return this._instance as Returns<T>;
     }
     if (!isFn(this.service)) {
+      this.logger.error(`service '{service}' is not a function`, { service: asString(this.service as any) });
       throw new PBinJError(
         `service '${String(this.service)}' is not a function and is not configured as a value, to configure as a value set invokable to false on the service description`,
       );
@@ -333,7 +335,9 @@ export class ServiceDescriptor<
 
       if (val instanceof Promise) {
         this._promise = val;
+        this.logger.debug('waiting for promise');
         this._promise.then((v) => {
+          this.logger.debug('resolved promise');
           this._promise = undefined;
           this.invalid = false;
           this.invoked = true;
@@ -345,10 +349,15 @@ export class ServiceDescriptor<
     } else {
       try {
         resp = new (this.service as any)(...this.args);
+        if (this.error) {
+          this.logger.info('service has recovered');
+        }
         this.error = undefined;
       } catch (e) {
+        const obj = { message: String(e) }
+        this.logger.error('error invoking service {message}', obj);
         this.invalidate();
-        this.error = { message: String(e) };
+        this.error = obj;
         throw e;
       }
     }
