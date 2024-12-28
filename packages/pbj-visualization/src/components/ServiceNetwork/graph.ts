@@ -412,7 +412,7 @@ export function updateGraphDrawerData(nodeId: string): DrawerData | undefined {
 
   const refsData = moduleReferences.get(node.mod.name) || [];
   const refs = refsData.reduce<DrawerData["deps"]>((prev, ref) => {
-    const moduleData = modulesMap.get(ref.name);
+    const moduleData = modulesMap.get(ref.path);
     if (!moduleData) return prev;
     if (checkIsValidModule(moduleData.mod)) {
       prev.push({
