@@ -30,7 +30,8 @@ fetchServiceData().catch((e) => {
 </script>
 
 <template>
-  <v-app full-height full-width>
+
+  <v-app full-height full-width class="app">
     <v-app-bar color="info" title="PBinJ Visualization">
       <template v-slot:append>
         <v-btn-toggle v-model="view" mandatory>
@@ -54,15 +55,15 @@ fetchServiceData().catch((e) => {
 
     <ServiceDrawer :service="graphDrawerData?.service" v-if="graphDrawerShow" />
 
-    <v-main min-width="100%" class="">
+    <v-main min-width="100%" class="main">
       <v-container>
         <div v-if="graphLoading">
           <v-skeleton-loader
             :type="view == 'network' ? 'image' : 'table'"
           ></v-skeleton-loader>
         </div>
-        <div v-if="error">Error: {{ error }}</div>
-        <div v-if="!graphLoading">
+        <div v-else-if="error">Error: {{ error }}</div>
+        <div v-else>
           <ServiceNetwork :services="services" v-if="view === 'network'" />
           <ServiceTable :services="services" v-if="view === 'table'" />
           <LogView v-if="view === 'logs'" />
@@ -72,14 +73,6 @@ fetchServiceData().catch((e) => {
   </v-app>
 </template>
 
-<style>
-v-app {
-  --v-theme-info: red;
-}
-.button-group {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 10px;
-  gap: 10px;
-}
+<style scoped>
+
 </style>

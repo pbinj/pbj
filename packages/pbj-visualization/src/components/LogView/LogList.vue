@@ -15,7 +15,7 @@ const error = ref(levelToIcon.error.color);
 </script>
 <template>
   <code class="logs">
-    <pre class="log-line" v-for="log in props.logs" :key="log.timestamp">
+    <pre class="log-line" v-for="log in props.logs" :key="log.id">
         <span :class="'log-level '+log.level">{{ log.level }}</span> 
         <span class="log-timestamp" :title="log.timestamp + ''">{{ new Date(log.timestamp).toISOString()}}</span>
         <span class="log-name">{{ log.name }}</span>

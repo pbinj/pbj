@@ -1,8 +1,8 @@
 #!/usr/bin/env tsx
 import { eq } from "drizzle-orm";
-import { drizzlePBinJKey, register } from "./pbj";
+import { drizzlePBinJKey, register } from "./pbj.js";
 import { pbj } from "@pbinj/pbj";
-import { users as usersTable } from "./schema";
+import { users as usersTable } from "./schema.js";
 import { fileURLToPath } from "url";
 
 register();

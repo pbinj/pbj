@@ -7,7 +7,7 @@ import LogList from "./LogList.vue";
 import { watch } from "vue";
 
 const maxSize = 1000;
-const logs = ref([] as LogMessage[]);
+const logs = ref(allLogs.value);
 const logLevel = ref<LogLevel>("debug");
 const search = ref<string>("");
 

@@ -3,6 +3,9 @@
   "version": "1.0.6",
   "private": true,
   "type": "module",
+  "exports": {
+    ".": "./dist/src/index.js"
+  },
   "scripts": {
     "lint:check": "prettier --check --ignore-path ../../.prettierignore .",
     "lint": "prettier --ignore-path ../../.prettierignore --write  .",

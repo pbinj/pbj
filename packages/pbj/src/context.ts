@@ -337,6 +337,12 @@ export function createNewContext<TRegistry extends RegistryType>() {
   return new Context<TRegistry>();
 }
 
-export const context = createNewContext<Registry>();
+declare global {
+  var __pbj_context: Context<Registry> | undefined;
+}
+
+
+//Make this work when pbj is imported from multiple locations.
+export const context =  (globalThis["__pbj_context"] ??= createNewContext<Registry>());
 
 export const pbj = context.pbj.bind(context);

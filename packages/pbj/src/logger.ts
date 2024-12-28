@@ -6,6 +6,7 @@ import { asString } from "./pbjKey.js";
 export const levels = ["debug", "info", "warn", "error"] as const;
 export type LogLevel = (typeof levels)[number];
 export type LogMessage = {
+  id: string;
   name: string;
   level: LogLevel;
   message: string;
@@ -21,7 +22,7 @@ export const loggerPBinJKey = pbjKey<Logger>("@pbj/logger");
 export function formatStr(fmt: string, obj: unknown) {
   return fmt.replace(/{([^}]+)}/g, (match, key) => {
     const reply = get(obj, key);
-    if (typeof reply === "symbol") {
+    if (typeof reply === "symbol" || typeof reply === "function") {
       return asString(reply) ?? match;
     }
     return reply ?? match;
@@ -103,6 +104,7 @@ export class Logger implements LoggerI {
   }
   _log(level: LogLevel, message: string, context: object = {}) {
     this.fire({
+      id: crypto.randomUUID(),
       name: this.name,
       level,
       message,

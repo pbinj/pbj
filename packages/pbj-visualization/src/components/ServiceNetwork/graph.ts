@@ -253,10 +253,10 @@ function recursivelyGetNodeByDep(node: SearcherNode[]) {
 // #endregion
 
 // #region parse graph raw data
-function getEdge(modId: string, dep: string) {
+function getEdge(to: string, from: string) {
   return {
-    from: modId,
-    to: dep,
+    from,
+    to,
     arrows: {
       to: {
         enabled: true,
@@ -273,14 +273,13 @@ function determineNodeSize(depsLen: number) {
 function getUniqueDeps(deps: string[], processEachDep?: (dep: string) => void) {
   // remove vue style reference, e.g, a.vue -> a.vue?type=style, skip duplicate dep
   // don't use `mod.deps.filter`, will save filter overhead(for performance)
-  const uniqueDeps: string[] = [];
-  deps.forEach((dep) => {
+  const uniqueDeps = new Set<string>();
+  for(const dep of deps){
     // skip duplicate dep
-    if (uniqueDeps.includes(dep)) return;
-    uniqueDeps.push(dep);
-    processEachDep?.(dep);
-  });
-  return uniqueDeps;
+    if (uniqueDeps.size !== uniqueDeps.add(dep).size ) 
+      processEachDep?.(dep);
+  }
+  return [...uniqueDeps];
 }
 
 export function parseGraphRawData(modules: ServiceI[]) {
@@ -413,7 +412,7 @@ export function updateGraphDrawerData(nodeId: string): DrawerData | undefined {
 
   const refsData = moduleReferences.get(node.mod.name) || [];
   const refs = refsData.reduce<DrawerData["deps"]>((prev, ref) => {
-    const moduleData = modulesMap.get(ref.path);
+    const moduleData = modulesMap.get(ref.name);
     if (!moduleData) return prev;
     if (checkIsValidModule(moduleData.mod)) {
       prev.push({

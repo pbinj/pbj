@@ -2,7 +2,7 @@ import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
 import { envRequired } from "@pbinj/pbj/env";
 import { pbj, context, pbjKey } from "@pbinj/pbj";
-import * as schemaOrig from "./schema";
+import * as schemaOrig from "./schema.js";
 
 export const schema = schemaOrig;
 

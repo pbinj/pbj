@@ -8,18 +8,21 @@ const props = defineProps(["service"]);
 </script>
 
 <template>
-  <v-navigation-drawer location="right" temporary absolute>
+  <v-navigation-drawer location="right" >
     <v-list>
-      <v-list-item
-        :title="'Service: ' + props.service?.name"
-        :subtitle="props.service.description"
-      >
+      <v-list-item>
         <v-btn
           class="close"
           icon="mdi-close"
           size="x-small"
           @click="closeDrawer"
         ></v-btn>
+      </v-list-item>
+      <v-list-item
+        :title="'Service: ' + props.service?.name"
+        :subtitle="props.service.description"
+      >
+        
       </v-list-item>
       <v-divider></v-divider>
       <v-list-item link title="Dependencies">
