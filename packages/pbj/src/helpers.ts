@@ -4,7 +4,6 @@ import type { PBinJKey, RegistryType, ValueOf } from "./types.js";
 import { type PathOf, get } from "./util.js";
 declare module "./context.js" {
   interface Context {
-
     transform<
       R,
       T extends PBinJKey<TRegistry>,

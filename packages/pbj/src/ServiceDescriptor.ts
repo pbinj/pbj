@@ -26,7 +26,8 @@ const EMPTY = [] as const;
 export class ServiceDescriptor<
   TRegistry extends RegistryType,
   T extends Constructor | Fn | unknown,
-> implements ServiceDescriptorI<TRegistry, T> {
+> implements ServiceDescriptorI<TRegistry, T>
+{
   static #dependencies = new Set<CKey>();
 
   static value<
@@ -83,13 +84,15 @@ export class ServiceDescriptor<
     this.service = service;
   }
 
-
   get name() {
     return this._name ?? asString(this[serviceSymbol]);
   }
 
   set name(name: string | undefined) {
-    this.logger.debug('renamed service {from}->{to}', { to: name, from: this._name });
+    this.logger.debug("renamed service {from}->{to}", {
+      to: name,
+      from: this._name,
+    });
     this._name = name;
   }
 
@@ -103,7 +106,10 @@ export class ServiceDescriptor<
     if (this._cacheable === _cacheable) {
       return;
     }
-    this.logger.debug('changed cacheable {from} -> {to}', { to: _cacheable, from: this._cacheable });
+    this.logger.debug("changed cacheable {from} -> {to}", {
+      to: _cacheable,
+      from: this._cacheable,
+    });
     this.invalidate();
     this._cacheable = _cacheable;
   }
@@ -123,8 +129,7 @@ export class ServiceDescriptor<
     this.invokable = isFn(_service);
     this._service = _service;
     this._factory = this.invokable && !isConstructor(_service as Fn<T>);
-    this.logger.debug('changed service');
-
+    this.logger.debug("changed service");
   }
 
   get service() {
@@ -285,7 +290,7 @@ export class ServiceDescriptor<
     if (this.invoked === false) {
       return;
     }
-    this.logger.debug('invalidating service');
+    this.logger.debug("invalidating service");
     this.invalid = true;
     this.invoked = false;
     this._instance = undefined;
@@ -322,7 +327,9 @@ export class ServiceDescriptor<
       return this._instance as Returns<T>;
     }
     if (!isFn(this.service)) {
-      this.logger.error(`service '{service}' is not a function`, { service: asString(this.service as any) });
+      this.logger.error(`service '{service}' is not a function`, {
+        service: asString(this.service as any),
+      });
       throw new PBinJError(
         `service '${String(this.service)}' is not a function and is not configured as a value, to configure as a value set invokable to false on the service description`,
       );
@@ -335,9 +342,9 @@ export class ServiceDescriptor<
 
       if (val instanceof Promise) {
         this._promise = val;
-        this.logger.debug('waiting for promise');
+        this.logger.debug("waiting for promise");
         this._promise.then((v) => {
-          this.logger.debug('resolved promise');
+          this.logger.debug("resolved promise");
           this._promise = undefined;
           this.invalid = false;
           this.invoked = true;
@@ -350,12 +357,12 @@ export class ServiceDescriptor<
       try {
         resp = new (this.service as any)(...this.args);
         if (this.error) {
-          this.logger.info('service has recovered');
+          this.logger.info("service has recovered");
         }
         this.error = undefined;
       } catch (e) {
-        const obj = { message: String(e) }
-        this.logger.error('error invoking service {message}', obj);
+        const obj = { message: String(e) };
+        this.logger.error("error invoking service {message}", obj);
         this.invalidate();
         this.error = obj;
         throw e;

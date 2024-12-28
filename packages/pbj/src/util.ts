@@ -9,10 +9,10 @@ export type PathOf<
 > = TPath extends TKey
   ? T[TPath]
   : TPath extends
-  | `${infer TFirst extends TKey}.${infer TRest}`
-  | `[${infer TFirst extends TKey}]${infer TRest}`
-  ? PathOf<T[TFirst], TRest>
-  : never;
+        | `${infer TFirst extends TKey}.${infer TRest}`
+        | `[${infer TFirst extends TKey}]${infer TRest}`
+    ? PathOf<T[TFirst], TRest>
+    : never;
 
 const toPath = (path: string) => path.split(/\.|\[(.+?)\]/g).filter(Boolean);
 
@@ -25,7 +25,7 @@ export function get<T, TKey extends string>(
     return (acc as any)?.[part];
   }, obj) as any;
   return value ?? defaultValue;
-};
+}
 
 export function keyOf(key: PBinJKey<any> | Service): CKey {
   return hasA(key, serviceSymbol, isSymbol)

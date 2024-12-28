@@ -48,12 +48,13 @@ export interface Context<TRegistry extends RegistryType = Registry> {
   ): Promise<ValueOf<TRegistry, T>>;
 }
 export class Context<TRegistry extends RegistryType = Registry>
-  implements Context<TRegistry> {
+  implements Context<TRegistry>
+{
   //this thing is used to keep track of dependencies.
   protected map = new Map<CKey, ServiceDescriptor<TRegistry, any>>();
   private listeners: ServiceDescriptorListener[] = [];
   public logger = new Logger();
-  constructor(private readonly parent?: Context<any>) { }
+  constructor(private readonly parent?: Context<any>) {}
 
   public onServiceAdded(
     fn: ServiceDescriptorListener,
@@ -164,7 +165,7 @@ export class Context<TRegistry extends RegistryType = Registry>
       return;
     }
     ctx.invalidate();
-    this.logger.warn('invalidating service {key}', { key });
+    this.logger.warn("invalidating service {key}", { key });
     for (const [k, v] of this.map) {
       if (v.hasDependency(key)) {
         this.invalidate(k, v, seen);
@@ -189,7 +190,9 @@ export class Context<TRegistry extends RegistryType = Registry>
 
     if (inst) {
       if (origArgs?.length) {
-        this.logger.info('modifying registered service {key}', { key: asString(serviceKey) });
+        this.logger.info("modifying registered service {key}", {
+          key: asString(serviceKey),
+        });
 
         inst.args = args;
         inst.service = service;
@@ -209,12 +212,14 @@ export class Context<TRegistry extends RegistryType = Registry>
       () => {
         this.invalidate(key);
       },
-      this.logger.createChild(asString(serviceKey)!)
+      this.logger.createChild(asString(serviceKey)!),
     );
 
     this.map.set(key, newInst);
     void this.notifyAdd(newInst);
-    this.logger.info('registering service with key {key}', { key: asString(serviceKey) });
+    this.logger.info("registering service with key {key}", {
+      key: asString(serviceKey),
+    });
     return newInst;
   }
   private notifyAdd(inst: ServiceDescriptor<TRegistry, any>) {
@@ -237,14 +242,14 @@ export class Context<TRegistry extends RegistryType = Registry>
   }
 
   newContext<TTRegistry extends TRegistry = TRegistry>() {
-    this.logger.info('new context');
+    this.logger.info("new context");
 
     return new Context<TTRegistry>(this);
   }
   scoped<R, TKey extends PBinJKeyType | (keyof TRegistry & symbol)>(
     _key: TKey,
   ): (next: () => R, ...args: ServiceArgs<TKey, TRegistry>) => R {
-    this.logger.error('scoped not enabled');
+    this.logger.error("scoped not enabled");
     throw new PBinJError(
       "async not enabled, please add 'import \"@pbinj/pbj/scope\";' to your module to enable async support",
     );
@@ -312,11 +317,17 @@ export class Context<TRegistry extends RegistryType = Registry>
       return this.resolve(key);
     } catch (e) {
       if (isAsyncError(e)) {
-        this.logger.debug("waiting for promise[{waitKey}] for {key}", { key: asString(key), waitKey: asString(e.key) });
+        this.logger.debug("waiting for promise[{waitKey}] for {key}", {
+          key: asString(key),
+          waitKey: asString(e.key),
+        });
         await e.promise;
         return this.resolveAsync(key);
       }
-      this.logger.error("error resolving async {key} {error}", { key: asString(key), error: e });
+      this.logger.error("error resolving async {key} {error}", {
+        key: asString(key),
+        error: e,
+      });
       throw e;
     }
   }
