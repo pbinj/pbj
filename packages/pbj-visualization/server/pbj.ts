@@ -55,6 +55,14 @@ export class ServerConfig {
   set path(path: string) {
     this._path = path;
   }
+  toJSON() {
+    return {
+      port: this.port,
+      host: this.host,
+      path: this.path,
+      url: this.url,
+    };
+  }
 }
 
 export async function register(
@@ -95,7 +103,7 @@ export async function register(
     });
 
     if (!service) {
-      ctx.logger.error(`{error} {action} {service}`, { error: "not found", action, service });
+      ctx.logger.error(`{error} {action} {service}`, { error: "not found", action, name: req.body.name });
       res.send({ error: "Service was not found" });
       return;
     }
@@ -128,7 +136,7 @@ export async function register(
           value,
           timing: performance.now() - perf,
           message,
-          service,
+          service:asString(service[serviceSymbol]),
         }),
       );
     } catch (e) {
@@ -149,6 +157,9 @@ export async function register(
       const unsub = ctx.logger.onLogMessage((msg) => {
         socket.emit('log', msg);
       });
+      socket.on('ping', (ping) => {
+        ping?.emit('pong');
+      });
       socket.on('disconnect', () => {
         unsub?.();
         console.log('disconnected');
@@ -157,7 +168,7 @@ export async function register(
     //In dev mode the os will assign a port (0) and then we will assign it back to the config.
     //this should allow vite to
     config.port = (server.address() as AddressInfo)?.port!;
-    ctx.logger.info("PBinJ visualization server started at: {url}", config);
+    ctx.logger.info("PBinJ visualization server started at: {url}", config as any);
     console.log("PBinJ visualization server started at: %s", config.url);
   }
   return app;

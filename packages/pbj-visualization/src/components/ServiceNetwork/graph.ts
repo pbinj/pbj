@@ -23,9 +23,8 @@ export async function fetchServiceData() {
 export const groups = {
   "@pbj": {
     color: colors.purple.accent3,
-    label: "PBinJ nodes",
     shape: "box",
-    font: "12px arial rgba(255,255,255,.8)",
+    font: "12px arial rgba(0,0,0,.8)",
   },
   vue: {
     color: "#42b883",

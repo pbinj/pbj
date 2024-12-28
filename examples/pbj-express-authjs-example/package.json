@@ -10,12 +10,14 @@
     "clean": "rm -rf dist",
     "test": "vitest run",
     "build": "tsc",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "visualize":"pbj-visualization $PWD/dist/pbj.js"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@pbinj/pbj-visualization": "workspace:*",
     "@types/ejs": "^3.1.5",
     "drizzle-kit": "^0.28.1",
     "tsx": "^4.19.2",
@@ -28,9 +30,9 @@
     "@auth/express": "^0.8.4",
     "@libsql/client": "0.14.0",
     "@pbinj/pbj": "workspace:*",
-    "pbj-drizzle-example": "workspace:*",
     "@types/express": "^5.0.0",
     "drizzle-orm": "^0.37.0",
-    "ejs": "^3.1.10"
+    "ejs": "^3.1.10",
+    "pbj-drizzle-example": "workspace:*"
   }
 }

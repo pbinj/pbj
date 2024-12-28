@@ -1,59 +1,65 @@
 <script lang="tsx" setup>
-import { io } from "socket.io-client";
 import { ref } from "vue";
-import type { LogMessage } from "@pbinj/pbj/logger";
-const socket = io({ path: '/socket.io' });
+import type { LogMessage, LogLevel } from "@pbinj/pbj/logger";
+import LogConfig from './LogConfig.vue';
+import { allLogs,connected, format, levels, levelToIcon } from './logs.js';
+import Logs from './Logs.vue';
+import { watch } from "vue";
+
 const maxSize = 1000;
 const logs = ref([] as LogMessage[]);
-const connected = ref(false);
-socket.on('connect', () => {
-    connected.value = true;
+const logLevel = ref<LogLevel>("debug");
+const search = ref<string>('');
+
+watch(allLogs, (logs) => {
+  onConfig({search:search.value, level:logLevel.value, maxSize});
 });
-socket.on('disconnect', () => {
-    connected.value = false;
-});
-socket.on('log', (data) => {
-   logs.value = [...logs.value, ...data].slice(-maxSize);
-});
+
+function onConfig({search:text, level, maxSize = 1000}:{search:string, level?:LogLevel, maxSize?:number}) {
+  let _logs = allLogs.value;
+  if (text) {
+    const re = new RegExp(text.replace(/([^.]\*)/g, '.+?'), 'i');
+    _logs = _logs.filter((log) =>re.test(format(log.message, log.context)));
+  }
+  const levelIndex = level ? levels.indexOf(level) : 0;
+  if (levelIndex === -1) {
+    throw new Error(`Invalid log level: ${level}`);
+  }
+  if (level !== 'debug') {
+    _logs = _logs.filter((log) => levels.indexOf(log.level) >= levelIndex);
+  }
+  logLevel.value = level ?? 'debug';
+  search.value = text;
+  logs.value = _logs;
+}
+
+const info = ref(levelToIcon.info.color);
+const debug = ref(levelToIcon.debug.color);
+const warn = ref(levelToIcon.warn.color);
+const error = ref(levelToIcon.error.color);
+
 
 </script>
 
 <template>
- <v-card class="log-container" title="Logs">
-  <div class="log-header"> 
-    <span>Messages</span>
-    <div>
-    <span v-if="!connected">
-         <v-icon
-            color="red-darken-2"
-            icon="mdi-alert-circle"
-            size="small"/> Disconnected</span>
-    <span v-if="connected">
-          <v-icon
-      color="green-darken-2"
-      icon="mdi-atenna"
-      size="small"/> Connected ({{ logs.length }})
-    </span>
-    </div>
-  </div>
-    
-  <code class="log-view">
-    <pre class="log-line" v-for="log in logs">
-        <span class="log-level">{{ log.level }}</span> 
-        <span class="log-timestamp" :title="log.timestamp + ''">{{ new Date(log.timestamp).toISOString()}}</span>
-        <span class="log-name">{{ log.name }}</span>
-        <span class="log-message">{{ log.message }}</span>
-    </pre>
-  </code>
+ <v-card class="log-container">
+ 
+        <LogConfig :connected="connected" :onConfig="onConfig"/>
+
+  <Logs :logs="logs">
+    <template v-slot:nologs>
+      No logs found
+      
+      <span v-if="!connected">(not connected) <v-btn icon></v-btn></span>
+      <span v-else-if="search != ''">Try clearing search bar</span>
+      <span v-else-if="logLevel !== 'debug'">(level is '{{ logLevel }}' try changing to debug)</span>
+      <span v-else>No log messages found.</span>
+      </template>
+ </Logs>
 </v-card>
 </template>
 
 <style scoped>
-.log-header {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-}
 .log-container {
     height: 100%;
     width: 100%;
@@ -63,16 +69,5 @@ socket.on('log', (data) => {
   min-width: 500px;
   min-height: 800px;
 }
-.log-view {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    overflow: auto;
-}
-.log-line {
-    width: 100%;
-    font-size: 10px;
-    white-space: nowrap;
-    border-bottom: 1px solid #ccc;
-}
+
 </style>

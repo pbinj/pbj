@@ -1,7 +1,6 @@
-import { get } from "./helpers.js";
 import { pbjKey } from "./pbjKey.js";
 import { serviceSymbol } from "./symbols.js";
-
+import { get } from "./util.js";
 export const levels = ["debug", "info", "warn", "error"] as const;
 export type LogLevel = typeof levels[number];
 export type LogMessage = {
@@ -12,8 +11,9 @@ export type LogMessage = {
     timestamp: number;
 }
 export type LoggerI = {
-    [k in LogLevel]: (<T extends object>(message: MessageFormat<T>, obj: T) => void) | ((message: MessageFormat<{}>) => void);
+    [k in LogLevel]: (message:string, obj?:Record<string,unknown>) => void;
 }
+
 export const loggerPBinJKey = pbjKey<Logger>("@pbj/logger");
 
 export function formatStr(fmt: string, obj: unknown) {
@@ -37,9 +37,9 @@ export class Logger implements LoggerI {
     _buffer: LogMessage[] = [];
     _listeners: OnLogMessage[] = [];
 
-    constructor(public console = true, level: LogLevel = "info",
+    constructor(public _console: typeof console | boolean = console, level: LogLevel = "info",
         public name = '@pbj/context',
-        private meta = {},
+        private context: object = {},
         public format = formatStr,
         maxBuffer = 1000,
         private parent: Logger | undefined = undefined,
@@ -48,8 +48,8 @@ export class Logger implements LoggerI {
         this.maxBuffer = maxBuffer;
 
     }
-    createChild(name: string, meta = {}) {
-        return new Logger(this.console, this.level, name, ({ ...this.meta, ...meta }), this.format, this.maxBuffer, this);
+    createChild(name: string, context = {}) {
+        return new Logger(this._console, this.level, name, ({ ...this.context, ...context }), this.format, this.maxBuffer, this);
     }
     private resizeBuffer() {
         if (this._buffer.length > this._maxBuffer) {
@@ -76,8 +76,9 @@ export class Logger implements LoggerI {
         if (this.parent) {
             this.parent.fire(...e);
         } else {
-            if (this.console) {
-                e.forEach(v => console.log(
+            if (this._console) {
+                const con = typeof this._console === 'boolean' ? console : this._console;
+                e.forEach(v => con.log(
                     `[${v.level}] ${v.name} ${v.timestamp}: ${this.format(v.message, v.context)}`));
             }
             this._buffer.push(...e);
@@ -85,7 +86,7 @@ export class Logger implements LoggerI {
         }
     }
     _log(level: LogLevel, message: string, context: object = {}) {
-        this.fire({ name: this.name, level, message, context: { ...this.meta, ...context }, timestamp: Date.now() });
+        this.fire({ name: this.name, level, message, context: { ...this.context, ...context }, timestamp: Date.now() });
     }
     public onLogMessage(fn: (msg: LogMessage[]) => void, init = true) {
         init && fn(this._buffer);
@@ -94,37 +95,16 @@ export class Logger implements LoggerI {
             this._listeners = this._listeners.filter((v) => v !== fn);
         }
     }
-    debug<T extends object>(...[message, obj]: [MessageFormat<T>, obj: T] | [message: MessageFormat<undefined>]) {
+    debug(message:string, obj?:Record<string,unknown>) {
         this._log("debug", message, obj);
     }
-    error<T extends object>(...[message, obj]: [MessageFormat<T>, obj: T] | [message: MessageFormat<undefined>]) {
+    error(message:string, obj?:Record<string,unknown>) {
         this._log("error", message, obj);
     }
-    warn<T extends object>(...[message, obj]: [MessageFormat<T>, obj: T] | [message: MessageFormat<undefined>]) {
+    warn(message:string, obj?:Record<string,unknown>) {
         this._log("warn", message, obj);
     }
-    info<T extends object>(...[message, obj]: [MessageFormat<T>, obj: T] | [message: MessageFormat<undefined>]) {
+    info(message:string, obj?:Record<string,unknown>) {
         this._log("info", message, obj);
     }
 }
-
-
-type Primitive = string | number | boolean | null | undefined;
-
-type PathImpl<T, Key extends keyof T> = Key extends string
-    ? T[Key] extends Primitive
-    ? `${Key}`
-    : T[Key] extends object
-    ? `${Key}.${PathImpl<T[Key], keyof T[Key]> & string}`
-    : never
-    : never;
-
-type Path<T> = PathImpl<T, keyof T> | keyof T;
-
-type AllowedPaths<T> = Path<T> extends string ? `{${Path<T>}}` : string;
-
-type MessageFormat<T> =
-    T extends undefined ? string :
-    T extends object
-    ? `${string}${AllowedPaths<T>}${string}` | never
-    : never;

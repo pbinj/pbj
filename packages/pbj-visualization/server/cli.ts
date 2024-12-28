@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { pathToFileURL } from "url";
 import { register } from "./pbj.js";
 export async function main(imports: string[] = process.argv.slice(2)) {
   console.log("Running server");

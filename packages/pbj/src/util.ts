@@ -2,6 +2,31 @@ import { hasA, isSymbol } from "./guards.js";
 import { serviceSymbol } from "./symbols.js";
 import type { CKey, PBinJKey, Service } from "./types.js";
 
+export type PathOf<
+  T,
+  TPath extends string,
+  TKey extends string & keyof T = keyof T & string,
+> = TPath extends TKey
+  ? T[TPath]
+  : TPath extends
+  | `${infer TFirst extends TKey}.${infer TRest}`
+  | `[${infer TFirst extends TKey}]${infer TRest}`
+  ? PathOf<T[TFirst], TRest>
+  : never;
+
+const toPath = (path: string) => path.split(/\.|\[(.+?)\]/g).filter(Boolean);
+
+export function get<T, TKey extends string>(
+  obj: T,
+  key: TKey,
+  defaultValue?: PathOf<T, TKey> | undefined,
+): PathOf<T, TKey> {
+  const value = toPath(key).reduce((acc, part) => {
+    return (acc as any)?.[part];
+  }, obj) as any;
+  return value ?? defaultValue;
+};
+
 export function keyOf(key: PBinJKey<any> | Service): CKey {
   return hasA(key, serviceSymbol, isSymbol)
     ? (key[serviceSymbol] as any)

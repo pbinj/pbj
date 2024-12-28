@@ -39,6 +39,8 @@ function invoke() {
       :disabled="busy"
       :loading="busy"
       :color="invoked ? 'success' : 'primary'"
+                size="x-small"
+
     >
       {{ label }}
     </v-btn>

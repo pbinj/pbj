@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import Invoke from "./InvokeButton.vue";
 import { closeDrawer } from "./ServiceNetwork/graph";
+import Logs from './LogView/Logs.vue';
+import { allLogs } from './LogView/logs.js';
+
 const props = defineProps(["service"]);
 </script>
 
@@ -37,6 +40,9 @@ const props = defineProps(["service"]);
           endpoint="/api/invalidate"
           label="Invalidate"
         />
+      </v-list-item>
+      <v-list-item title="Logs">
+        <Logs :logs="allLogs.filter(v=>v.name === props.service.name)" />
       </v-list-item>
     </v-list>
   </v-navigation-drawer>

@@ -214,7 +214,7 @@ export class Context<TRegistry extends RegistryType = Registry>
 
     this.map.set(key, newInst);
     void this.notifyAdd(newInst);
-    this.logger.info('registering service {key}', { key: asString(serviceKey) });
+    this.logger.info('registering service with key {key}', { key: asString(serviceKey) });
     return newInst;
   }
   private notifyAdd(inst: ServiceDescriptor<TRegistry, any>) {
