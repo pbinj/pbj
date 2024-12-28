@@ -11,7 +11,7 @@
     "test": "vitest run",
     "build": "tsc",
     "watch": "tsc -w",
-    "visualize":"pbj-visualization $PWD/dist/pbj.js"
+    "visualize": "pbj-visualization $PWD/dist/pbj.js"
   },
   "author": "",
   "license": "ISC",
