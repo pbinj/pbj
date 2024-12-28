@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import Invoke from "./InvokeButton.vue";
 import { closeDrawer } from "./ServiceNetwork/graph";
-import Logs from './LogView/Logs.vue';
-import { allLogs } from './LogView/logs.js';
+import LogList from "./LogView/LogList.vue";
+import { allLogs } from "./LogView/logs.js";
 
 const props = defineProps(["service"]);
 </script>
@@ -42,7 +42,7 @@ const props = defineProps(["service"]);
         />
       </v-list-item>
       <v-list-item title="Logs">
-        <Logs :logs="allLogs.filter(v=>v.name === props.service.name)" />
+        <LogList :logs="allLogs.filter((v) => v.name === props.service.name)" />
       </v-list-item>
     </v-list>
   </v-navigation-drawer>

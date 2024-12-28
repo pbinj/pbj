@@ -41,7 +41,7 @@ fetchServiceData().catch((e) => {
             <v-icon icon="mdi-table" size="small" />
             Table</v-btn
           >
-            <v-btn value="logs" to="/logs">
+          <v-btn value="logs" to="/logs">
             <v-icon icon="mdi-text" size="small" />
             Log</v-btn
           >

@@ -58,7 +58,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-   <v-card title="Network">
+  <v-card title="Network">
     <div class="graph-body">
       <div ref="container" class="absolute h-full w-full" />
     </div>

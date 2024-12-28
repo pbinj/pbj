@@ -1,22 +1,21 @@
-
 <script lang="ts" setup>
 import LogMessageVue from "./LogMessage.vue";
 import type { LogMessage } from "@pbinj/pbj/logger";
 import { levelToIcon } from "./logs.js";
-import { ref } from 'vue';
+import { ref } from "vue";
+
 const props = defineProps<{
-    logs: LogMessage[],
+  logs: LogMessage[];
 }>();
 
 const info = ref(levelToIcon.info.color);
 const debug = ref(levelToIcon.debug.color);
 const warn = ref(levelToIcon.warn.color);
 const error = ref(levelToIcon.error.color);
-
 </script>
 <template>
   <code class="logs">
-    <pre class="log-line" v-for="log in props.logs">
+    <pre class="log-line" v-for="log in props.logs" :key="log.timestamp">
         <span :class="'log-level '+log.level">{{ log.level }}</span> 
         <span class="log-timestamp" :title="log.timestamp + ''">{{ new Date(log.timestamp).toISOString()}}</span>
         <span class="log-name">{{ log.name }}</span>
@@ -42,39 +41,38 @@ const error = ref(levelToIcon.error.color);
   background: v-bind(debug);
 }
 .log-header {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 .log-level {
-  padding:2px 5px;
+  padding: 2px 5px;
   border-radius: 3px;
   width: 7ch;
   text-align: center;
   display: inline-block;
 }
 
-
 .log-container {
-    height: 100%;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-     position: relative;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
   min-width: 500px;
   min-height: 800px;
 }
 
 .logs {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    overflow: auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: auto;
 }
 .log-line {
-    width: 100%;
-    font-size: 10px;
-    white-space: nowrap;
-    border-bottom: 1px solid #ccc;
+  width: 100%;
+  font-size: 10px;
+  white-space: nowrap;
+  border-bottom: 1px solid #ccc;
 }
 </style>
