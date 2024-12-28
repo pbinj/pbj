@@ -6,7 +6,8 @@ import { toParts } from "./logs.js";
 const props = defineProps<{ log: LogMessage }>();
 
 const parts = toParts(props.log.message);
-const context = props.log.context;
+//eslint-disable-next-line  @typescript-eslint/no-explicit-any
+const context = props.log.context as any;
 </script>
 
 <template>

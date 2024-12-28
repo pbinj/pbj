@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { connect } from "./logs.js";
+import colors from "vuetify/util/colors";
 
 const props = defineProps<{
   connected: boolean;
