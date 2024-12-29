@@ -21,7 +21,12 @@ yarn add @pbinj/pbj-visualization
 
 ## Quick Start
 
-Add the visualization middleware to your  application:
+Use the pbj-visualization script to launch your app.
+```bash
+$ pbj-visualization ./path/to/your/pea.ts
+```
+
+Or for more control embed it into your app.
 
 ```typescript
 import { register } from "@pbinj/pbj-visualization";
@@ -56,14 +61,6 @@ register(context);
 
 ```
 
-## Running as a Server
-PBJ also provides a CLI to run the visualization server standalone. It does however need to load
-your context, so you will need to provide a file to import from.  You can supply multiple files.
-
-```bash
-pnpm pbj-visualization ./path/to/your/pea.ts
-```
-
 ### Network View
 
 The network view displays your dependencies as an interactive graph:
@@ -81,6 +78,8 @@ The table view provides a detailed list of all services:
 - Registration status
 - Lifecycle information
 
+### Log View
+Shows the PBinJ logs in real time.   
 
 ## Examples
 
