@@ -30,6 +30,7 @@ export const serverConfigPBinJKey = pbjKey<ServerConfig>("serverConfig");
 export class ServerConfig {
   constructor(
     private _port = env("PJB_PORT", "0"),
+    private _port = env("PJB_PORT", "0"),
     private _host = env("PJB_HOST", "localhost"),
     private _path = env("PJB_PATH", "/"),
   ) {}

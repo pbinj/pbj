@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { reactive, ref, watch } from "vue";
 import ServiceTable from "./components/ServiceTable.vue";
 import ServiceDrawer from "./components/ServiceDrawer.vue";
 import {
@@ -15,6 +15,7 @@ import {
 } from "./components/ServiceNetwork/graph";
 import LogView from "./components/LogView/LogView.vue";
 
+const route = useRoute();
 const route = useRoute();
 const error = ref<string | null>(null);
 const view = ref<"network" | "table" | "logs">(
