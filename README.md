@@ -9,7 +9,8 @@ A lightweight, proxy-based Dependency Injection (DI) framework for Node.js with 
 
 [Documentation](https://pbinj.github.io/pbj)
 
-[!Visualization](./docs/vis.mov)
+[![Visualization](./docs/image.png)](./docs/vis.mov)
+
 ## Features
 
 - Lightweight nearly everything is done with `pbjKey`, `context.register`, `context.resolve` and `pbj`.
