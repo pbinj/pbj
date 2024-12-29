@@ -43,11 +43,12 @@ jobs:
       - name: Lint
         run: pnpm lint:check
 
+      - name: Build
+        run: pnpm build
+
       - name: Test
         run: pnpm test
 
-      - name: Build
-        run: pnpm build
 
       - name: Create and publish versions
         uses: changesets/action@v1
