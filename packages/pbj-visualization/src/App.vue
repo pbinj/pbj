@@ -16,7 +16,6 @@ import {
 import LogView from "./components/LogView/LogView.vue";
 
 const route = useRoute();
-const route = useRoute();
 const error = ref<string | null>(null);
 const view = ref<"network" | "table" | "logs">(
   (route.name as "network" | "table" | "logs") || "network",
