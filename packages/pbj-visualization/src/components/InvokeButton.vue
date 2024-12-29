@@ -30,11 +30,14 @@ function invoke() {
     },
   );
 }
-watch(() => props.service, () => {
-  invoked.value = false;
-  resp.value = "";
-  busy.value = false;
-})
+watch(
+  () => props.service,
+  () => {
+    invoked.value = false;
+    resp.value = "";
+    busy.value = false;
+  },
+);
 </script>
 
 <template>

@@ -30,7 +30,6 @@ fetchServiceData().catch((e) => {
 </script>
 
 <template>
-
   <v-app full-height full-width class="app">
     <v-app-bar color="info" title="PBinJ Visualization">
       <template v-slot:append>
@@ -73,6 +72,4 @@ fetchServiceData().catch((e) => {
   </v-app>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

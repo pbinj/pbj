@@ -274,10 +274,9 @@ function getUniqueDeps(deps: string[], processEachDep?: (dep: string) => void) {
   // remove vue style reference, e.g, a.vue -> a.vue?type=style, skip duplicate dep
   // don't use `mod.deps.filter`, will save filter overhead(for performance)
   const uniqueDeps = new Set<string>();
-  for(const dep of deps){
+  for (const dep of deps) {
     // skip duplicate dep
-    if (uniqueDeps.size !== uniqueDeps.add(dep).size ) 
-      processEachDep?.(dep);
+    if (uniqueDeps.size !== uniqueDeps.add(dep).size) processEachDep?.(dep);
   }
   return [...uniqueDeps];
 }

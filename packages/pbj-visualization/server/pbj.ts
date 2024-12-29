@@ -105,7 +105,7 @@ export async function register(
     });
 
     if (!service) {
-      ctx.logger.error(`{error} {action} {service}`, {
+      ctx.logger.error(`{error} {action} {name}`, {
         error: "not found",
         action,
         name: req.body.name,
@@ -149,7 +149,7 @@ export async function register(
       ctx.logger.error(`error {action} {service}`, {
         error: e,
         action,
-        service,
+        service: asString(service[serviceSymbol]),
       });
       res.send({ error: String(e) });
     }
@@ -167,11 +167,15 @@ export async function register(
       const unsub = ctx.logger.onLogMessage((msg) => {
         socket.emit("log", msg);
       });
+      const unadd = ctx.onServiceAdded((service) => {
+        socket.emit("onServiceAdded", service);
+      });
       socket.on("ping", (ping) => {
         ping?.emit("pong");
       });
       socket.on("disconnect", () => {
         unsub?.();
+        unadd?.();
         console.log("disconnected");
       });
     });

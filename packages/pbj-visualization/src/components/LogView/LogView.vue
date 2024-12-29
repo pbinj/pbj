@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref } from "vue";
-import type { LogMessage, LogLevel } from "@pbinj/pbj/logger";
+import type { LogLevel } from "@pbinj/pbj/logger";
 import LogConfig from "./LogConfig.vue";
 import { allLogs, connected, format, levels } from "./logs.js";
 import LogList from "./LogList.vue";

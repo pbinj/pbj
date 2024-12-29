@@ -4,25 +4,22 @@ import { closeDrawer } from "./ServiceNetwork/graph";
 import LogList from "./LogView/LogList.vue";
 import { allLogs } from "./LogView/logs.js";
 
-const props = defineProps(["service"]);
+const props = defineProps<{ service: ServiceI }>();
 </script>
 
 <template>
-  <v-navigation-drawer location="right" >
+  <v-navigation-drawer location="right">
     <v-list>
-      <v-list-item>
+      <v-list-item
+        :title="props.service?.name"
+        :subtitle="props.service.description"
+      >
         <v-btn
           class="close"
           icon="mdi-close"
           size="x-small"
           @click="closeDrawer"
         ></v-btn>
-      </v-list-item>
-      <v-list-item
-        :title="'Service: ' + props.service?.name"
-        :subtitle="props.service.description"
-      >
-        
       </v-list-item>
       <v-divider></v-divider>
       <v-list-item link title="Dependencies">

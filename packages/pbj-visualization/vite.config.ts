@@ -10,7 +10,13 @@ import { context } from "@pbinj/pbj";
 import { register, serverConfigPBinJKey } from "./server/pbj.js";
 
 export const CONFIG = {
-  plugins: [tsConfigPaths(), vue(), vueJsx(), vueDevTools(), vuetify({ autoImport: true })],
+  plugins: [
+    tsConfigPaths(),
+    vue(),
+    vueJsx(),
+    vueDevTools(),
+    vuetify({ autoImport: true }),
+  ],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
