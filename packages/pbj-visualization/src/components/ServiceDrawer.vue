@@ -3,6 +3,7 @@ import Invoke from "./InvokeButton.vue";
 import { closeDrawer } from "./ServiceNetwork/graph";
 import LogList from "./LogView/LogList.vue";
 import { allLogs } from "./LogView/logs.js";
+import { type ServiceI } from "../types";
 
 const props = defineProps<{ service: ServiceI }>();
 </script>
