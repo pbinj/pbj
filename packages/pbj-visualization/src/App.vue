@@ -52,7 +52,10 @@ fetchServiceData().catch((e) => {
       </template>
     </v-app-bar>
 
-    <ServiceDrawer :service="graphDrawerData.service" v-if="graphDrawerShow && graphDrawerData?.service" />
+    <ServiceDrawer
+      :service="graphDrawerData.service"
+      v-if="graphDrawerShow && graphDrawerData?.service"
+    />
 
     <v-main min-width="100%" class="main">
       <v-container>
