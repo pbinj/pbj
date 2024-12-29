@@ -1,5 +1,14 @@
 # @pbinj/pbj-metrics-example
 
+## 1.0.7
+
+### Patch Changes
+
+- 91495a7: Added logging and visualization to make debugging and development easier.
+- Updated dependencies [91495a7]
+  - @pbinj/pbj-prometheus@1.0.2
+  - @pbinj/pbj@1.0.2
+
 ## 1.0.6
 
 ### Patch Changes
