@@ -1,22 +1,10 @@
 import { fileURLToPath, URL } from "node:url";
-
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import vueJsx from "@vitejs/plugin-vue-jsx";
 import vueDevTools from "vite-plugin-vue-devtools";
 import vuetify from "vite-plugin-vuetify";
 import tsConfigPaths from "vite-tsconfig-paths";
-import { context } from "@pbinj/pbj";
-import { register, serverConfigPBinJKey } from "./server/pbj.js";
-
-export const CONFIG = {
-  plugins: [
-    tsConfigPaths(),
-    vue(),
-    vueJsx(),
-    vueDevTools(),
-    vuetify({ autoImport: true }),
-  ],
 import { context } from "@pbinj/pbj";
 import { register, serverConfigPBinJKey } from "./server/pbj.js";
 
