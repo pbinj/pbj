@@ -10,4 +10,8 @@ export interface ServiceI {
   cacheable: boolean;
   primitive: boolean;
   listOf: boolean;
+  error?: {
+    message: string;
+  };
+  args: unknown[];
 }

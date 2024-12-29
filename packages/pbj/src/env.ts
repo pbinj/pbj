@@ -1,6 +1,19 @@
-import { context } from "./context.js";
+import { Context, context } from "./context.js";
 import { pbjKey } from "./pbjKey.js";
 import { pathOf } from "./helpers.js";
+declare module "./context.js" {
+  interface Context {
+    env<K extends keyof PBinJEnv & string, D extends string>(
+      this: Context,
+      envKey: K,
+      defaultValue?: D,
+    ): string | D;
+    envRequired<K extends keyof PBinJEnv & string>(
+      this: Context,
+      envKey: K,
+    ): string;
+  }
+}
 
 export const Default = {
   env: process.env,
@@ -15,20 +28,23 @@ export const envPBinJKey = pbjKey<PBinJEnv>("@pbj/env");
 
 context.register(envPBinJKey, () => Default.env);
 
-export function env<K extends keyof PBinJEnv & string, D extends string>(
-  envKey: K,
-  defaultValue?: D,
-): string | D {
-  return context.register(
+Context.prototype.env = function env<
+  K extends keyof PBinJEnv & string,
+  D extends string,
+>(this: Context, envKey: K, defaultValue?: D): string | D {
+  return this.register(
     Symbol.for(`@pbj/env/${envKey}`),
     pathOf(envPBinJKey, envKey, defaultValue as any),
   ).proxy;
-}
+};
 
-export function envRequired<K extends keyof PBinJEnv & string>(
-  envKey: K,
-): string {
-  return context
-    .register(Symbol.for(`@pbj/env/${envKey}`), pathOf(envPBinJKey, envKey))
-    .withOptional(false).proxy;
-}
+Context.prototype.envRequired = function envRequired<
+  K extends keyof PBinJEnv & string,
+>(this: Context, envKey: K): string {
+  return this.register(
+    Symbol.for(`@pbj/env/${envKey}`),
+    pathOf(envPBinJKey, envKey),
+  ).withOptional(false).proxy;
+};
+export const env = context.env.bind(context);
+export const envRequired = context.envRequired.bind(context);

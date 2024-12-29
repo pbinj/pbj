@@ -192,6 +192,8 @@ export interface ServiceDescriptorI<
   invoke(): Returns<T>;
 
   asArray(): this;
+
+  invalidate(): void;
 }
 /**
  * The interceptor function, allows you to intercept the invocation of a service.  The

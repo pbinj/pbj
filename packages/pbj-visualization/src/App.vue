@@ -1,71 +1,69 @@
 <script setup lang="ts">
-import { reactive, ref, watch } from "vue";
+import { ref } from "vue";
 import ServiceTable from "./components/ServiceTable.vue";
-import ServiceGraph from "./components/ServiceGraph.vue";
-import type { ServiceI } from "./types";
+import ServiceDrawer from "./components/ServiceDrawer.vue";
+import {
+  ServiceNetwork,
+  graphDrawerData,
+  graphDrawerShow,
+} from "./components/ServiceNetwork";
+import { useRoute } from "vue-router";
+import {
+  fetchServiceData,
+  graphLoading,
+  services,
+} from "./components/ServiceNetwork/graph";
 
-const View = ["network", "table"] as const;
-
-const loading = ref(false);
+const route = useRoute();
 const error = ref<string | null>(null);
-const services = ref([] as ServiceI[]);
-const view = ref(0);
+const view = ref<"network" | "table">(
+  (route.name as "network" | "table") || "network",
+);
+
 // watch the params of the route to fetch the data again
 //watch(fetchData, { immediate: true })
-
-async function fetchData() {
-  error.value = null;
-  loading.value = true;
-  try {
-    services.value = await (await fetch("/api/services")).json();
-  } catch (err) {
-    error.value = String(err);
-  } finally {
-    loading.value = false;
-  }
-}
-
-fetchData();
+fetchServiceData().catch((e) => {
+  error.value = String(e);
+  console.error(e);
+});
 </script>
 
 <template>
-  <v-responsive class="border rounded" min-height="700">
-    <v-app>
-      <v-app-bar color="info" title="PBinJ Visualization">
-        <template v-slot:append>
-          <v-btn-toggle v-model="view" mandatory>
-            <v-btn>
-              <v-icon icon="mdi-graph-outline" size="small" />Network</v-btn
-            >
-            <v-btn>
-              <v-icon icon="mdi-table" size="small" />
-              Table</v-btn
-            >
-          </v-btn-toggle>
-          <v-btn @click="fetchData">
-            <v-icon icon="mdi-refresh" size="large" />
-          </v-btn>
-        </template>
-      </v-app-bar>
-      <v-main min-width="100%">
-        <v-container>
-          <div v-if="loading">
-            <v-skeleton-loader
-              :type="view == 0 ? 'image' : 'table'"
-            ></v-skeleton-loader>
-          </div>
-          <div v-if="error">Error: {{ error }}</div>
-          <div v-if="!loading">
-            <ServiceGraph
-              :services="services"
-              v-if="View[view] === 'network'"
-            />
-            <ServiceTable :services="services" v-if="View[view] === 'table'" />
-          </div>
-        </v-container>
-      </v-main>
-    </v-app>
-  </v-responsive>
+  <v-app full-height full-width>
+    <v-app-bar color="info" title="PBinJ Visualization">
+      <template v-slot:append>
+        <v-btn-toggle v-model="view" mandatory>
+          <v-btn value="network" to="/network">
+            <v-icon icon="mdi-graph-outline" size="small" />Network</v-btn
+          >
+          <v-btn value="table" to="/table">
+            <v-icon icon="mdi-table" size="small" />
+            Table</v-btn
+          >
+        </v-btn-toggle>
+        <v-btn @click="fetchServiceData">
+          <v-icon icon="mdi-refresh" size="large" />
+        </v-btn>
+      </template>
+    </v-app-bar>
+
+    <ServiceDrawer :service="graphDrawerData?.service" v-if="graphDrawerShow" />
+
+    <v-main min-width="100%" class="">
+      <v-container>
+        <div v-if="graphLoading">
+          <v-skeleton-loader
+            :type="view == 'network' ? 'image' : view"
+          ></v-skeleton-loader>
+        </div>
+        <div v-if="error">Error: {{ error }}</div>
+        <div v-if="!graphLoading">
+          <ServiceNetwork :services="services" v-if="view === 'network'" />
+          <ServiceTable :services="services" v-if="view === 'table'" />
+        </div>
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 
 <style>

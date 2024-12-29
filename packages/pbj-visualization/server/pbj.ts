@@ -1,6 +1,18 @@
-import { pbjKey, context } from "@pbinj/pbj";
+import {
+  pbjKey,
+  context,
+  asString,
+  type ServiceDescriptorI,
+  type Registry,
+  serviceSymbol,
+} from "@pbinj/pbj";
 import { env } from "@pbinj/pbj/env";
 import express from "express";
+import { Server } from "http";
+import type { AddressInfo } from "net";
+import { anyOf, enums } from "./schema/schema.js";
+
+const isAction = anyOf(enums("invoke", "invalidate"));
 
 /**
  * CJS / ESM madness.
@@ -16,21 +28,30 @@ const dirname = (() => {
 export const serverConfigPBinJKey = pbjKey<ServerConfig>("serverConfig");
 export class ServerConfig {
   constructor(
-    private _port = env("PJB_PORT", "3000"),
+    private _port = env("PJB_PORT", "0"),
     private _host = env("PJB_HOST", "localhost"),
     private _path = env("PJB_PATH", "/"),
   ) {}
   get host() {
     return this._host + "";
   }
+  set host(host: string) {
+    this._host = host;
+  }
   get url() {
-    return `http://${this.host}:${this.port}`;
+    return `http://${this.host}:${this.port}${this.path}`;
   }
   get port() {
     return Number(this._port);
   }
+  set port(port: number) {
+    this._port = port + "";
+  }
   get path() {
     return this._path + "";
+  }
+  set path(path: string) {
+    this._path = path;
   }
 }
 
@@ -44,17 +65,81 @@ export async function register(
   const config = ctx.resolve(serverConfigPBinJKey);
   const index = `${dirname}/../web/index.html`;
   app.use(config.path, express.static(`${dirname}/../web`));
+  app.use(express.json());
   app.get("/", (_, res) => {
     res.sendFile(index);
   });
+
   app.get("/api/services", (_, res) => {
     res.send(JSON.stringify(ctx.toJSON()));
   });
 
+  app.post("/api/:action", async (req, res) => {
+    const action = req.params.action;
+    if (!isAction(action)) {
+      res.send({ error: "Invalid action" });
+      return;
+    }
+    if (!req.body.name) {
+      res.send({ error: "name required." });
+    }
+
+    let service: ServiceDescriptorI<Registry, any> | undefined = undefined;
+    ctx.visit((v) => {
+      if (v?.name && asString(v.name) === req.body.name) {
+        service = v;
+      }
+    });
+
+    if (!service) {
+      res.send({ error: "Service was not found" });
+      return;
+    }
+    let value: any;
+    let perf = performance.now();
+    let message: string;
+    try {
+      switch (action) {
+        case "invalidate": {
+          value = (
+            ctx.register(service[serviceSymbol]) as ServiceDescriptorI<
+              Registry,
+              any
+            >
+          )?.invalidate();
+          message = "Service invalidated";
+          break;
+        }
+        case "invoke": {
+          value = await ctx.resolveAsync(service[serviceSymbol] as any);
+          message = "Service invoked";
+          break;
+        }
+      }
+
+      res.send(
+        JSON.stringify({
+          success: true,
+          action,
+          value,
+          timing: performance.now() - perf,
+          message,
+          service,
+        }),
+      );
+    } catch (e) {
+      res.send({ error: String(e) });
+    }
+  });
   if (start) {
-    await new Promise<void>((resolve) =>
-      app.listen(config.port, config.host, resolve),
-    );
+    const server = await new Promise<Server>((resolve) => {
+      const _server = app.listen(config.port, config.host, () => {
+        resolve(_server);
+      });
+    });
+    //In dev mode the os will assign a port (0) and then we will assign it back to the config.
+    //this should allow vite to
+    config.port = (server.address() as AddressInfo)?.port!;
     console.log("PBinJ visualization server started at: %s", config.url);
   }
   return app;

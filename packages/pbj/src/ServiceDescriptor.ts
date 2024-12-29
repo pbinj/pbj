@@ -1,9 +1,8 @@
 import { keyOf } from "./util.js";
-import { has, isConstructor, isFn, isPrimitive, isSymbol } from "./guards.js";
+import { has, isConstructor, isFn, isPrimitive } from "./guards.js";
 import { newProxy } from "./newProxy.js";
 import type { Registry } from "./registry.js";
 import { proxyKey, serviceSymbol } from "./symbols.js";
-import { isPBinJKey, pbjKey, pbjKeyName } from "./pbjKey.js";
 import { PBinJError } from "./errors.js";
 import type {
   Args,
@@ -59,6 +58,7 @@ export class ServiceDescriptor<
   public primitive?: boolean;
   public invalid = false;
   public optional = true;
+  public error?: { message: string };
 
   public tags: PBinJKeyType<T>[] = [];
   private _name: string | undefined;
@@ -337,7 +337,14 @@ export class ServiceDescriptor<
       }
       resp = val;
     } else {
-      resp = new (this.service as any)(...this.args);
+      try {
+        resp = new (this.service as any)(...this.args);
+        this.error = undefined;
+      } catch (e) {
+        this.invalidate();
+        this.error = { message: String(e) };
+        throw e;
+      }
     }
 
     this.addDependency(...ServiceDescriptor.#dependencies);
@@ -370,7 +377,9 @@ export class ServiceDescriptor<
       invalid: this.invalid,
       primitive: this.primitive,
       listOf: this._isListOf,
+      error: this.error,
       dependencies: Array.from(this.dependencies ?? [], asString as any),
+      args: this.args?.map(asString as any),
     };
   }
 }

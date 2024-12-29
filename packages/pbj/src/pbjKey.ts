@@ -1,4 +1,5 @@
-import { isFn, isSymbol } from "./guards.js";
+import { isFn, isPBinJ, isSymbol } from "./guards.js";
+import { proxyKey } from "./symbols.js";
 import type { Fn, PBinJKey, PBinJKeyType } from "./types.js";
 
 const pbjKeyMap = new WeakMap<{}, string>();
@@ -17,6 +18,10 @@ export function isPBinJKey(v: unknown): v is PBinJKeyType<unknown> {
   return pbjKeyMap.has(v as any);
 }
 export function asString(key: PBinJKey<any>) {
+  if (isPBinJ(key)) {
+    const service = key[proxyKey];
+    return asString(service);
+  }
   if (isPBinJKey(key)) {
     return pbjKeyName(key);
   }
