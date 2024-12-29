@@ -19,6 +19,7 @@ import type {
 } from "./types.js";
 import { asString } from "./pbjKey.js";
 import { PBinJAsyncError } from "./errors.js";
+import { Logger } from "./logger.js";
 
 const EMPTY = [] as const;
 
@@ -71,6 +72,7 @@ export class ServiceDescriptor<
     public invokable = true,
     public description?: string,
     private onChange?: () => void,
+    private logger = new Logger(),
   ) {
     this[serviceSymbol] = key;
     this.args = args as Args<T>;
@@ -87,6 +89,10 @@ export class ServiceDescriptor<
   }
 
   set name(name: string | undefined) {
+    this.logger.debug("renamed service {from}->{to}", {
+      to: name,
+      from: this._name,
+    });
     this._name = name;
   }
 
@@ -100,6 +106,10 @@ export class ServiceDescriptor<
     if (this._cacheable === _cacheable) {
       return;
     }
+    this.logger.debug("changed cacheable {from} -> {to}", {
+      to: _cacheable,
+      from: this._cacheable,
+    });
     this.invalidate();
     this._cacheable = _cacheable;
   }
@@ -119,6 +129,7 @@ export class ServiceDescriptor<
     this.invokable = isFn(_service);
     this._service = _service;
     this._factory = this.invokable && !isConstructor(_service as Fn<T>);
+    this.logger.debug("changed service");
   }
 
   get service() {
@@ -279,6 +290,7 @@ export class ServiceDescriptor<
     if (this.invoked === false) {
       return;
     }
+    this.logger.debug("invalidating service");
     this.invalid = true;
     this.invoked = false;
     this._instance = undefined;
@@ -303,7 +315,7 @@ export class ServiceDescriptor<
     return this._invoke();
   };
 
-  private _promise?: Promise<T>;
+  private _promise?: Promise<T> & { resolved?: boolean };
   _invoke = (): Returns<T> => {
     if (this._promise) {
       throw new PBinJAsyncError(this[serviceSymbol], this._promise);
@@ -315,6 +327,9 @@ export class ServiceDescriptor<
       return this._instance as Returns<T>;
     }
     if (!isFn(this.service)) {
+      this.logger.error(`service '{service}' is not a function`, {
+        service: asString(this.service as any),
+      });
       throw new PBinJError(
         `service '${String(this.service)}' is not a function and is not configured as a value, to configure as a value set invokable to false on the service description`,
       );
@@ -327,7 +342,9 @@ export class ServiceDescriptor<
 
       if (val instanceof Promise) {
         this._promise = val;
+        this.logger.debug("waiting for promise");
         this._promise.then((v) => {
+          this.logger.debug("resolved promise");
           this._promise = undefined;
           this.invalid = false;
           this.invoked = true;
@@ -339,10 +356,15 @@ export class ServiceDescriptor<
     } else {
       try {
         resp = new (this.service as any)(...this.args);
+        if (this.error) {
+          this.logger.info("service has recovered");
+        }
         this.error = undefined;
       } catch (e) {
+        const obj = { message: String(e) };
+        this.logger.error("error invoking service {message}", obj);
         this.invalidate();
-        this.error = { message: String(e) };
+        this.error = obj;
         throw e;
       }
     }

@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import Invoke from "./InvokeButton.vue";
 import { closeDrawer } from "./ServiceNetwork/graph";
-const props = defineProps(["service"]);
+import LogList from "./LogView/LogList.vue";
+import { allLogs } from "./LogView/logs.js";
+import { type ServiceI } from "../types";
+
+const props = defineProps<{ service: ServiceI }>();
 </script>
 
 <template>
-  <v-navigation-drawer location="right" temporary absolute>
+  <v-navigation-drawer location="right">
     <v-list>
       <v-list-item
-        :title="'Service: ' + props.service?.name"
+        :title="props.service?.name"
         :subtitle="props.service.description"
       >
         <v-btn
@@ -37,6 +41,9 @@ const props = defineProps(["service"]);
           endpoint="/api/invalidate"
           label="Invalidate"
         />
+      </v-list-item>
+      <v-list-item title="Logs">
+        <LogList :logs="allLogs.filter((v) => v.name === props.service.name)" />
       </v-list-item>
     </v-list>
   </v-navigation-drawer>

@@ -23,9 +23,8 @@ export async function fetchServiceData() {
 export const groups = {
   "@pbj": {
     color: colors.purple.accent3,
-    label: "PBinJ nodes",
     shape: "box",
-    font: "12px arial rgba(255,255,255,.8)",
+    font: "12px arial rgba(0,0,0,.8)",
   },
   vue: {
     color: "#42b883",
@@ -254,10 +253,10 @@ function recursivelyGetNodeByDep(node: SearcherNode[]) {
 // #endregion
 
 // #region parse graph raw data
-function getEdge(modId: string, dep: string) {
+function getEdge(to: string, from: string) {
   return {
-    from: modId,
-    to: dep,
+    from,
+    to,
     arrows: {
       to: {
         enabled: true,
@@ -274,14 +273,12 @@ function determineNodeSize(depsLen: number) {
 function getUniqueDeps(deps: string[], processEachDep?: (dep: string) => void) {
   // remove vue style reference, e.g, a.vue -> a.vue?type=style, skip duplicate dep
   // don't use `mod.deps.filter`, will save filter overhead(for performance)
-  const uniqueDeps: string[] = [];
-  deps.forEach((dep) => {
+  const uniqueDeps = new Set<string>();
+  for (const dep of deps) {
     // skip duplicate dep
-    if (uniqueDeps.includes(dep)) return;
-    uniqueDeps.push(dep);
-    processEachDep?.(dep);
-  });
-  return uniqueDeps;
+    if (uniqueDeps.size !== uniqueDeps.add(dep).size) processEachDep?.(dep);
+  }
+  return [...uniqueDeps];
 }
 
 export function parseGraphRawData(modules: ServiceI[]) {

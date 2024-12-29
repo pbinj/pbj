@@ -11,6 +11,7 @@ import express from "express";
 import { Server } from "http";
 import type { AddressInfo } from "net";
 import { anyOf, enums } from "./schema/schema.js";
+import { Server as ServerIO } from "socket.io";
 
 const isAction = anyOf(enums("invoke", "invalidate"));
 
@@ -53,6 +54,14 @@ export class ServerConfig {
   set path(path: string) {
     this._path = path;
   }
+  toJSON() {
+    return {
+      port: this.port,
+      host: this.host,
+      path: this.path,
+      url: this.url,
+    };
+  }
 }
 
 export async function register(
@@ -77,6 +86,10 @@ export async function register(
   app.post("/api/:action", async (req, res) => {
     const action = req.params.action;
     if (!isAction(action)) {
+      ctx.logger.error(`{error} {action} service`, {
+        error: "invalid action",
+        action,
+      });
       res.send({ error: "Invalid action" });
       return;
     }
@@ -92,6 +105,11 @@ export async function register(
     });
 
     if (!service) {
+      ctx.logger.error(`{error} {action} {name}`, {
+        error: "not found",
+        action,
+        name: req.body.name,
+      });
       res.send({ error: "Service was not found" });
       return;
     }
@@ -124,10 +142,15 @@ export async function register(
           value,
           timing: performance.now() - perf,
           message,
-          service,
+          service: asString(service[serviceSymbol]),
         }),
       );
     } catch (e) {
+      ctx.logger.error(`error {action} {service}`, {
+        error: e,
+        action,
+        service: asString(service[serviceSymbol]),
+      });
       res.send({ error: String(e) });
     }
   });
@@ -137,9 +160,32 @@ export async function register(
         resolve(_server);
       });
     });
+    const io = new ServerIO(server, { path: "/socket.io" });
+    io.on("connection", (socket) => {
+      console.log("connected", socket.id);
+      socket.emit("connected", `Connected ${socket.id}`);
+      const unsub = ctx.logger.onLogMessage((msg) => {
+        socket.emit("log", msg);
+      });
+      const unadd = ctx.onServiceAdded((service) => {
+        socket.emit("onServiceAdded", service);
+      });
+      socket.on("ping", (ping) => {
+        ping?.emit("pong");
+      });
+      socket.on("disconnect", () => {
+        unsub?.();
+        unadd?.();
+        console.log("disconnected");
+      });
+    });
     //In dev mode the os will assign a port (0) and then we will assign it back to the config.
     //this should allow vite to
     config.port = (server.address() as AddressInfo)?.port!;
+    ctx.logger.info(
+      "PBinJ visualization server started at: {url}",
+      config as any,
+    );
     console.log("PBinJ visualization server started at: %s", config.url);
   }
   return app;

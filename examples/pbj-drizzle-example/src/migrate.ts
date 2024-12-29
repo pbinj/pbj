@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 
 import { migrate as dbMigrate } from "drizzle-orm/libsql/migrator";
-import { drizzlePBinJKey, register } from "./pbj";
+import { drizzlePBinJKey, register } from "./pbj.js";
 import { pbj } from "@pbinj/pbj";
 import { fileURLToPath } from "url";
 

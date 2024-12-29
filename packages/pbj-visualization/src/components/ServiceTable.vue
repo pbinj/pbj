@@ -13,8 +13,7 @@ const search = "";
 </script>
 
 <template>
-  <v-card>
-    <title>Services</title>
+  <v-card title="Services">
     <v-data-table-virtual
       :headers="headers"
       :items="props.services"

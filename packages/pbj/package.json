@@ -21,6 +21,14 @@
     "./guards": {
       "import": "./dist/esm/guards.js",
       "require": "./dist/cjs/guards.js"
+    },
+    "./logger": {
+      "import": "./dist/esm/logger.js",
+      "require": "./dist/cjs/logger.js"
+    },
+    "./pbjKey": {
+      "import": "./dist/esm/pbjKey.js",
+      "require": "./dist/cjs/pbjKey.js"
     }
   },
   "files": [

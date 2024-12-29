@@ -2,8 +2,8 @@ import { ExpressAuth, getSession } from "@auth/express";
 import express, { Express } from "express";
 import "@pbinj/pbj/scope";
 import { context, pbj } from "@pbinj/pbj";
-import { sessionPBinJKey } from "./pbj";
-import { ExpressAuthConfigClass } from "./auth.config";
+import { sessionPBinJKey } from "./pbj.js";
+import { ExpressAuthConfigClass } from "./auth.config.js";
 
 const app: Express = express();
 

@@ -1,6 +1,6 @@
-import { Context, context } from "./context.js";
+import { context, Context } from "./context.js";
 import { pbjKey } from "./pbjKey.js";
-import { pathOf } from "./helpers.js";
+import "./helpers.js";
 declare module "./context.js" {
   interface Context {
     env<K extends keyof PBinJEnv & string, D extends string>(
@@ -34,7 +34,7 @@ Context.prototype.env = function env<
 >(this: Context, envKey: K, defaultValue?: D): string | D {
   return this.register(
     Symbol.for(`@pbj/env/${envKey}`),
-    pathOf(envPBinJKey, envKey, defaultValue as any),
+    this.pathOf(envPBinJKey, envKey, defaultValue as any),
   ).proxy;
 };
 
@@ -43,7 +43,7 @@ Context.prototype.envRequired = function envRequired<
 >(this: Context, envKey: K): string {
   return this.register(
     Symbol.for(`@pbj/env/${envKey}`),
-    pathOf(envPBinJKey, envKey),
+    this.pathOf(envPBinJKey, envKey),
   ).withOptional(false).proxy;
 };
 export const env = context.env.bind(context);

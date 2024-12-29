@@ -1,16 +1,9 @@
 import { type Registry } from "./registry.js";
-import { context, pbj } from "./context.js";
+import { context, Context } from "./context.js";
 import type { PBinJKey, RegistryType, ValueOf } from "./types.js";
-import { Context } from "./context.js";
+import { type PathOf, get } from "./util.js";
 declare module "./context.js" {
   interface Context {
-    value<T, TKey extends string>(
-      this: Context,
-      obj: T,
-      key: TKey,
-      defaultValue?: PathOf<T, TKey> | undefined,
-    ): PathOf<T, TKey>;
-
     transform<
       R,
       T extends PBinJKey<TRegistry>,
@@ -34,32 +27,6 @@ declare module "./context.js" {
   }
 }
 
-type PathOf<
-  T,
-  TPath extends string,
-  TKey extends string & keyof T = keyof T & string,
-> = TPath extends TKey
-  ? T[TPath]
-  : TPath extends
-        | `${infer TFirst extends TKey}.${infer TRest}`
-        | `[${infer TFirst extends TKey}]${infer TRest}`
-    ? PathOf<T[TFirst], TRest>
-    : never;
-
-const toPath = (path: string) => path.split(/\.|\[(.+?)\]/g).filter(Boolean);
-
-Context.prototype.value = function get<T, TKey extends string>(
-  this: Context,
-  obj: T,
-  key: TKey,
-  defaultValue?: PathOf<T, TKey> | undefined,
-): PathOf<T, TKey> {
-  const value = toPath(key).reduce((acc, part) => {
-    return (acc as any)?.[part];
-  }, obj) as any;
-  return value ?? defaultValue;
-};
-
 Context.prototype.pathOf = function pathOf<
   T extends PBinJKey<TRegistry>,
   TPath extends string,
@@ -71,7 +38,7 @@ Context.prototype.pathOf = function pathOf<
   defaultValue?: PathOf<ValueOf<TRegistry, T>, TPath> | undefined,
 ) {
   return (ctx = this.pbj(service)) =>
-    this.value(ctx as ValueOf<TRegistry, T>, path, defaultValue);
+    get(ctx as ValueOf<TRegistry, T>, path, defaultValue);
 };
 
 Context.prototype.transform = function transform<
@@ -83,6 +50,4 @@ Context.prototype.transform = function transform<
 };
 
 export const transform = context.transform.bind(context);
-export const get = context.value.bind(context);
-export const value = context.value.bind(context);
 export const pathOf = context.pathOf.bind(context);

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { fetchServiceData } from "./ServiceNetwork/graph";
 const props = defineProps(["service", "label", "endpoint"]);
 const endpoint = props.endpoint ?? "/api/invoke";
@@ -30,6 +30,14 @@ function invoke() {
     },
   );
 }
+watch(
+  () => props.service,
+  () => {
+    invoked.value = false;
+    resp.value = "";
+    busy.value = false;
+  },
+);
 </script>
 
 <template>
@@ -39,6 +47,7 @@ function invoke() {
       :disabled="busy"
       :loading="busy"
       :color="invoked ? 'success' : 'primary'"
+      size="x-small"
     >
       {{ label }}
     </v-btn>

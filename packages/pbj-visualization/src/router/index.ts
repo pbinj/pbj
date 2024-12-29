@@ -13,25 +13,11 @@ const router = createRouter({
   history,
   routes: [
     {
-      path: "/",
+      path: "/:view(network|table|logs)*",
       name: "network",
       component: HomeView,
     },
-    {
-      path: "",
-      name: "network",
-      component: HomeView,
-    },
-    {
-      path: "/table",
-      name: "table",
-      component: HomeView,
-    },
-    {
-      path: "/network",
-      name: "network",
-      component: HomeView,
-    },
+
     {
       path: "/about",
       name: "about",

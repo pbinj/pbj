@@ -1,7 +1,7 @@
-import app from "./auth.route";
+import app from "./auth.route.js";
 import * as ejs from "ejs";
 import { pbj } from "@pbinj/pbj";
-import { sessionPBinJKey } from "./pbj";
+import { sessionPBinJKey } from "./pbj.js";
 import { env } from "@pbinj/pbj/env";
 
 const port = app.get("port") ?? 3000;

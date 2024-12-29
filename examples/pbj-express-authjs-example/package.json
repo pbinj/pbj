@@ -10,27 +10,34 @@
     "clean": "rm -rf dist",
     "test": "vitest run",
     "build": "tsc",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "visualize": "DATABASE_AUTH_TOKEN='' DATABASE_URL='file:./local.db' pbj-visualization $PWD/dist/index.js"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@pbinj/pbj-visualization": "workspace:*",
     "@types/ejs": "^3.1.5",
     "drizzle-kit": "^0.28.1",
+    "express": "^4.21.2",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "vite-tsconfig-paths": "^5.1.2",
     "vitest": "^2.1.8"
+  },
+  "peerDependencies": {
+    "express": "^4.21.2",
+    "@pbinj/pbj": "workspace:*"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.7.4",
     "@auth/express": "^0.8.4",
     "@libsql/client": "0.14.0",
     "@pbinj/pbj": "workspace:*",
-    "pbj-drizzle-example": "workspace:*",
     "@types/express": "^5.0.0",
     "drizzle-orm": "^0.37.0",
-    "ejs": "^3.1.10"
+    "ejs": "^3.1.10",
+    "pbj-drizzle-example": "workspace:*"
   }
 }

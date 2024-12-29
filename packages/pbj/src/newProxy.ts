@@ -85,7 +85,7 @@ function isServiceDescriptor<T extends Fn | Constructor | unknown>(
   return has(v, serviceSymbol);
 }
 
-export const serviceDesciptor = <T extends Fn | Constructor | unknown>(
+export const serviceDescriptor = <T extends Fn | Constructor | unknown>(
   v: T,
 ): ServiceDescriptorI<any, T> | undefined => {
   if (hasA(v, serviceDescriptorKey, isServiceDescriptor)) {
