@@ -1,6 +1,6 @@
 {
   "name": "@pbinj/pbj-visualization",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "type": "module",
   "typings": "./dist/esm/index.d.ts",
   "repository": {
