@@ -7,10 +7,14 @@ The `listOf` function is a powerful feature in PBinJ that allows you to retrieve
 ```typescript
 import { pbj, pbjKey, context } from "@pbinj/pbj";
 
+interface Plugin {};
+
 // Using PBinJKey
 const pluginKey = pbjKey<Plugin>("plugin");
 const plugins = context.listOf(pluginKey);
+class BaseService {
 
+}
 // Using Class type
 const services = context.listOf(BaseService);
 ```
@@ -20,6 +24,8 @@ const services = context.listOf(BaseService);
 ### Tag-based Collection
 
 ```typescript
+import { pbj, pbjKey, context } from "@pbinj/pbj";
+
 interface LoggerService {
   log(message: string): void;
 }
@@ -51,6 +57,8 @@ loggers.forEach((logger) => logger.log("Hello"));
 ### Inheritance-based Collection
 
 ```typescript
+import { pbj, pbjKey, context } from "@pbinj/pbj";
+
 class BasePlugin {
   abstract execute(): void;
 }
@@ -79,6 +87,8 @@ plugins.forEach((plugin) => plugin.execute());
 ### Factory-based Collection
 
 ```typescript
+import { pbj, pbjKey, context as ctx } from "@pbinj/pbj";
+
 interface Handler {
   handle(data: any): void;
 }
@@ -87,7 +97,6 @@ const handlerFactory = () => ({
   handle: (data: any) => console.log(data),
 });
 
-const ctx = context;
 ctx.register(pbjKey("handler-a"), handlerFactory);
 ctx.register(pbjKey("handler-b"), handlerFactory);
 ctx.register(handlerFactory);
@@ -102,6 +111,10 @@ handlers.forEach((handler) => handler.handle("test"));
 The `listOf` function maintains type safety through the registry:
 
 ```typescript
+
+import { pbj, pbjKey, context as ctx } from "@pbinj/pbj";
+
+
 interface Plugin {
   name: string;
   execute(): void;
@@ -126,6 +139,9 @@ const plugins: Plugin[] = ctx.listOf(pluginKey);
 ### Plugin System
 
 ```typescript
+
+import { pbj, pbjKey, context } from "@pbinj/pbj";
+
 interface Plugin {
   name: string;
   initialize(): void;
@@ -149,6 +165,9 @@ class PluginManager {
 ### Event Handlers
 
 ```typescript
+
+import { pbj, pbjKey, context } from "@pbinj/pbj";
+
 interface EventHandler {
   event: string;
   handle(data: any): void;
@@ -169,6 +188,9 @@ class EventBus {
 ### Middleware Chain
 
 ```typescript
+
+import { pbj, pbjKey, context } from "@pbinj/pbj";
+
 interface Middleware {
   order: number;
   process(data: any, next: () => void): void;

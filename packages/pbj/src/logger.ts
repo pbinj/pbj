@@ -31,6 +31,7 @@ export function formatStr(fmt: string, obj: unknown) {
 interface OnLogMessage {
   (msg: LogMessage[]): void;
 }
+const oconsole = console;
 
 export class Logger implements LoggerI {
   [serviceSymbol] = loggerPBinJKey;
@@ -42,7 +43,7 @@ export class Logger implements LoggerI {
   _listeners: OnLogMessage[] = [];
 
   constructor(
-    public _console: typeof console | boolean = console,
+    public console: typeof oconsole | boolean = oconsole,
     level: LogLevel = "info",
     public name = "@pbj/context",
     private context: object = {},

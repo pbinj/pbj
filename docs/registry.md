@@ -8,7 +8,7 @@ The PBinJ registry system uses TypeScript's module augmentation to provide type 
 
 To register your service types with PBinJ, augment the `Registry` interface:
 
-```typescript
+```typescript title="db.ts"
 import { pbjKey } from "@pbinj/pbj";
 
 // Define your service

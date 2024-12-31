@@ -27,7 +27,9 @@ class UserService {
     this.logger.log("UserService initialized");
   }
 }
-const userService = context.resolve(UserService, pbj(LoggerService));
+
+context.register(UserService).withArgs(pbj(LoggerService));
+
 ```
 
 ### Factory Registration
@@ -142,6 +144,8 @@ context.register(configKey, {
 ```typescript
 import { pbj, context } from "@pbinj/pbj";
 
+class UserService {}
+
 // Singleton (default)
 context.register(UserService);
 
@@ -151,7 +155,7 @@ context.register(UserService);
 // Cached factory (singleton after first resolution)
 context
   .register(UserService)
-  .withCachable()
+  .withCacheable()
   .withOptional()
   .withDescription("This is the user service")
   .withName("UserService");
@@ -161,44 +165,22 @@ context
 
 ```typescript
 import { pbj, context } from "@pbinj/pbj";
-
+class UserService {}
 // Register with tags
 context.register(UserService).withTags("service", "user");
 
-// Register with metadata
-context.register(UserService).withMetadata({ version: "1.0.0" });
 ```
-
-## Best Practices
-
-1. **Explicit Dependencies**: Prefer explicit registration for core services to make dependencies clear.
+1. **Testing**: Use manual registration to swap implementations in tests.
 
    ```typescript
-   context.register(CoreService, pbj(LoggerService), pbj(ConfigService));
-   ```
+   import { context } from "@pbinj/pbj";
+   class DatabaseService {}
+   class MockDatabaseService extends DatabaseService {}
 
-2. **Configuration Management**: Use manual registration for configuration objects.
-
-   ```typescript
-   context.register(ConfigKey, {
-     apiUrl: process.env.API_URL,
-     timeout: parseInt(process.env.TIMEOUT ?? "5000"),
-   });
-   ```
-
-3. **Testing**: Use manual registration to swap implementations in tests.
-
-   ```typescript
    // In tests
    context.register(DatabaseService, new MockDatabaseService());
    ```
 
-4. **Lifecycle Management**: Use registration hooks for cleanup.
-   ```typescript
-   context.register(DatabaseService).onDispose(async (service) => {
-     await service.disconnect();
-   });
-   ```
 
 ## Common Patterns
 
@@ -207,11 +189,31 @@ context.register(UserService).withMetadata({ version: "1.0.0" });
 ```typescript
 import { pbj, context, pbjKey } from "@pbinj/pbj";
 
+interface Plugin {
+  initialize(): void;
+}
+
+class AuthPlugin implements Plugin {
+  initialize() {
+    /* auth setup */
+  }
+}
+class LoggingPlugin implements Plugin {
+  initialize() {
+    /* logging setup */
+  }
+}
+class MetricsPlugin implements Plugin {
+  initialize() {
+    /* metrics setup */
+  }
+}
+
 const pluginKey = pbjKey<Plugin[]>("plugins");
 
-context.register(AuthPlugin).withTag(pluginKey);
-context.register(LoggingPlugin).withTag(pluginKey);
-context.register(MetricsPlugin).withTag(pluginKey);
+context.register(AuthPlugin).withTags(pluginKey);
+context.register(LoggingPlugin).withTags(pluginKey);
+context.register(MetricsPlugin).withTags(pluginKey);
 
 // Access all plugins
 class PluginManager {

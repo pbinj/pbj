@@ -65,6 +65,8 @@ app.use("/*", async (req, res, next) => {
 ### Nested Scopes
 
 ```typescript
+import "@pbinj/pbj/scope";
+
 const userKey = pbjKey<User>("user");
 const tenantKey = pbjKey<Tenant>("tenant");
 

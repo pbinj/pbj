@@ -10,6 +10,16 @@ Use `createNewContext()` to create isolated contexts for each test:
 
 ```typescript
 import { createNewContext, pbj, pbjKey } from "@pbinj/pbj";
+import { describe, beforeEach, it} from 'vitest';
+class DatabaseService {
+  constructor() {
+    // Database setup
+  }
+}
+
+class UserService {
+  constructor(private db = pbj(DatabaseService)) {}
+}
 
 describe("UserService", () => {
   let context: Context;

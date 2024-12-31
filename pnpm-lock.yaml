@@ -33,6 +33,22 @@ importers:
       docsify-cli:
         specifier: ^4.4.4
         version: 4.4.4
+    devDependencies:
+      '@pbinj/pbj':
+        specifier: workspace:*
+        version: link:../packages/pbj
+      marked:
+        specifier: ^15.0.4
+        version: 15.0.4
+      tsx:
+        specifier: ^4.19.2
+        version: 4.19.2
+      vite-tsconfig-paths:
+        specifier: ^5.1.4
+        version: 5.1.4(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.1))
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
   examples/pbj-drizzle-example:
     dependencies:
@@ -112,7 +128,7 @@ importers:
         version: 5.7.2
       vite-tsconfig-paths:
         specifier: ^5.1.2
-        version: 5.1.4(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.1))
+        version: 5.1.4(typescript@5.7.2)(vite@6.0.3(@types/node@22.10.1)(tsx@4.19.2))
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
@@ -154,6 +170,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^2.1.5
         version: 2.1.8(vitest@2.1.8(@types/node@22.10.1)(jsdom@25.0.1))
+      marked:
+        specifier: ^15.0.4
+        version: 15.0.4
       prettier:
         specifier: ^3.3.3
         version: 3.4.2
@@ -3452,6 +3471,11 @@ packages:
   marked@1.2.9:
     resolution: {integrity: sha512-H8lIX2SvyitGX+TRdtS06m1jHMijKN/XjfH6Ooii9fvxMlh8QdqBfBDkGUpMWH2kQNrtixjzYUa3SH8ROTgRRw==}
     engines: {node: '>= 8.16.2'}
+    hasBin: true
+
+  marked@15.0.4:
+    resolution: {integrity: sha512-TCHvDqmb3ZJ4PWG7VEGVgtefA5/euFmsIhxtD0XsBxI39gUSKL81mIRFdt0AiNQozUahd4ke98ZdirExd/vSEw==}
+    engines: {node: '>= 18'}
     hasBin: true
 
   media-typer@0.3.0:
@@ -7906,6 +7930,8 @@ snapshots:
       semver: 7.6.3
 
   marked@1.2.9: {}
+
+  marked@15.0.4: {}
 
   media-typer@0.3.0: {}
 
