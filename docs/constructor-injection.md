@@ -22,6 +22,8 @@ class UserService {
 PBinJ provides full type safety for constructor injection. TypeScript will infer the correct types from your services:
 
 ```typescript
+import { pbj } from "@pbinj/pbj";
+
 class LoggerService {
   log(message: string): void {
     console.log(message);
@@ -41,6 +43,8 @@ class UserService {
 Dependencies are optional by default. You can handle cases where a dependency might not be available:
 
 ```typescript
+import { pbj } from "@pbinj/pbj";
+
 class AnalyticsService {
   constructor(
     private logger = pbj(LoggerService),
@@ -60,6 +64,11 @@ To make a dependency required, you can use the `service.withOptional(false)` mod
 
 ```typescript
 import { context } from "@pbinj/pbj";
+class LoggerService {
+  log(message: string): void {
+    console.log(message);
+  }
+}
 //This will throw an error if LoggerService is not registered
 context.register(LoggerService).withOptional(false);
 ```
@@ -69,6 +78,12 @@ context.register(LoggerService).withOptional(false);
 You can inject factory functions that create instances with additional parameters:
 
 ```typescript
+import { pbj, context } from "@pbinj/pbj";
+
+class ConfigService {
+  constructor(readonly dbConnectionString = "postgres://localhost:5432") {}
+}
+
 class DatabaseConnection {
   constructor(private connectionString: string) {}
 }
@@ -88,6 +103,9 @@ class UserRepository {
 Use `pbjKey` to manage multiple implementations of the same interface:
 
 ```typescript
+
+import { pbj, pbjKey } from "@pbinj/pbj";
+
 interface Cache {
   get(key: string): Promise<string | null>;
   set(key: string, value: string): Promise<void>;
@@ -117,17 +135,7 @@ class CacheService {
 
 ## Best Practices
 
-1. **Default Parameters**: Always use default parameters with `pbj()`:
-
-   ```typescript
-   // Good
-   constructor(private logger = pbj(LoggerService)) {}
-
-   // Bad - Don't do this
-   constructor(private logger: LoggerService) {}
-   ```
-
-2. **Interface Keys**: Use `pbjKey` for interfaces and abstract classes:
+1. **Interface Keys**: Use `pbjKey` for interfaces and abstract classes:
 
    ```typescript
    interface ILogger {
@@ -137,48 +145,15 @@ class CacheService {
    const loggerKey = pbjKey<ILogger>("logger");
    ```
 
-3. **Single Responsibility**: Keep services focused and inject only what's needed:
-
-   ```typescript
-   // Good
-   class UserService {
-     constructor(
-       private users = pbj(UserRepository),
-       private logger = pbj(LoggerService)
-     ) {}
-   }
-
-   // Bad - Too many dependencies
-   class UserService {
-     constructor(
-       private users = pbj(UserRepository),
-       private logger = pbj(LoggerService),
-       private cache = pbj(CacheService),
-       private metrics = pbj(MetricsService),
-       private email = pbj(EmailService),
-       private auth = pbj(AuthService)
-     ) {}
-   }
-   ```
-
-4. **Registration Order**: Register dependencies before the services that use them:
-
-   ```typescript
-   export function register() {
-     // Register dependencies first
-     context.register(loggerKey, LoggerService);
-     context.register(dbKey, DatabaseService);
-
-     // Then register services that use them
-     context.register(UserService);
-   }
-   ```
 
 ## Common Patterns
 
 ### Configuration Injection
 
 ```typescript
+import { env, envRequired } from "@pbinj/pbj/env";
+import { pbj } from "@pbinj/pbj";
+
 class ConfigService {
   constructor(
     readonly apiUrl = env("API_URL", "http://localhost:3000"),
@@ -200,6 +175,8 @@ class ApiClient {
 ### Service Composition
 
 ```typescript
+import { pbj } from "@pbinj/pbj";
+
 class UserController {
   constructor(
     private users = pbj(UserService),
@@ -223,6 +200,7 @@ Constructor injection makes testing easier by allowing you to mock dependencies:
 
 ```typescript
 import { context } from "@pbinj/pbj";
+import {describe, it} from 'vitest';
 
 describe("UserService", () => {
   it("should create user", async () => {
@@ -242,10 +220,5 @@ describe("UserService", () => {
     expect(mockDb.saveUser).toHaveBeenCalled();
   });
 });
-```
 
-```
-</augment_code_snippet>
-
-This documentation provides a comprehensive guide to constructor injection in PBinJ, covering basic usage, type safety, best practices, common patterns, and testing. It includes practical examples and explains important concepts while maintaining a focus on real-world usage.
 ```

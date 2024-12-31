@@ -8,8 +8,18 @@ This guide covers testing strategies using PBinJ's dependency injection system, 
 
 Use `createNewContext()` to create isolated contexts for each test:
 
-```typescript
+```ts
 import { createNewContext, pbj, pbjKey } from "@pbinj/pbj";
+import { describe, beforeEach, it} from 'vitest';
+class DatabaseService {
+  constructor() {
+    // Database setup
+  }
+}
+
+class UserService {
+  constructor(private db = pbj(DatabaseService)) {}
+}
 
 describe("UserService", () => {
   let context: Context;
@@ -29,8 +39,9 @@ describe("UserService", () => {
 
 #### Method 1: Direct Mock Registration
 
-```typescript
+```ts
 import { context, pbj, pbjKey } from "@pbinj/pbj";
+import { describe, it } from 'vitest';
 
 interface Logger {
   log(message: string): void;
@@ -64,6 +75,8 @@ describe("UserService", () => {
 ### Testing Async Contexts
 
 ```typescript
+import { context, pbj, pbjKey } from "@pbinj/pbj";
+import { describe, it } from 'vitest';
 import "@pbinj/pbj/scope";
 
 describe("AuthService", () => {
@@ -83,6 +96,9 @@ describe("AuthService", () => {
 ### Testing Factory Injections
 
 ```typescript
+import { context, pbj, pbjKey } from "@pbinj/pbj";
+import { describe, it } from 'vitest';
+
 interface ApiClient {
   fetch(url: string): Promise<any>;
 }
@@ -110,6 +126,9 @@ describe("DataService", () => {
 ### Testing Lists of Services
 
 ```typescript
+import { context, pbj, pbjKey } from "@pbinj/pbj";
+import { describe, it } from 'vitest';
+
 interface Plugin {
   execute(): void;
 }
@@ -137,7 +156,9 @@ describe("PluginManager", () => {
 
 ### 1. Create Test Helpers
 
-```typescript
+```ts
+import {  pbj, pbjKey, createNewContext } from "@pbinj/pbj";
+
 // test/helpers.ts
 export function createTestContext() {
   const context = createNewContext();
@@ -160,7 +181,7 @@ export function createMockLogger() {
 
 ### 2. Use Test-Specific Types
 
-```typescript
+```ts
 // test/types.ts
 export interface TestContext {
   logger: jest.Mocked<Logger>;
@@ -176,7 +197,7 @@ declare module "@pbinj/pbj" {
 
 ### 3. Organize Test Mocks
 
-```typescript
+```ts
 // test/mocks/database.ts
 export function createMockDatabase() {
   return {
@@ -199,7 +220,7 @@ export function createMockAuthProvider() {
 
 Here's a complete example testing a user registration flow:
 
-```typescript
+```ts
 import { createNewContext, pbj, pbjKey } from "@pbinj/pbj";
 import { UserService } from "../services/user";
 import { EmailService } from "../services/email";
@@ -270,7 +291,7 @@ describe("User Registration", () => {
 
 For integration tests where you want to use real services:
 
-```typescript
+```ts
 import { DrizzleAdapter } from "../adapters/drizzle";
 import { migrate } from "../db/migrate";
 

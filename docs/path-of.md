@@ -15,18 +15,8 @@ const host = dbHostGetter(); // returns the host value
 
 // Access array elements
 const firstUserGetter = pathOf(configKey, "users[0]");
-const firstUser = firstUserGetter();
 ```
 
-## Syntax
-
-```typescript
-function pathOf<T extends PBinJKey<TRegistry>, TPath extends string>(
-  service: T,
-  path: TPath,
-  defaultValue?: PathOf<ValueOf<TRegistry, T>, TPath>
-) => (ctx?: ValueOf<TRegistry, T>) => PathOf<ValueOf<TRegistry, T>, TPath>
-```
 
 ## Features
 
@@ -35,6 +25,8 @@ function pathOf<T extends PBinJKey<TRegistry>, TPath extends string>(
 Access nested objects using dot notation:
 
 ```typescript
+import { pathOf, pbjKey } from "@pbinj/pbj";
+
 interface UserConfig {
   database: {
     connection: {
@@ -46,7 +38,6 @@ interface UserConfig {
 
 const configKey = pbjKey<UserConfig>("config");
 const portGetter = pathOf(configKey, "database.connection.port");
-const port = portGetter(); // Type-safe access to port number
 ```
 
 ### Array Indexing
@@ -54,6 +45,8 @@ const port = portGetter(); // Type-safe access to port number
 Access array elements using bracket notation:
 
 ```typescript
+import { pathOf, pbjKey } from "@pbinj/pbj";
+
 interface AppConfig {
   users: Array<{
     name: string;
@@ -63,7 +56,7 @@ interface AppConfig {
 
 const configKey = pbjKey<AppConfig>("config");
 const firstUserNameGetter = pathOf(configKey, "users[0].name");
-const firstName = firstUserNameGetter();
+
 ```
 
 ### Default Values
@@ -71,8 +64,16 @@ const firstName = firstUserNameGetter();
 Provide default values for optional properties:
 
 ```typescript
+import { pathOf, pbjKey } from "@pbinj/pbj";
+interface Config {
+  features: {
+    experimental: boolean;
+  };
+}
+
+const configKey = pbjKey<Config>("config");
 const featureGetter = pathOf(configKey, "features.experimental", false);
-const isExperimental = featureGetter(); // returns false if path doesn't exist
+
 ```
 
 ### Custom Context
@@ -80,14 +81,12 @@ const isExperimental = featureGetter(); // returns false if path doesn't exist
 Use with custom context objects:
 
 ```typescript
+import { pathOf, pbjKey } from "@pbinj/pbj";
+interface User { name: string};
+
+const userKey = pbjKey<User>("user");
 const nameGetter = pathOf(userKey, "name");
 
-// Use with default context
-const name = nameGetter();
-
-// Use with custom context
-const customUser = { name: "Alice" };
-const customName = nameGetter(customUser);
 ```
 
 ## Common Use Cases
@@ -95,6 +94,8 @@ const customName = nameGetter(customUser);
 ### Configuration Access
 
 ```typescript
+import { pathOf, pbjKey } from "@pbinj/pbj";
+
 const configKey = pbjKey<{
   api: {
     endpoints: {
@@ -124,6 +125,7 @@ class ApiService {
 ### Environment Variables
 
 ```typescript
+import { pathOf } from "@pbinj/pbj";
 import { envPBinJKey } from "@pbinj/pbj/env";
 
 // Create type-safe getters for environment variables
@@ -131,9 +133,9 @@ const getDatabaseUrl = pathOf(envPBinJKey, "DATABASE_URL");
 const getApiKey = pathOf(envPBinJKey, "API_KEY");
 
 class DatabaseService {
-  constructor() {
-    this.url = getDatabaseUrl();
-    this.apiKey = getApiKey();
+  constructor(
+    private url =  pathOf(envPBinJKey, "DATABASE_URL"), 
+    private apiKey = ApiKey = pathOf(envPBinJKey, "API_KEY")){
   }
 }
 ```
@@ -141,6 +143,8 @@ class DatabaseService {
 ### Feature Flags
 
 ```typescript
+import {pbjKey, pathOf} from '@pbinj/pbj';
+
 interface Features {
   flags: {
     newUI: boolean;
@@ -168,6 +172,8 @@ class UiService {
 The `pathOf` helper provides full type safety for your paths:
 
 ```typescript
+import { pathOf, pbjKey } from "@pbinj/pbj";
+
 interface Config {
   database: {
     host: string;
@@ -190,6 +196,8 @@ const invalidGetter = pathOf(configKey, "database.invalid");
 1. **Use with Factory Registration**
 
    ```typescript
+   import { pathOf, pbjKey } from "@pbinj/pbj";
+
    const userKey = pbjKey<User>("user");
    const nameGetter = pathOf(sessionKey, "user.name");
 
@@ -199,6 +207,8 @@ const invalidGetter = pathOf(configKey, "database.invalid");
 2. **Centralize Path Definitions**
 
    ```typescript
+   import { pathOf, pbjKey } from "@pbinj/pbj";
+
    // paths.ts
    export const configPaths = {
      dbHost: pathOf(configKey, "database.host"),
@@ -210,6 +220,8 @@ const invalidGetter = pathOf(configKey, "database.invalid");
 3. **Handle Optional Values**
 
    ```typescript
+   import { pathOf, pbjKey } from "@pbinj/pbj";
+
    class UserService {
      private userRoles = pathOf(userKey, "roles", []);
 
@@ -222,6 +234,8 @@ const invalidGetter = pathOf(configKey, "database.invalid");
 4. **Composition with Other Features**
 
    ```typescript
+   import { pathOf, pbjKey } from "@pbinj/pbj";
+   
    // Combine with async context
    const sessionUser = pathOf(sessionKey, "user");
 

@@ -31,6 +31,7 @@ export function formatStr(fmt: string, obj: unknown) {
 interface OnLogMessage {
   (msg: LogMessage[]): void;
 }
+const oconsole = console;
 
 export class Logger implements LoggerI {
   [serviceSymbol] = loggerPBinJKey;
@@ -42,7 +43,7 @@ export class Logger implements LoggerI {
   _listeners: OnLogMessage[] = [];
 
   constructor(
-    public _console: typeof console | boolean = console,
+    public console: typeof oconsole | boolean = oconsole,
     level: LogLevel = "info",
     public name = "@pbj/context",
     private context: object = {},
@@ -55,7 +56,7 @@ export class Logger implements LoggerI {
   }
   createChild(name: string, context = {}) {
     return new Logger(
-      this._console,
+      this.console,
       this.level,
       name,
       { ...this.context, ...context },
@@ -89,9 +90,8 @@ export class Logger implements LoggerI {
     if (this.parent) {
       this.parent.fire(...e);
     } else {
-      if (this._console) {
-        const con =
-          typeof this._console === "boolean" ? console : this._console;
+      if (this.console) {
+        const con = typeof this.console === "boolean" ? console : this.console;
         e.forEach((v) =>
           con.log(
             `[${v.level}] ${v.name} ${v.timestamp}: ${this.format(v.message, v.context)}`,

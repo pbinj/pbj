@@ -1,6 +1,6 @@
 import { it, describe, expect } from "vitest";
-import { MetricsConfig } from "../MetricsConfig";
-import { register, registerKey } from "../pbj";
+import { MetricsConfig } from "../MetricsConfig.js";
+import { register, registerKey } from "../pbj.js";
 import { createNewContext } from "@pbinj/pbj";
 
 describe("metrics", () => {

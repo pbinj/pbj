@@ -5,7 +5,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "docsify serve ."
+    "start": "docsify serve .",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [],
   "author": "",
@@ -13,5 +15,19 @@
   "dependencies": {
     "docsify": "^4.13.1",
     "docsify-cli": "^4.4.4"
+  },
+  "devDependencies": {
+    "@pbinj/pbj": "workspace:*",
+    "@pbinj/pbj-visualization": "workspace:*",
+    "@pbinj/pbj-prometheus": "workspace:*",
+    
+    "@types/node": "^22.10.2",
+    "marked": "^15.0.4",
+    "source-map": "^0.7.4",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.1",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^2.1.8"
   }
 }

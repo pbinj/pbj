@@ -1,7 +1,7 @@
-import { context, pbj, pbjKey } from "@pbinj/pbj";
+import { context, pbjKey } from "@pbinj/pbj";
 import * as client from "prom-client";
-import { MetricsConfig } from "./MetricsConfig";
-import { MetricService } from "./MetricService";
+import { MetricsConfig } from "./MetricsConfig.js";
+import { MetricService } from "./MetricService.js";
 
 export const promClientPBinJKey = pbjKey<typeof client>(
   "@pbj/prometheus/metrics",

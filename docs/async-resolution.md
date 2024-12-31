@@ -6,7 +6,6 @@ The `resolveAsync` function in PBinJ allows for asynchronous resolution of depen
 
 ```typescript
 import { context, pbjKey } from "@pbinj/pbj";
-import "@pbinj/pbj/scope";
 
 const asyncKey = pbjKey<Promise<string>>("async-value");
 
@@ -22,7 +21,7 @@ console.log(result); // Outputs: "Async Result"
 
 ## Function Signature
 
-```typescript
+```ts
 resolveAsync<TKey extends PBinJKey<TRegistry>>(key: TKey): Promise<ValueOf<TRegistry, TKey>>
 ```
 
@@ -53,10 +52,20 @@ If any error occurs during the async resolution process, `resolveAsync` will rej
 
 ```typescript
 import { context, pbjKey } from "@pbinj/pbj";
-import "@pbinj/pbj/scope";
+
+class AnalyticsService {
+  //...
+}
+class UserData {
+  //...
+}
 
 const userDataKey = pbjKey<Promise<UserData>>("user-data");
 const analyticsKey = pbjKey<Promise<AnalyticsService>>("analytics");
+
+async function fetchUserData(){
+  //...
+}
 
 context.register(userDataKey, async () => {
   // Fetch user data asynchronously
@@ -65,7 +74,7 @@ context.register(userDataKey, async () => {
 
 context.register(analyticsKey, async (userData = context.pbj(userDataKey)) => {
   // Initialize analytics service with user data
-  return new AnalyticsService(await userData);
+  return new AnalyticsService(userData);
 });
 
 // Resolve the analytics service
@@ -87,7 +96,7 @@ context.register(asyncKey, async () => {
   // Simulating an async operation
   await new Promise(resolve => setTimeout(resolve, 100));
   return "Async Result";
-}).withAsync();
+}).
 
 
 

@@ -8,8 +8,9 @@ like branded types. We can use this type information for convenient tokens.
 
 Separate your interfaces from your implementation.
 
-```typescript
-# interfaces.ts
+```ts
+import {  pbjKey } from "@pbinj/pbj";
+
 // Define your interfaces
 interface LoggerService {
   log(message: string): void;
@@ -19,12 +20,6 @@ interface DatabaseService {
   findUser(id: string): Promise<User>;
 }
 
-```
-
-```typescript
-# pbj-keys.ts
-import {  pbjKey } from "@pbinj/pbj";
-import type { LoggerService, DatabaseService } from "./interfaces";
 
 
 // Define your keys
@@ -37,11 +32,11 @@ const dbKey = pbjKey<DatabaseService>("@yourservice/database");
 
 Register services with `context.register()`:
 
-```typescript
-# services.ts@pbinj
+```ts
+//# services.ts@pbinj
 import { context } from "@pbinj/pbj";
-import type { LoggerService, DatabaseService } from "./interfaces";
-import { loggerKey, dbKey } from "./services";
+//import type { LoggerService, DatabaseService } from "./interfaces";
+//import { loggerKey, dbKey } from "./services";
 
 class LoggerServiceImpl implements LoggerService {
     ...

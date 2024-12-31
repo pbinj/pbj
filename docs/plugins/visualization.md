@@ -28,7 +28,7 @@ $ pbj-visualization ./path/to/your/pea.ts
 
 Or for more control embed it into your app.
 
-```typescript
+```ts
 import { register } from "@pbinj/pbj-visualization";
 
 register(app);
@@ -53,10 +53,10 @@ PBJ_PATH=/pbj        # Base path for the visualization UI
 Or programmatically:
 
 ```typescript
-import { register, VisualizationConfig, visualizationConfigKey } from "@pbinj/pbj-visualization";
+import { register, ServerConfig, visualizationConfigKey } from "@pbinj/pbj-visualization";
 import { context } from "@pbinj/pbj";
 
-context.register(visualizationConfigKey,  new VisualizationConfig(4000, "0.0.0.0", "/debug"));
+context.register(visualizationConfigKey,  new ServerConfig(4000, "0.0.0.0", "/debug"));
 register(context);
 
 ```
@@ -87,10 +87,13 @@ Shows the PBinJ logs in real time.
 
 ```typescript
 import express from "express";
-import { apply } from "@pbinj/pbj-visualization";
+import { register } from "@pbinj/pbj-visualization";
 import { context } from "@pbinj/pbj";
 
 const app = express();
+class DatabaseService {
+  // ...
+}
 
 // Register some services
 class UserService {
@@ -106,7 +109,7 @@ context.register(UserService);
 context.register(AuthService);
 
 // Add visualization
-apply(app);
+register(context);
 
 app.listen(3000);
 ```

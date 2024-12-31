@@ -28,10 +28,14 @@ context.register(DatabaseConnection, (config = pbj(ConfigService)) => {
 For better type safety, use `pbjKey` with your factories:
 
 ```typescript
+import { pbj, context, pbjKey } from "@pbinj/pbj";
+
 interface Cache {
   get(key: string): Promise<string | null>;
   set(key: string, value: string): Promise<void>;
 }
+class MemoryCache implements Cache { /*...*/ }
+class RedisCache implements Cache { /*...*/ }
 
 const cacheKey = pbjKey<Cache>("cache");
 
@@ -49,6 +53,8 @@ context.register(cacheKey, (config = pbj(ConfigService)) => {
 Factories can depend on other services:
 
 ```typescript
+import { pbj, context, pbjKey } from "@pbinj/pbj";
+
 class EmailService {
   constructor(
     private apiKey: string,
@@ -71,6 +77,8 @@ context.register(
 Create different implementations based on conditions:
 
 ```typescript
+import { pbj, context, pbjKey } from "@pbinj/pbj";
+
 const loggerKey = pbjKey<Logger>("logger");
 
 context.register(loggerKey, (config = pbj(ConfigService)) => {
@@ -92,6 +100,8 @@ context.register(loggerKey, (config = pbj(ConfigService)) => {
 Pass configuration objects to factories:
 
 ```typescript
+import { pbj, context, pbjKey } from "@pbinj/pbj";
+
 interface HttpClientOptions {
   baseUrl: string;
   timeout: number;
@@ -117,19 +127,24 @@ context.register(
 Compose multiple factories together:
 
 ```typescript
+import { pbj, context, pbjKey } from "@pbinj/pbj";
+class ApiClient {
+  // ...
+}
+
 const apiClientKey = pbjKey<ApiClient>("api-client");
 
 context.register(
   apiClientKey,
   (
-    http = pbj(httpClientKey),
-    auth = pbj(AuthService),
+    httpClient = pbj(httpClientKey),
+    authService = pbj(AuthService),
     cache = pbj(cacheKey)
   ) => {
     return new ApiClient({
-      httpClient: http,
-      authService: auth,
-      cache: cache,
+      httpClient,
+      authService,
+      cache,
     });
   }
 );
@@ -140,6 +155,13 @@ context.register(
 1. **Use Type Safety**: Always define return types for factories:
 
    ```typescript
+   import { pbj, context, pbjKey } from "@pbinj/pbj";
+   class DatabaseConnection {
+     // ...
+   }
+
+  const dbKey = pbjKey<DatabaseConnection>("database");
+
    // Good
    context.register(dbKey, (config: ConfigService): DatabaseConnection => {
      return new DatabaseConnection(config.dbUrl);
@@ -154,6 +176,18 @@ context.register(
 2. **Default Parameters**: Use default parameters with `pbj()`:
 
    ```typescript
+   import { pbj, context, pbjKey } from "@pbinj/pbj";
+   class ConfigService {
+     // ...
+   }
+   class LoggerService {
+     // ...
+   }
+   class Service {
+     constructor(config: ConfigService, logger: LoggerService) {
+       // ...
+     }
+   }
    // Good
    context.register(
      serviceKey,
@@ -165,6 +199,12 @@ context.register(
 
 3. **Error Handling**: Handle factory initialization errors:
    ```typescript
+   import { pbj, context, pbjKey } from "@pbinj/pbj";
+   class DatabaseConnection {
+     static async create(url: string): Promise<DatabaseConnection> {
+       // ...
+     }
+   }
    context.register(dbKey, async (config = pbj(ConfigService)) => {
      try {
        return await DatabaseConnection.create(config.dbUrl);
@@ -180,6 +220,15 @@ context.register(
 ### Connection Pools
 
 ```typescript
+import { pbj, context, pbjKey } from "@pbinj/pbj";
+
+interface Pool {
+  //...
+}
+const createPool = (config: PoolConfig):Pool => {
+  //...
+};
+
 const poolKey = pbjKey<Pool>("database-pool");
 
 context.register(poolKey, async (config = pbj(ConfigService)) => {
@@ -200,6 +249,11 @@ context.register(poolKey, async (config = pbj(ConfigService)) => {
 ### Feature Flags
 
 ```typescript
+import { pbj, context, pbjKey } from "@pbinj/pbj";
+
+class FeatureService {
+  //...
+}
 const featureKey = pbjKey<FeatureService>("features");
 
 context.register(featureKey, (config = pbj(ConfigService)) => {

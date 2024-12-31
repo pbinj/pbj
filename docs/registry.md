@@ -8,7 +8,7 @@ The PBinJ registry system uses TypeScript's module augmentation to provide type 
 
 To register your service types with PBinJ, augment the `Registry` interface:
 
-```typescript
+```typescript 
 import { pbjKey } from "@pbinj/pbj";
 
 // Define your service
@@ -33,6 +33,8 @@ declare module "@pbinj/pbj" {
 ### Constructor Registration
 
 ```typescript
+import { context } from "@pbinj/pbj";
+
 class LoggerService {
   log(message: string): void {
     console.log(message);
@@ -52,6 +54,8 @@ context.register(LoggerService);
 ### Factory Registration
 
 ```typescript
+import { pbjKey , context} from "@pbinj/pbj";
+
 interface CacheService {
   get(key: string): Promise<string | null>;
   set(key: string, value: string): Promise<void>;
@@ -76,6 +80,8 @@ context.register(cacheKey, (config = pbj(ConfigService)) => {
 ### Multiple Service Implementations
 
 ```typescript
+import { pbjKey } from "@pbinj/pbj";
+
 interface AuthProvider {
   authenticate(token: string): Promise<boolean>;
 }
@@ -94,6 +100,8 @@ declare module "@pbinj/pbj" {
 ### Generic Services
 
 ```typescript
+import { pbjKey } from "@pbinj/pbj";
+
 interface Repository<T> {
   findById(id: string): Promise<T>;
   save(entity: T): Promise<void>;
@@ -119,7 +127,7 @@ declare module "@pbinj/pbj" {
 
 Create a dedicated types file for your registry declarations:
 
-```typescript
+```ts
 // types/registry.ts
 import { pbjKey } from "@pbinj/pbj";
 import type { UserService, AuthService, LoggerService } from "../services";
@@ -139,7 +147,7 @@ declare module "@pbinj/pbj" {
 
 ### 2. Use Symbol Service Keys
 
-```typescript
+```ts
 // services/database/types.ts
 export const dbServiceSymbol = Symbol("DatabaseService");
 
@@ -152,7 +160,9 @@ declare module "@pbinj/pbj" {
 
 ### 3. Group Related Services
 
-```typescript
+```ts
+import { pbjKey } from "@pbinj/pbj";
+
 // features/auth/types.ts
 export const authKeys = {
   service: pbjKey<AuthService>("auth-service"),
@@ -171,7 +181,7 @@ declare module "@pbinj/pbj" {
 
 ### 4. Document Service Contracts
 
-```typescript
+```ts
 /**
  * Represents a caching service for the application
  * @interface CacheService
@@ -205,6 +215,9 @@ declare module "@pbinj/pbj" {
 ### Factory with Dependencies
 
 ```typescript
+import { context, pbj, pbjKey } from "@pbinj/pbj";
+
+
 interface Config {
   apiUrl: string;
   apiKey: string;
@@ -213,6 +226,10 @@ interface Config {
 interface ApiClient {
   get(path: string): Promise<any>;
   post(path: string, data: any): Promise<any>;
+}
+class ApiClientImpl implements ApiClient {
+  constructor(private config: Config, private logger: LoggerService) {}
+  //...
 }
 
 const configKey = pbjKey<Config>("config");
@@ -237,6 +254,8 @@ context.register(
 ### Conditional Registration
 
 ```typescript
+import { pbjKey, context } from "@pbinj/pbj";
+
 interface EmailProvider {
   sendEmail(to: string, subject: string, body: string): Promise<void>;
 }
@@ -259,7 +278,9 @@ if (process.env.NODE_ENV === "production") {
 
 ### Testing Support
 
-```typescript
+```ts
+import { context } from "@pbinj/pbj";
+
 // test/mocks/registry.ts
 declare module "@pbinj/pbj" {
   interface Registry {
@@ -273,8 +294,3 @@ context.register(dbKey, () => createMock<DatabaseService>());
 context.register(authKey, () => createMock<AuthService>());
 ```
 
-```
-</augment_code_snippet>
-
-This documentation covers module augmentation in PBinJ's registry system, including basic usage, type safety features, advanced patterns, and best practices for maintaining a type-safe dependency injection system.
-```

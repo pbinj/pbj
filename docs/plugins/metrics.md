@@ -33,7 +33,8 @@ This will:
 Configure the metrics through environment variables or the `MetricsConfig` class:
 
 ```typescript
-import { MetricsConfig, context } from "@pbinj/pbj-prometheus";
+import { context } from "@pbinj/pbj";
+import { MetricsConfig } from "@pbinj/pbj-prometheus";
 
 context.register(
   MetricsConfig,
@@ -87,7 +88,8 @@ class CustomMetricsService {
 
 The plugin automatically monitors registered services:
 
-```typescript
+```ts
+import { context } from "@pbinj/pbj";
 import { MetricsConfig } from "@pbinj/pbj-prometheus";
 
 // Monitor specific services
@@ -106,7 +108,8 @@ This creates metrics for:
 
 ### Keys
 
-```typescript
+```ts
+import { pbj } from "@pbinj/pbj";
 import { promClientPBinJKey, registerKey } from "@pbinj/pbj-prometheus";
 
 // Access Prometheus client
@@ -120,7 +123,7 @@ const registry = pbj(registerKey);
 
 Core service for managing metrics:
 
-```typescript
+```ts
 import { MetricService } from "@pbinj/pbj-prometheus";
 
 class CustomService {
@@ -144,7 +147,7 @@ app.use("/metrics", middleware());
 
 1. **Naming Conventions**
 
-   ```typescript
+   ```ts
    // Good - Clear, descriptive names
    const requestDuration = new prometheus.Histogram({
      name: "http_request_duration_seconds",
@@ -160,7 +163,7 @@ app.use("/metrics", middleware());
 
 2. **Label Usage**
 
-   ```typescript
+   ```ts
    // Good - Relevant labels
    counter.inc({
      method: "GET",
@@ -187,14 +190,22 @@ app.use("/metrics", middleware());
 ## Example: Complete Setup
 
 ```typescript
-import { context, pbj } from "@pbinj/pbj";
+import { context, pbj, pbjKey } from "@pbinj/pbj";
 import {
+  apply,
   MetricsConfig,
   MetricService,
   promClientPBinJKey,
 } from "@pbinj/pbj-prometheus";
 import express from "express";
-
+class UserService {
+  // ...
+}
+class AuthService {
+  // ...
+}
+const userServiceKey = pbjKey<UserService>("user-service");
+const authServiceKey = pbjKey<AuthService>("auth-service");
 // Configure metrics
 context.register(MetricsConfig, {
   port: 9464,
@@ -252,6 +263,7 @@ The plugin provides utilities for testing metrics:
 ```typescript
 import { context } from "@pbinj/pbj";
 import { registerKey } from "@pbinj/pbj-prometheus";
+import { describe, expect, it } from "vitest";
 
 describe("Metrics", () => {
   it("should record metrics", async () => {
