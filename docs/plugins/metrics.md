@@ -14,7 +14,7 @@ Note: `prom-client` is a peer dependency and must be installed separately.
 
 ### 1. Basic Setup
 
-```typescript
+```ts
 import { apply } from "@pbinj/pbj-prometheus";
 import express from "express";
 
@@ -32,8 +32,9 @@ This will:
 
 Configure the metrics through environment variables or the `MetricsConfig` class:
 
-```typescript
-import { MetricsConfig, context } from "@pbinj/pbj-prometheus";
+```ts
+import { context } from "@pbinj/pbj";
+import { MetricsConfig } from "@pbinj/pbj-prometheus";
 
 context.register(
   MetricsConfig,
@@ -60,7 +61,7 @@ Environment variables:
 
 ### 3. Custom Metrics
 
-```typescript
+```ts
 import { pbj } from "@pbinj/pbj";
 import { promClientPBinJKey } from "@pbinj/pbj-prometheus";
 
@@ -87,7 +88,8 @@ class CustomMetricsService {
 
 The plugin automatically monitors registered services:
 
-```typescript
+```ts
+import { context } from "@pbinj/pbj";
 import { MetricsConfig } from "@pbinj/pbj-prometheus";
 
 // Monitor specific services
@@ -106,7 +108,8 @@ This creates metrics for:
 
 ### Keys
 
-```typescript
+```ts
+import { pbj } from "@pbinj/pbj";
 import { promClientPBinJKey, registerKey } from "@pbinj/pbj-prometheus";
 
 // Access Prometheus client
@@ -120,7 +123,7 @@ const registry = pbj(registerKey);
 
 Core service for managing metrics:
 
-```typescript
+```ts
 import { MetricService } from "@pbinj/pbj-prometheus";
 
 class CustomService {
@@ -132,7 +135,7 @@ class CustomService {
 
 ### Express Middleware
 
-```typescript
+```ts
 import { middleware } from "@pbinj/pbj-prometheus";
 import express from "express";
 
@@ -144,7 +147,7 @@ app.use("/metrics", middleware());
 
 1. **Naming Conventions**
 
-   ```typescript
+   ```ts
    // Good - Clear, descriptive names
    const requestDuration = new prometheus.Histogram({
      name: "http_request_duration_seconds",
@@ -160,7 +163,7 @@ app.use("/metrics", middleware());
 
 2. **Label Usage**
 
-   ```typescript
+   ```ts
    // Good - Relevant labels
    counter.inc({
      method: "GET",
@@ -186,7 +189,7 @@ app.use("/metrics", middleware());
 
 ## Example: Complete Setup
 
-```typescript
+```ts
 import { context, pbj } from "@pbinj/pbj";
 import {
   MetricsConfig,
@@ -249,7 +252,7 @@ scrape_configs:
 
 The plugin provides utilities for testing metrics:
 
-```typescript
+```ts
 import { context } from "@pbinj/pbj";
 import { registerKey } from "@pbinj/pbj-prometheus";
 

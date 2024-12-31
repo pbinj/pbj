@@ -6,7 +6,18 @@ Tags provide a way to group and retrieve related services. They're particularly 
 
 ```typescript
 import { context, pbjKey } from "@pbinj/pbj";
-
+interface Plugin {
+  initialize?(): void;
+}
+class AuthPlugin implements Plugin {
+ 
+}
+class LoggingPlugin implements Plugin {
+ 
+}
+class MetricsPlugin implements Plugin {
+ 
+}
 // Define a tag key
 const pluginKey = pbjKey<Plugin>("plugin");
 
@@ -22,6 +33,12 @@ const plugins = context.listOf("plugin");
 ## Multiple Tags
 
 ```typescript
+
+import { pbjKey, context } from "@pbinj/pbj";
+class UserService {
+  //...
+}
+
 // Register with multiple tags
 context.register(UserService).withTags("service", "user", "core");
 
@@ -33,8 +50,20 @@ const userServices = context.listOf("user");
 ## Type-Safe Tags
 
 ```typescript
+import { pbjKey, context } from "@pbinj/pbj";
+
 interface Handler {
   handle(request: Request): Response;
+}
+class AuthHandler implements Handler {
+  handle(request: Request) {
+    // Handle auth requests
+  }
+}
+class LoggingHandler implements Handler {
+  handle(request: Request) {
+    // Handle logging requests
+  }
 }
 
 // Create a typed tag key
@@ -54,6 +83,8 @@ const handlers: Handler[] = context.listOf(handlerKey);
 ### Plugin System
 
 ```typescript
+import { pbjKey, context } from "@pbinj/pbj";
+
 interface Plugin {
   name: string;
   initialize(): void;
@@ -72,9 +103,23 @@ class PluginManager {
 ### Feature Modules
 
 ```typescript
+import { pbjKey, context } from "@pbinj/pbj";
+
 interface Feature {
   enabled: boolean;
   setup(): void;
+}
+class DarkModeFeature implements Feature {
+  enabled = true;
+  setup() {
+    // Enable dark mode
+  }
+}
+class NotificationsFeature implements Feature {
+  enabled = false;
+  setup() {
+    // Setup notifications
+  }
 }
 
 const featureKey = pbjKey<Feature>("feature");
@@ -93,10 +138,26 @@ features
 ### HTTP Handlers
 
 ```typescript
+import { pbjKey, context } from "@pbinj/pbj";
+
 interface RouteHandler {
   path: string;
   method: string;
   handle(req: Request): Response;
+}
+class UserHandler implements RouteHandler {
+  path = "/users";
+  method = "GET";
+  handle(req: Request) {
+    // Handle user requests
+  }
+}
+class AuthHandler implements RouteHandler {
+  path = "/auth";
+  method = "POST";
+  handle(req: Request) {
+    // Handle auth requests
+  }
 }
 
 const routeKey = pbjKey<RouteHandler>("route");
@@ -108,7 +169,7 @@ context.register(AuthHandler).withTags(routeKey);
 // Setup routes
 const routes = context.listOf(routeKey);
 routes.forEach((route) => {
-  app.use(route.path, route.handle);
+ // app.use(route.path, route.handle);
 });
 ```
 

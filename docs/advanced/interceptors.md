@@ -23,7 +23,7 @@ context.register(UserService).withInterceptors((invoke) => {
 
 ## Interceptor Function Type
 
-```typescript
+```ts
 type InterceptFn<T> = (invoke: () => T) => T;
 ```
 
@@ -37,6 +37,14 @@ The interceptor function receives:
 ### Error Handling
 
 ```typescript
+import { context } from "@pbinj/pbj";
+
+class UserService {
+  getUser(id: string) {
+    throw new Error("Failed to fetch user");
+  }
+}
+
 context.register(UserService).withInterceptors((invoke) => {
   try {
     return invoke();
@@ -50,6 +58,13 @@ context.register(UserService).withInterceptors((invoke) => {
 ### Performance Monitoring
 
 ```typescript
+import { context } from "@pbinj/pbj";
+class UserService {
+  getUser(id: string) {
+    // ...
+  }
+}
+
 context.register(UserService).withInterceptors((invoke) => {
   const start = performance.now();
   try {
@@ -64,6 +79,13 @@ context.register(UserService).withInterceptors((invoke) => {
 ### Multiple Interceptors
 
 ```typescript
+import { context } from "@pbinj/pbj";
+class UserService {
+  getUser(id: string) {
+    // ...
+  }
+}
+
 context.register(UserService).withInterceptors(
   // First interceptor (executes first)
   (invoke) => {
@@ -86,7 +108,7 @@ context.register(UserService).withInterceptors(
 
 1. **Keep Interceptors Focused**: Each interceptor should have a single responsibility.
 
-```typescript
+```ts
 // Good - Single responsibility
 const loggingInterceptor = (invoke) => {
   console.log("Starting");
@@ -109,7 +131,7 @@ context
 
 2. **Error Handling**: Always consider error cases in interceptors.
 
-```typescript
+```ts
 const errorHandlingInterceptor = (invoke) => {
   try {
     return invoke();
@@ -122,7 +144,7 @@ const errorHandlingInterceptor = (invoke) => {
 
 3. **Resource Cleanup**: Use try/finally for cleanup operations.
 
-```typescript
+```ts
 const resourceInterceptor = (invoke) => {
   const resource = acquireResource();
   try {
@@ -137,7 +159,7 @@ const resourceInterceptor = (invoke) => {
 
 ### With Metrics (Prometheus)
 
-```typescript
+```ts
 import { Counter } from "prom-client";
 
 const requestCounter = new Counter({
@@ -153,7 +175,7 @@ context.register(UserService).withInterceptors((invoke) => {
 
 ### With Logging (Winston)
 
-```typescript
+```ts
 import { logger } from "./logger";
 
 context.register(UserService).withInterceptors((invoke) => {

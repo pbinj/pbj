@@ -16,7 +16,7 @@ const pluginKey = pbjKey<Plugin>("plugin");
 
 // Listen for service changes
 const unsubscribe = context.onServiceAdded((service) => {
-  if (service.hasTag(pluginKey)) {
+  if (service?.hasTag(pluginKey)) {
     console.log(`Plugin service changed: ${service.name}`);
   }
 });
@@ -48,6 +48,8 @@ class PluginManager {
 ## Multiple Tags
 
 ```typescript
+import { pbjKey, context } from "@pbinj/pbj";
+
 interface Handler {
   path: string;
   handle(req: Request): Response;
@@ -122,17 +124,22 @@ class FeatureManager {
 3. **Specific Tag Checking**: Check for specific tags to avoid unnecessary updates:
 
 ```typescript
+import { pbjKey, context } from "@pbinj/pbj";
+class MetricsService {
+  //...
+}
+class LoggerService {
+  //...
+}
 const metricsKey = pbjKey<MetricsService>("metrics");
 const loggingKey = pbjKey<LoggerService>("logging");
 
-context.onServiceAdded((...services) => {
-  for (const service of services) {
+context.onServiceAdded((service) => {
     if (service.hasTag(metricsKey)) {
       updateMetrics();
     } else if (service.hasTag(loggingKey)) {
       updateLoggers();
     }
-  }
   // Avoid else or default cases to prevent unnecessary work
 });
 ```

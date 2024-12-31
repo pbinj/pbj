@@ -1,4 +1,4 @@
-import { marked } from 'marked';
+import { marked, type Tokens } from 'marked';
 import fs from 'fs/promises';
 import * as ts from "typescript";
 import { SourceMapGenerator } from 'source-map';
@@ -16,8 +16,8 @@ interface CodeBlock {
   text: string;
   lineStart: number;
 }
-const toObjStrMap = (...values:string[])=>{
-  return values.reduce((acc, cur, idx)=>`${acc}${JSON.stringify(cur)}:__${idx},`, '{')+'}';
+const toObjStrMap = (...values: string[]) => {
+  return values.reduce((acc, cur, idx) => `${acc}${JSON.stringify(cur)}:__${idx},`, '{') + '}';
 }
 
 export async function parseMarkdownFile(filePath: string): Promise<CodeBlock[]> {
@@ -25,7 +25,7 @@ export async function parseMarkdownFile(filePath: string): Promise<CodeBlock[]> 
   const tokens = marked.lexer(content);
   let lineCount = 1;
   return tokens
-    .filter((token): token is marked.Tokens.Code => token.type === 'code')
+    .filter((token): token is Tokens.Code => token.type === 'code')
     .map(token => {
       const block = { lang: token.lang || '', text: token.text, lineStart: lineCount };
       lineCount += token.text.split('\n').length + 1; // +1 for the code fence
@@ -38,24 +38,31 @@ const plugin = {
     if (!id.endsWith('.md')) return null;
 
     const codeBlocks = await parseMarkdownFile(id);
-    const testCases = [];
-    const importSet = new Set();
+    const testCases: string[] = [];
+    const importSet = new Set<string>();
     const sourceMapGenerator = new SourceMapGenerator({ file: id });
     let generatedLineOffset = 4; // Offset for import statements and other boilerplate
 
-    for(const block of codeBlocks) {
+    for (const block of codeBlocks) {
       if (block.lang !== 'typescript') continue;
-      const index = testCases.length;
-      const sourceFile = ts.createSourceFile(
-        `${id}-${index}.ts`,
-        block.text,
-        ts.ScriptTarget.Latest,
-        true
-      );
-
+      const index: number = testCases.length;
+      let sourceFile;
+      try {
+        sourceFile = ts.createSourceFile(
+          `${id}-${index}.ts`,
+          block.text,
+          ts.ScriptTarget.Latest,
+          true
+        );
+      } catch (e) {
+        console.error(`Error parsing TypeScript in ${id} at line ${block.lineStart}:`, e);
+        testCases.push(`test('Example ${index + 1}', () => { throw new Error("Failed to parse TypeScript Block ${index + 1} in ${id}\n${JSON.stringify(block.text)}\n${JSON.stringify(e)}"); })`);
+        continue;
+      }
       sourceFile.statements.forEach((statement) => {
         if (ts.isImportDeclaration(statement)) {
-          importSet.add(statement.moduleSpecifier.text);
+          generatedLineOffset++;
+          importSet.add(statement.moduleSpecifier.getFullText().trim().slice(1, -1));
         }
       });
 
@@ -98,30 +105,28 @@ const plugin = {
       generatedLineOffset += transpiledCode.split('\n').length + 3; // +3 for test function wrapper
     }
 
-    const output = `
+    const code = `
 import { test, expect } from 'vitest';
-//fake imports 
-${Array.from(importSet, (name, idx)=>`import * as __${idx} from '${name}'`).join(';\n')}
-//end fake imports
-const __FAKE_IMPORT_MAP__ = ${toObjStrMap(...importSet)};
-const require = (name) => __FAKE_IMPORT_MAP__[name];
+${Array.from(importSet, (name, idx) => `import * as __${idx} from '${name}'`).join(';\n')}
+const require = ((map)=>(name) => map[name])(${toObjStrMap(...importSet)})
 
 ${testCases.length ? testCases.join('\n') : `test(()=>{expect(true).toBe(true)})`}
 `;
 
     return {
-      code: output,
+      code,
       map: sourceMapGenerator.toString()
     };
   }
 } as const;
 
+//@ts-ignore
 if (import.meta.url === `file://${process.argv[1]}`) {
-  (async function(){
-    for(const arg of process.argv.slice(2)) {
-      console.log((await plugin.load(arg)).code);
+  (async function () {
+    for (const arg of process.argv.slice(2)) {
+      console.log((await plugin.load(arg))?.code);
     }
-  })().then(undefined,console.error);
+  })().then(undefined, console.error);
 }
 
 export default plugin;

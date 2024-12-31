@@ -8,22 +8,24 @@ PBinJ automatically derives service names from, symbol, pbjKey, class names, and
 
 ```typescript
 import { context, pbjKey } from "@pbinj/pbj";
+class LoggerService {}
 
 // 1. From pbjKey
 const loggerKey = pbjKey<LoggerService>("logger");
-context.register(loggerKey); // name: "logger"
+context.register(loggerKey, LoggerService); // name: "logger"
 
 // 2. From class name
 class UserService {}
 context.register(UserService); // name: "UserService"
 
 // 3. From function name
+class Service {}
 const myFactory = () => new Service();
 context.register(myFactory); // name: "myFactory"
 
 // 4. From symbol description
 const serviceSymbol = Symbol("myService");
-context.register(serviceSymbol); // name: "myService"
+context.register(serviceSymbol, ()=>"what"); // name: "myService"
 
 // 5. Anonymous functions
 context.register(() => "value"); // name: "<anonymous>"
@@ -34,14 +36,17 @@ context.register(() => "value"); // name: "<anonymous>"
 Use `withName` to override the default name:
 
 ```typescript
+import { context } from "@pbinj/pbj";
+class UserService {}
+class Service {}
 // Override automatic naming
 context.register(UserService).withName("CustomUserService");
 
 // Name anonymous services
 context.register(() => new Service()).withName("DynamicService");
-
+const serviceSymbol = Symbol("myService");
 // Name symbol-based services
-context.register(serviceSymbol).withName("BetterServiceName");
+context.register(serviceSymbol, Service).withName("BetterServiceName");
 ```
 
 ## Names with Tags
@@ -50,6 +55,16 @@ Names are particularly useful when working with tagged services:
 In general tags are a prefered way to group services.
 
 ```typescript
+import { pbjKey, context } from "@pbinj/pbj";
+interface Plugin {
+  initialize?(): void;
+}
+class AuthPlugin implements Plugin {
+ 
+}
+class LogPlugin implements Plugin {
+ 
+}
 const pluginKey = pbjKey<Plugin>("plugin");
 
 context.register(AuthPlugin).withName("Authentication").withTags(pluginKey);
@@ -57,8 +72,8 @@ context.register(AuthPlugin).withName("Authentication").withTags(pluginKey);
 context.register(LogPlugin).withName("Logging").withTags(pluginKey);
 
 // Listen for specific services
-context.onServiceAdded((...services) => {
-  if (services.some((service) => service.hasTag(pluginKey))) {
+context.onServiceAdded((service) => {
+  if (service.hasTag(pluginKey)) {
     console.log(`Plugin registered: ${service.name}`);
   }
 });
@@ -69,11 +84,13 @@ context.onServiceAdded((...services) => {
 Names are valuable for debugging and logging:
 
 ```typescript
+import { context } from "@pbinj/pbj";
+
 class ServiceManager {
   constructor() {
     context.onServiceAdded((service) => {
       console.log(
-        `Service ${service.name} was ${service.invalid ? "invalidated" : "registered"}`
+        `Service ${service?.name} was ${service?.invalid ? "invalidated" : "registered"}`
       );
     });
   }
@@ -89,7 +106,7 @@ class ServiceManager {
 
 1. **Consistent Naming**: Use consistent naming conventions:
 
-```typescript
+```ts
 // Good
 context.register(authService).withName("AuthService");
 context.register(dbService).withName("DatabaseService");
@@ -101,7 +118,7 @@ context.register(dbService).withName("DatabaseServiceImpl");
 
 2. **Meaningful Names**: Choose descriptive names:
 
-```typescript
+```ts
 // Good
 context.register(factory).withName("UserRepositoryFactory");
 
