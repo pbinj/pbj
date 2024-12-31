@@ -90,7 +90,7 @@ Services are initialized lazily, which can lead to unexpected async behavior:
 
 Type inference with generics can be tricky:
 
-```
+```ts
 
 // ❌ Bad: Generic type lost in proxy
 class Repository<T> {
@@ -168,7 +168,7 @@ class Service {
 
 2. **Avoid Object Manipulation**
 
-```
+```ts
 
 // Don't manipulate proxy objects directly
 const config = pbj(Config);
@@ -180,7 +180,7 @@ context.register(Config, newValues); // ✅ Good
 
 3. **Type Safety**
 
-```
+```ts
 // Always declare types in registry
 declare module "@pbinj/pbj" {
   interface Registry {
@@ -192,7 +192,7 @@ declare module "@pbinj/pbj" {
 
 4. **Async Handling**
 
-```
+```ts
 // Use async factories for async initialization
 context.register(DatabaseKey, async () => {
   const db = await Database.initialize();
@@ -206,7 +206,7 @@ context.register(DatabaseKey, async () => {
 
 Some native operations might not work as expected:
 
-```
+```ts
 // ❌ Bad: Direct property enumeration
 const config = pbj(Config);
 Object.keys(config); // May not return expected keys
