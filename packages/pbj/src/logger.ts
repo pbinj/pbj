@@ -91,8 +91,7 @@ export class Logger implements LoggerI {
       this.parent.fire(...e);
     } else {
       if (this.console) {
-        const con =
-          typeof this.console === "boolean" ? console : this.console;
+        const con = typeof this.console === "boolean" ? console : this.console;
         e.forEach((v) =>
           con.log(
             `[${v.level}] ${v.name} ${v.timestamp}: ${this.format(v.message, v.context)}`,
