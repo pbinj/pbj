@@ -6,7 +6,7 @@
     "outDir": "./dist/cjs",
     "target": "ES2019",
     "declaration": false,
-     "paths": {
+    "paths": {
       "@pbinj/pbj/*": ["./node_modules/@pbinj/pbj/src/*.ts"],
       "@pbinj/pbj": ["./node_modules/@pbinj/pbj/src/index.ts"],
       "prom-client": ["./node_modules/prom-client/index.d.ts"]
