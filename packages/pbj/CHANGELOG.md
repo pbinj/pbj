@@ -1,5 +1,11 @@
 # @pbinj/pbj
 
+## 1.0.2
+
+### Patch Changes
+
+- 91495a7: Added logging and visualization to make debugging and development easier.
+
 ## 1.0.1
 
 ### Patch Changes

@@ -4,6 +4,8 @@
 
 > A lightweight, proxy-based Dependency Injection (DI) framework for Node.js with full TypeScript support.
 
+[![Visualization](./image.png)](./vis.mov)
+
 ## Features
 
 - 🪶 Lightweight with zero runtime dependencies (other than `node:async_hooks`)
