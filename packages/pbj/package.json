@@ -29,6 +29,10 @@
     "./pbjKey": {
       "import": "./dist/esm/pbjKey.js",
       "require": "./dist/cjs/pbjKey.js"
+    },
+     "./async": {
+      "import": "./dist/esm/async.js",
+      "require": "./dist/cjs/async.js"
     }
   },
   "files": [

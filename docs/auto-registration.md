@@ -140,7 +140,7 @@ class Service {
 
 Override auto-registered services in tests:
 
-```typescript
+```ts
 import { context } from "@pbinj/pbj";
 
 describe("UserService", () => {
@@ -164,7 +164,7 @@ describe("UserService", () => {
 
 Auto registration doesn't prevent circular dependencies, but does try to resolve them:
 
-```typescript
+```ts
 // ❌ Bad: Circular dependency with auto registration
 class ServiceA {
   constructor(private b = pbj(ServiceB)) {}

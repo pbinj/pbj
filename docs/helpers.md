@@ -32,6 +32,8 @@ The result of applying the transformer function to the resolved service.
 ### Example
 
 ```typescript
+import { transform, pbjKey } from '@pbinj/pbj';
+
 const userService = pbjKey<UserService>('userService');
 
 const userName = transform(userService, (service) => service.getCurrentUser().name);
@@ -41,15 +43,6 @@ const userName = transform(userService, (service) => service.getCurrentUser().na
 
 The `pathOf` function creates a type-safe getter for accessing nested properties in your PBinJ services.
 
-### Syntax
-
-```typescript
-function pathOf<T extends PBinJKey<TRegistry>, TPath extends string, TRegistry extends RegistryType = Registry>(
-  service: T,
-  path: TPath,
-  defaultValue?: PathOf<ValueOf<TRegistry, T>, TPath>
-): (ctx?: ValueOf<TRegistry, T>) => PathOf<ValueOf<TRegistry, T>, TPath>
-```
 
 ### Parameters
 
@@ -64,15 +57,25 @@ A function that, when called, returns the value at the specified path in the ser
 ### Example
 
 ```typescript
+import { pathOf, pbjKey } from '@pbinj/pbj';
+
+interface Config {
+  database: {
+    host: string;
+    port: number;
+  };
+  users: string[];
+}
+
 const configKey = pbjKey<Config>('config');
 
-// Access nested property
-const dbHostGetter = pathOf(configKey, 'database.host');
-const host = dbHostGetter(); // returns the host value
+class DatabaseService {
+  constructor(
+    private host = pathOf(configKey, 'database.host'),
+    private port = pathOf(configKey, 'database.port')
+  ) {}
+}
 
-// Access array elements
-const firstUserGetter = pathOf(configKey, 'users[0]');
-const firstUser = firstUserGetter();
 ```
 
 ### Features

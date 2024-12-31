@@ -7,6 +7,7 @@ export default defineConfig({
     setupFiles: ['./src/setup.ts'],
     include: [
       './*.md',
+//      './junk.js'
     ],
     exclude: ['node_modules', 'dist', './vitest.config.ts'],
   },

@@ -18,18 +18,13 @@ const apiKey = envRequired("API_KEY");
 
 The `env` function retrieves an environment variable with an optional default value.
 
-### Syntax
 
-```typescript
-function env<K extends keyof PBinJEnv & string>(
-  envKey: K,
-  defaultValue?: PBinJEnv[K]
-): string | undefined;
-```
 
 ### Examples
 
 ```typescript
+import { env } from "@pbinj/pbj/env";
+
 // With default value
 const port = env("PORT", "3000");
 
@@ -49,15 +44,12 @@ class ConfigService {
 
 The `envRequired` function retrieves an environment variable and throws an error if it's not set.
 
-### Syntax
-
-```typescript
-function envRequired<K extends keyof PBinJEnv & string>(envKey: K): string;
-```
 
 ### Examples
 
 ```typescript
+import { envRequired } from "@pbinj/pbj/env";
+
 // Will throw if DATABASE_URL is not set
 const dbUrl = envRequired("DATABASE_URL");
 

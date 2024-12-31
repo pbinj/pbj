@@ -34,7 +34,10 @@ There are several ways to register services with PBinJ:
 
 ```typescript
 import { pbj, context, pbjKey } from "@pbinj/pbj";
-
+class DatabaseService {
+  constructor(private connectionString: string) { }
+  //...
+}
 // Method 1: Direct class registration
 class LoggerService {
   log(message: string) {
@@ -58,6 +61,8 @@ context.register(dbServiceKey, () => {
 Inject dependencies using the `pbj()` function:
 
 ```typescript
+import { pbj, pbjKey, context } from "@pbinj/pbj";
+
 class UserService {
   // Constructor injection
   constructor(
@@ -77,20 +82,27 @@ class UserService {
 Resolve services using `context.resolve()`:
 
 ```typescript
+import { context } from "@pbinj/pbj";
+
+class UserService {
+  // ...
+}
+context.register(UserService);
+//... elsewhere
+
 const userService = context.resolve(UserService);
-await userServic@pbinjr("123");
 ```
 
 ## Type Safety
 
-PBinJ provides full TypeScript support. Define your registry types for better type inference:
+PBinJ provides full TypeScript support. Define your registry types for better type inference, or use the `pbjKey`:
 
 ```typescript
 declare module "@pbinj/pbj" {
   export interface Registry {
     [dbServiceKey]: DatabaseService;
   }
-}@pbinj
+}
 ```
 
 ## Environment Variables
@@ -106,14 +118,15 @@ class ConfigService {
 
   // Required environment variable
   readonly apiKey = envRequired("API_KEY");
-}@pbinj
+}
 ```
 
 ## Async Context
 
 For web applications, PBinJ supports request-scoped dependencies:
 
-```typescript
+```ts
+import { pbj, pbjKey, context } from "@pbinj/pbj";
 import "@pbinj/pbj/scope";
 
 const sessionKey = pbjKey<Session>("session");
@@ -138,13 +151,13 @@ class AuthService {
 
 1. Use `pbjKey` for service registration:
 
-   ```typescript
+   ```ts
    const loggerKey = pbjKey<LoggerService>("logger");
    ```
 
 2. Register services at application startup:
 
-   ```typescript
+   ```ts
    export function register() {
      context.register(loggerKey, LoggerService);
      context.register(dbKey, DatabaseService);
@@ -153,14 +166,14 @@ class AuthService {
 
 3. Use factory functions for configurable services:
 
-   ```typescript
+   ```ts
    context.register(dbKey, (config = pbj(ConfigService)) => {
      return new DatabaseService(config.connectionString);
    });
    ```
 
 4. Keep services focused and follow single responsibility principle:
-   ```typescript
+   ```ts
    class UserService {
      constructor(
        private db = pbj(dbKey),

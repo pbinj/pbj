@@ -23,8 +23,8 @@ context.register(LoggerService);
 
 // Use the service
 class UserService {
-  constructor(private logger:LoggerService)) {
-    this.logger.log("UserService initialized");
+  constructor(private logger:LoggerService) {
+    logger.log("UserService initialized");
   }
 }
 
@@ -59,7 +59,10 @@ context.register(dbKey, createDatabase);
 ```typescript
 import { pbj, context } from "@pbinj/pbj";
 import { env } from "@pbinj/pbj/env";
-}
+class CacheService {}
+class RedisCacheService extends CacheService {}
+class InMemoryCacheService extends CacheService {}
+
 // Environment-based registration
 context.register(CacheService, (nodeEnv = env("NODE_ENV")) =>
 nodeEnv == "production" ? new RedisCacheService() :  new InMemoryCacheService());
@@ -96,7 +99,7 @@ context.register(
 ### Using PBinJKey
 
 ```typescript
-import { pbj, pbjKey } from "@pbinj/pbj";
+import { pbj, pbjKey, context } from "@pbinj/pbj";
 
 interface MetricsService {
   track(event: string): void;
@@ -120,7 +123,7 @@ class AnalyticsService {
 ### Module Augmentation
 
 ```typescript
-import { pbj, pbjKey } from "@pbinj/pbj";
+import { pbj, pbjKey, context } from "@pbinj/pbj";
 
 const configKey = pbjKey<Config>("config");
 
@@ -178,7 +181,7 @@ context.register(UserService).withTags("service", "user");
    class MockDatabaseService extends DatabaseService {}
 
    // In tests
-   context.register(DatabaseService, new MockDatabaseService());
+   context.register(DatabaseService).withService(MockDatabaseService);
    ```
 
 

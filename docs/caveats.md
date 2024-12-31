@@ -60,6 +60,7 @@ class ConfigService {
 PBinJ can handle circular dependencies, but they should be avoided:
 
 ```typescript
+
 // ❌ Bad: Circular dependency
 class ServiceA {
   constructor(private b = pbj(ServiceB)) {}
@@ -89,7 +90,8 @@ Services are initialized lazily, which can lead to unexpected async behavior:
 
 Type inference with generics can be tricky:
 
-```typescript
+```
+
 // ❌ Bad: Generic type lost in proxy
 class Repository<T> {
   constructor(private db = pbj(Database)) {}
@@ -105,6 +107,8 @@ context.register(userRepoKey, new Repository<User>());
 Be explicit about optional dependencies:
 
 ```typescript
+import { pbj, pbjKey, context } from "@pbinj/pbj";
+
 // ❌ Bad: Implicit optional dependency
 class Service {
   constructor(private logger = pbj(Logger)) {}
@@ -129,7 +133,7 @@ Proxies keep references to their targets:
 
 Testing proxied services requires special consideration:
 
-```typescript
+```
 // ❌ Bad: Direct mock assignment
 service.dependency = mockDependency;
 
@@ -141,7 +145,7 @@ context.register(DependencyKey, mockDependency);
 
 Spying on proxy properties requires proper setup:
 
-```typescript
+```
 // ❌ Bad: Direct spy on proxy
 const spy = jest.spyOn(service.logger, "log");
 
@@ -154,7 +158,7 @@ context.register(LoggerKey, mockLogger);
 
 1. **Keep References**
 
-```typescript
+```
 // Always store proxy references
 class Service {
   private readonly config = pbj(Config);
@@ -164,7 +168,8 @@ class Service {
 
 2. **Avoid Object Manipulation**
 
-```typescript
+```
+
 // Don't manipulate proxy objects directly
 const config = pbj(Config);
 Object.assign(config, newValues); // ❌ Bad
@@ -175,7 +180,7 @@ context.register(Config, newValues); // ✅ Good
 
 3. **Type Safety**
 
-```typescript
+```
 // Always declare types in registry
 declare module "@pbinj/pbj" {
   interface Registry {
@@ -187,7 +192,7 @@ declare module "@pbinj/pbj" {
 
 4. **Async Handling**
 
-```typescript
+```
 // Use async factories for async initialization
 context.register(DatabaseKey, async () => {
   const db = await Database.initialize();
@@ -201,7 +206,7 @@ context.register(DatabaseKey, async () => {
 
 Some native operations might not work as expected:
 
-```typescript
+```
 // ❌ Bad: Direct property enumeration
 const config = pbj(Config);
 Object.keys(config); // May not return expected keys
