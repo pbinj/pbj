@@ -1,5 +1,16 @@
 # @pbinj/pbj-metrics
 
+## 2.0.0
+
+### Minor Changes
+
+- 82b9175: Added docs and fixed some packaging issues, also wrote a checker for the examples
+
+### Patch Changes
+
+- Updated dependencies [82b9175]
+  - @pbinj/pbj@2.0.0
+
 ## 1.0.2
 
 ### Patch Changes
