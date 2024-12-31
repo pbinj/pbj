@@ -1,6 +1,6 @@
 import { context } from "@pbinj/pbj";
-import { register, registerKey } from "./pbj";
-import { MetricsConfig } from "./MetricsConfig";
+import { register, registerKey } from "./pbj.js";
+import { MetricsConfig } from "./MetricsConfig.js";
 import type { Express, Response } from "express";
 
 export const middleware = (ctx = context) =>

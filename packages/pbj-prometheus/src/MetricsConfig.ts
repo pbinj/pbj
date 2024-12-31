@@ -32,7 +32,7 @@ export class MetricsConfig {
       camelToSnakeCase(`${prefix}${oname}`)
         .replace(/[^a-zA-Z0-9_:]/g, "_")
         .replace(/__/g, "_"),
-  ) {}
+  ) { }
 
   get port() {
     return Number(this._port);

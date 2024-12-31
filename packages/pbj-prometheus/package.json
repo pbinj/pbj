@@ -2,16 +2,20 @@
   "name": "@pbinj/pbj-prometheus",
   "version": "1.0.2",
   "description": "A @pbinj/pbj extension for prometheus metrics.",
-  "types": "./dist/index.d.ts",
+  "type": "module",
   "exports": {
-    ".": "./dist/index.js"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pbinj/pbj.git"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && tsc -p tsconfig.cjs.json",
     "watch": "tsc -w",
     "clean": "rm -rf dist",
     "test": "vitest run",
@@ -27,17 +31,17 @@
   "author": "Justin Spears <pbinj@gmail.com>",
   "license": "MIT",
   "devDependencies": {
+    "@pbinj/pbj": "workspace:*",
     "@types/express": "^5.0.0",
     "@types/node": "^22.9.0",
     "prettier": "^3.3.3",
     "prom-client": "^15.1.3",
     "typescript": "^5.7.2",
     "vite-tsconfig-paths": "^5.1.2",
-    "vitest": "^2.1.5",
-    "@pbinj/pbj": "workspace:*"
+    "vitest": "^2.1.8"
   },
   "peerDependencies": {
-    "prom-client": "^15.1.3",
-    "@pbinj/pbj": "workspace:*"
+    "@pbinj/pbj": "workspace:*",
+    "prom-client": "^15.1.3"
   }
 }

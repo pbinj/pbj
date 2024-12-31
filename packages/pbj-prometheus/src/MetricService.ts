@@ -1,7 +1,6 @@
-import { pbj } from "@pbinj/pbj";
-import { MetricsConfig } from "./MetricsConfig";
-import { promClientPBinJKey, registerKey } from "./pbj";
-import { ServiceDescriptor } from "@pbinj/pbj/ServiceDescriptor";
+import { pbj, ServiceDescriptorI as ServiceDescriptor } from "@pbinj/pbj";
+import { MetricsConfig } from "./MetricsConfig.js";
+import { promClientPBinJKey, registerKey } from "./pbj.js";
 
 export class MetricService {
   constructor(
