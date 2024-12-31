@@ -14,7 +14,7 @@ Note: `prom-client` is a peer dependency and must be installed separately.
 
 ### 1. Basic Setup
 
-```ts
+```typescript
 import { apply } from "@pbinj/pbj-prometheus";
 import express from "express";
 
@@ -32,7 +32,7 @@ This will:
 
 Configure the metrics through environment variables or the `MetricsConfig` class:
 
-```ts
+```typescript
 import { context } from "@pbinj/pbj";
 import { MetricsConfig } from "@pbinj/pbj-prometheus";
 
@@ -61,7 +61,7 @@ Environment variables:
 
 ### 3. Custom Metrics
 
-```ts
+```typescript
 import { pbj } from "@pbinj/pbj";
 import { promClientPBinJKey } from "@pbinj/pbj-prometheus";
 
@@ -135,7 +135,7 @@ class CustomService {
 
 ### Express Middleware
 
-```ts
+```typescript
 import { middleware } from "@pbinj/pbj-prometheus";
 import express from "express";
 
@@ -189,15 +189,23 @@ app.use("/metrics", middleware());
 
 ## Example: Complete Setup
 
-```ts
-import { context, pbj } from "@pbinj/pbj";
+```typescript
+import { context, pbj, pbjKey } from "@pbinj/pbj";
 import {
+  apply,
   MetricsConfig,
   MetricService,
   promClientPBinJKey,
 } from "@pbinj/pbj-prometheus";
 import express from "express";
-
+class UserService {
+  // ...
+}
+class AuthService {
+  // ...
+}
+const userServiceKey = pbjKey<UserService>("user-service");
+const authServiceKey = pbjKey<AuthService>("auth-service");
 // Configure metrics
 context.register(MetricsConfig, {
   port: 9464,
@@ -252,9 +260,10 @@ scrape_configs:
 
 The plugin provides utilities for testing metrics:
 
-```ts
+```typescript
 import { context } from "@pbinj/pbj";
 import { registerKey } from "@pbinj/pbj-prometheus";
+import { describe, expect, it } from "vitest";
 
 describe("Metrics", () => {
   it("should record metrics", async () => {
