@@ -37,6 +37,7 @@ interface UserConfig {
 }
 
 const configKey = pbjKey<UserConfig>("config");
+//This is a proxy 
 const portGetter = pathOf(configKey, "database.connection.port");
 ```
 
@@ -253,8 +254,4 @@ const invalidGetter = pathOf(configKey, "database.invalid");
    }
    ```
 
-```
-</augment_code_snippet>
-
-This documentation covers the `pathOf` helper function in detail, including its syntax, features, common use cases, and best practices for accessing nested properties in a type-safe way.
 ```
