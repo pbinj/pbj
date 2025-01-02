@@ -28,6 +28,7 @@
   - [Naming](advanced/name.md)
 - [Caveats](caveats.md)
 - [Testing](testing.md)
+- [Writing Docs](writing-docs.md)
 - [Examples](https://github.com/pbinj/pbj/tree/main/examples)
 - [Ideas](ideas.md)
 - [License](license.md)
