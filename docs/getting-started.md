@@ -185,8 +185,8 @@ class AuthService {
 
 ## Next Steps
 
-- Explore the [examples](https://github.com/spbjjus/pbj/tree/main/examples) for real-world usage
-- Read the [API documentation](https://spbjjus.github.io/pbj) for detailed information
+- Explore the [examples](https://github.com/pbinj/pbj/tree/main/examples) for real-world usage
+- Read the [API documentation](https://pbinj.github.io/pbj) for detailed information
 - Check out integration examples with popular frameworks:
   - Express
   - Drizzle ORM

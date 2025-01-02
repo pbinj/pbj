@@ -333,4 +333,4 @@ describe("Integration: UserService", () => {
 
 - [Vitest Documentation](https://vitest.dev/)
 - [Jest Documentation](https://jestjs.io/)
-- [Example Projects](https://github.com/spbjjus/pbj/tree/main/examples)
+- [Example Projects](https://github.com/pbinj/pbj/tree/main/examples)

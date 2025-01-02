@@ -6,15 +6,11 @@ The `listOf` function is a powerful feature in PBinJ that allows you to retrieve
 
 ```typescript
 import { pbj, pbjKey, context } from "@pbinj/pbj";
+class BaseService {}
+class MyService extends BaseService {}
 
-interface Plugin {};
+context.register(MyService);
 
-// Using PBinJKey
-const pluginKey = pbjKey<Plugin>("plugin");
-const plugins = context.listOf(pluginKey);
-class BaseService {
-
-}
 // Using Class type
 const services = context.listOf(BaseService);
 ```
@@ -75,13 +71,11 @@ class PluginB extends BasePlugin {
   }
 }
 
-const ctx = context;
-ctx.register(PluginA);
-ctx.register(PluginB);
+context.register(PluginA);
+context.register(PluginB);
 
 // Get all plugins that inherit from BasePlugin
-const plugins = ctx.listOf(BasePlugin);
-plugins.forEach((plugin) => plugin.execute());
+context.listOf(BasePlugin).forEach((plugin) => plugin.execute());
 ```
 
 ### Factory-based Collection
@@ -150,12 +144,10 @@ interface Plugin {
 const pluginKey = pbjKey<Plugin>("plugin");
 
 class PluginManager {
-  constructor(private ctx = context) {}
+  constructor(private pluigns = context.listOf(pluginKey)) {}
 
   initializePlugins() {
-    const plugins = this.ctx.listOf(pluginKey);
-    for (const plugin of plugins) {
-      console.log(`Initializing plugin: ${plugin.name}`);
+    for (const plugin of this.plugins) {
       plugin.initialize();
     }
   }
@@ -176,11 +168,10 @@ interface EventHandler {
 const handlerKey = pbjKey<EventHandler>("event-handler");
 
 class EventBus {
-  constructor(private ctx = context) {}
+  constructor(private handlers = context.listOf(handlerKey)) {}
 
   emit(event: string, data: any) {
-    const handlers = this.ctx.listOf(handlerKey);
-    handlers.filter((h) => h.event === event).forEach((h) => h.handle(data));
+    this.handlers.filter((h) => h.event === event).forEach((h) => h.handle(data));
   }
 }
 ```
@@ -223,6 +214,10 @@ class MiddlewareChain {
 1. **Use Tags for Flexible Grouping**
 
    ```typescript
+   import { pbjKey, context } from "@pbinj/pbj";
+
+   interface HttpHandler {}
+
    const httpHandlerKey = pbjKey<HttpHandler>("http-handler");
    const adminHandlerKey = pbjKey<HttpHandler>("admin-handler");
 
@@ -237,11 +232,21 @@ class MiddlewareChain {
 2. **Combine with Factory Pattern**
 
    ```typescript
+   import { pbjKey, context } from "@pbinj/pbj";
+
+   interface Validator {
+     type: string;
+     validate(data: any): boolean;
+   }
+
    const validatorKey = pbjKey<Validator>("validator");
 
    const createValidator = (type: string) => ({
      type,
-     validate: (data: any) => /* validation logic */
+     validate(){ 
+      //...
+      return true;
+     }
    });
 
    ctx.register(pbjKey("email"), () => createValidator("email"))
@@ -253,6 +258,8 @@ class MiddlewareChain {
 3. **Order Management**
 
    ```typescript
+   import { pbjKey, context } from "@pbinj/pbj";
+
    interface OrderedPlugin {
      order: number;
      execute(): void;
@@ -261,26 +268,29 @@ class MiddlewareChain {
    const pluginKey = pbjKey<OrderedPlugin>("plugin");
 
    class PluginOrchestrator {
-     executeInOrder() {
-       const plugins = ctx.listOf(pluginKey).sort((a, b) => a.order - b.order);
+     constructor(private ctx = context, private plugins = ctx.listOf(pluginKey)) {}
 
-       plugins.forEach((p) => p.execute());
+     executeInOrder() {
+       this.plugins.toSorted(({ order: a }, { order: b }) => a - b).forEach((p) => p.execute());
      }
    }
+
    ```
 
 4. **Dynamic Registration**
 
    ```typescript
-   class FeatureRegistry {
-     registerFeature(feature: Feature) {
-       return ctx.register(feature).withTags(featureKey);
-     }
+   import { pbjKey, context } from "@pbinj/pbj";
 
-     getFeatures() {
-       return ctx.listOf(featureKey);
+   interface Feature {}
+
+   const featureKey = pbjKey<Feature>("feature");
+
+   class FeatureRegistry {
+    constructor(private ctx = context, public features = ctx.listOf(featureKey)) {}
+    registerFeature(feature: Feature) {
+       return this.ctx.register(feature).withTags(featureKey);
      }
    }
    ```
 
-```

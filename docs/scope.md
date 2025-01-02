@@ -39,7 +39,7 @@ class AuthService {
 
 ## Express Integration Example
 
-Let's look at a real-world example using Express and Auth.js. You can find the complete example at [pbj-express-authjs-example](https://github.com/spbjjus/pbj/tree/main/examples/pbj-express-authjs-example).
+Let's look at a real-world example using Express and Auth.js. You can find the complete example at [pbj-express-authjs-example](https://github.com/pbinj/pbj/tree/main/examples/pbj-express-authjs-example).
 
 ### Session Management
 
