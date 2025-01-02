@@ -150,12 +150,10 @@ interface Plugin {
 const pluginKey = pbjKey<Plugin>("plugin");
 
 class PluginManager {
-  constructor(private ctx = context) {}
+  constructor(private pluigns = context.listOf(pluginKey)) {}
 
   initializePlugins() {
-    const plugins = this.ctx.listOf(pluginKey);
-    for (const plugin of plugins) {
-      console.log(`Initializing plugin: ${plugin.name}`);
+    for (const plugin of this.plugins) {
       plugin.initialize();
     }
   }
@@ -176,11 +174,10 @@ interface EventHandler {
 const handlerKey = pbjKey<EventHandler>("event-handler");
 
 class EventBus {
-  constructor(private ctx = context) {}
+  constructor(private handlers = listOf(handlerKey)) {}
 
   emit(event: string, data: any) {
-    const handlers = this.ctx.listOf(handlerKey);
-    handlers.filter((h) => h.event === event).forEach((h) => h.handle(data));
+    this.handlers.filter((h) => h.event === event).forEach((h) => h.handle(data));
   }
 }
 ```
@@ -223,6 +220,9 @@ class MiddlewareChain {
 1. **Use Tags for Flexible Grouping**
 
    ```typescript
+   
+   interface HttpHandler {}
+
    const httpHandlerKey = pbjKey<HttpHandler>("http-handler");
    const adminHandlerKey = pbjKey<HttpHandler>("admin-handler");
 
@@ -272,6 +272,10 @@ class MiddlewareChain {
 4. **Dynamic Registration**
 
    ```typescript
+   interface Feature {}
+
+   const featureKey = pbjKey<Feature>("feature");
+
    class FeatureRegistry {
      registerFeature(feature: Feature) {
        return ctx.register(feature).withTags(featureKey);
@@ -283,4 +287,3 @@ class MiddlewareChain {
    }
    ```
 
-```

@@ -221,4 +221,4 @@ const values = keys.map((key) => config[key]);
 
 - [JavaScript Proxy Documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
 - [TypeScript Generics Guide](https://www.typescriptlang.org/docs/handbook/2/generics.html)
-- [PBinJ Examples](https://github.com/spbjjus/pbj/tree/main/examples)
+- [PBinJ Examples](https://github.com/pbinj/pbj/tree/main/examples)
