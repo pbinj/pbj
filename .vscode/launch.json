@@ -118,10 +118,10 @@
       "request": "launch",
       "name": "Launch Program",
       "skipFiles": ["<node_internals>/**"],
-      "runtimeExecutable": "/Users/justinspbjrs/.nvm/versions/node/v22.7.0/bin/node",
+      "runtimeExecutable": "${HOME}/.nvm/versions/node/v22.7.0/bin/node",
 
       "env": {
-        "PATH": "${env:PATH}:${workspaceFolder}/node_modules/.bin:/Users/justinspbjrs/.nvm/versions/node/v22.7.0/bin/"
+        "PATH": "${env:PATH}:${workspaceFolder}/node_modules/.bin:${HOME}/.nvm/versions/node/v22.7.0/bin/"
       },
       "runtimeArgs": ["vitest"],
       "type": "node",
@@ -131,9 +131,9 @@
     {
       "name": "Launch Vite DEV server",
       "request": "launch",
-      "runtimeExecutable": "/Users/justinspbjrs/injection/node_modules/.bin/vitest",
+      "runtimeExecutable": "${HOME}/injection/node_modules/.bin/vitest",
       "env": {
-        "PATH": "${env:PATH}:${workspaceFolder}/node_modules/.bin:/Users/justinspbjrs/.nvm/versions/node/v22.7.0/bin/"
+        "PATH": "${env:PATH}:${workspaceFolder}/node_modules/.bin:${HOME}/.nvm/versions/node/v22.7.0/bin/"
       },
       "type": "node"
       // "serverReadyAction": {
