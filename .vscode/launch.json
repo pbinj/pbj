@@ -4,6 +4,7 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
+
   {
     "name": "Launch Edge",
     "request": "launch",
@@ -56,7 +57,7 @@
       "program": "${workspaceFolder}/docs/src/markdown-loader.ts",
       "cwd": "${workspaceFolder}/docs",
       "args": [
-        "./registry.md"
+        "./pbj-key.md"
       ],
       /*
        * Path to tsx binary

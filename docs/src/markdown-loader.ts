@@ -2,19 +2,27 @@ import { marked, type Tokens } from 'marked';
 import fs from 'fs/promises';
 import * as ts from "typescript";
 import { SourceMapGenerator } from 'source-map';
+import * as tsvfs from '@typescript/vfs';
+import path from 'path';
 
-const transpileOptions: ts.TranspileOptions = {
+const transpileOptions = {
   compilerOptions: {
     module: ts.ModuleKind.CommonJS,
     target: ts.ScriptTarget.ES5,
     sourceMap: true,
+    skipLibCheck: true,
+    paths: {
+      "@pbinj/pbj/*": ["./node_modules/@pbinj/pbj/src/*.ts"],
+      "@pbinj/pbj": ["./node_modules/@pbinj/pbj/src/index.ts"]
+    }
   },
-};
+} as const satisfies ts.TranspileOptions;
 
 interface CodeBlock {
   lang: string;
   text: string;
   lineStart: number;
+  filename: string;
 }
 const toObjStrMap = (...values: string[]) => {
   return values.reduce((acc, cur, idx) => `${acc}${JSON.stringify(cur)}:__${idx},`, '{') + '}';
@@ -25,84 +33,124 @@ export async function parseMarkdownFile(filePath: string): Promise<CodeBlock[]> 
   const tokens = marked.lexer(content);
   let lineCount = 1;
   return tokens
-    .filter((token): token is Tokens.Code => token.type === 'code')
-    .map(token => {
-      const block = { lang: token.lang || '', text: token.text, lineStart: lineCount };
+    .filter((token): token is Tokens.Code => token.type === 'code' && token.lang === 'typescript')
+    .map((token, index) => {
+      const filenameMatch = token.text.match(/\/\/\s*filename\s*=\s*(.+)/);
+      const filename = filenameMatch ? filenameMatch[1].trim() : `example-${index}.ts`;
+      const text = token.text.replace(/\/\/\s*filename\s*=\s*.+\n/, '');
+      const block = { lang: token.lang || '', text, lineStart: lineCount, filename };
       lineCount += token.text.split('\n').length + 1; // +1 for the code fence
       return block;
     });
 }
 
 const plugin = {
-  async load(id: string) {
-    if (!id.endsWith('.md')) return null;
-
-    const codeBlocks = await parseMarkdownFile(id);
+  async load(file: string) {
+    if (!file.endsWith('.md')) return null;
+    const codeBlocks = await parseMarkdownFile(file);
     const testCases: string[] = [];
     const importSet = new Set<string>();
-    const sourceMapGenerator = new SourceMapGenerator({ file: id });
+    const sourceMapGenerator = new SourceMapGenerator({ file });
     let generatedLineOffset = 4; // Offset for import statements and other boilerplate
+    const projectRoot = path.join(__dirname, "..")
+    const fsMap = new Map<string, string>();
+
+
+
+
+    const system = tsvfs.createFSBackedSystem(fsMap, projectRoot, ts)
+    const env = tsvfs.createVirtualTypeScriptEnvironment(system, [], ts, transpileOptions.compilerOptions)
+
+    const host = tsvfs.createVirtualCompilerHost(system, transpileOptions.compilerOptions, ts)
+
+
+    const rootNames = [];
+    const transpiledMap = new Map<string, string>();
+    for (const block of codeBlocks) {
+      rootNames.push(block.filename);
+      fsMap.set(block.filename.replace('.ts', ''), block.text);
+      env.createFile(block.filename, block.text);
+    }
+    const program = ts.createProgram({
+      rootNames,
+      options: transpileOptions.compilerOptions,
+      host: host.compilerHost,
+    });
+
+    try {
+      const result = program.emit();
+      console.log(result);
+
+
+    } catch (e) {
+      console.error(e);
+      throw e;
+    }
+    const diagnostics = program.getSemanticDiagnostics();
+    const diagMap = new Map<string, ts.Diagnostic[]>();
+    if (diagnostics.length) {
+      for (const diag of diagnostics) {
+        if (diag.file?.fileName) {
+          diagMap.set(diag.file.fileName || '', (diagMap.get(diag.file.fileName) || []).concat(diag))
+        }
+      }
+    }
 
     for (const block of codeBlocks) {
-      if (block.lang !== 'typescript') continue;
-      const index: number = testCases.length;
-      let sourceFile;
-      try {
-        sourceFile = ts.createSourceFile(
-          `${id}-${index}.ts`,
-          block.text,
-          ts.ScriptTarget.Latest,
-          true
-        );
-      } catch (e) {
-        console.error(`Error parsing TypeScript in ${id} at line ${block.lineStart}:`, e);
-        testCases.push(`test('Example ${index + 1}', () => { throw new Error("Failed to parse TypeScript Block ${index + 1} in ${id}\n${JSON.stringify(block.text)}\n${JSON.stringify(e)}"); })`);
+      const diags = diagMap.get(block.filename);
+      const index = testCases.length + 1;
+      if (diags?.length) {
+        testCases.push(`test('Example ${index}', () => { throw new Error("Failed to compile TypeScript Block ${index} in (${file}) ${block.filename}\\n${diags.map(d => `${d.code} (${d.start}): ${JSON.stringify(d.messageText)}`).join('\\n')}"); })`);
+        continue;
+      }
+
+      const sourceFile = program.getSourceFile(block.filename);
+      if (!sourceFile) {
+        console.error(`Source file not found for ${block.filename}`);
         continue;
       }
       sourceFile.statements.forEach((statement) => {
         if (ts.isImportDeclaration(statement)) {
-          generatedLineOffset++;
-          importSet.add(statement.moduleSpecifier.getFullText().trim().slice(1, -1));
+          if (importSet.size !== importSet.add(statement.moduleSpecifier.getFullText().trim().slice(1, -1)).size) {
+            generatedLineOffset++;
+          }
         }
       });
 
-      const transpiledOutput = ts.transpileModule(block.text, {
-        ...transpileOptions,
-        fileName: `${id}-${index}.ts`,
-      });
 
-      const transpiledCode = transpiledOutput.outputText;
-      const transpiledMap = JSON.parse(transpiledOutput.sourceMapText || '{}');
+      // const transpiledCode = sourceFile.tra
+      // const transpiledMap = JSON.parse(transpiledOutput.sourceMapText || '{}');
 
-      // Adjust source map
-      transpiledMap.sources = [id];
-      transpiledMap.mappings.split(';').forEach((line: string, lineIndex: number) => {
-        line.split(',').forEach((segment: string) => {
-          const [column, sourceIndex, sourceLine, sourceColumn] = segment.split('').map(Number);
-          if (!isNaN(sourceLine)) {
-            sourceMapGenerator.addMapping({
-              generated: {
-                line: lineIndex + generatedLineOffset,
-                column: column || 0
-              },
-              original: {
-                line: sourceLine + block.lineStart,
-                column: sourceColumn || 0
-              },
-              source: id
-            });
-          }
-        });
-      });
-
+      // // Adjust source map
+      // transpiledMap.sources = [file];
+      // transpiledMap.mappings.split(';').forEach((line: string, lineIndex: number) => {
+      //   line.split(',').forEach((segment: string) => {
+      //     const [column, sourceIndex, sourceLine, sourceColumn] = segment.split('').map(Number);
+      //     if (!isNaN(sourceLine)) {
+      //       sourceMapGenerator.addMapping({
+      //         generated: {
+      //           line: lineIndex + generatedLineOffset,
+      //           column: column || 0
+      //         },
+      //         original: {
+      //           line: sourceLine + block.lineStart,
+      //           column: sourceColumn || 0
+      //         },
+      //         source: file
+      //       });
+      //     }
+      //   });
+      // });
+      const transpiledCode = transpiledMap.get(block.filename.replace('/', '').replace('.ts', '.js'));
       testCases.push(`
-        test('Example ${index + 1}', async () => {
+        test('Example ${index} ${file ? ` (${block.filename})` : ''}', async () => {
           const exports = {};
           ${transpiledCode}
         });
       `);
-
-      generatedLineOffset += transpiledCode.split('\n').length + 3; // +3 for test function wrapper
+      if (transpiledCode) {
+        generatedLineOffset += transpiledCode?.split('\n').length + 3; // +3 for test function wrapper
+      }
     }
 
     const code = `

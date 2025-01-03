@@ -18,10 +18,10 @@
   },
   "devDependencies": {
     "@pbinj/pbj": "workspace:*",
-    "@pbinj/pbj-visualization": "workspace:*",
     "@pbinj/pbj-prometheus": "workspace:*",
-    
+    "@pbinj/pbj-visualization": "workspace:*",
     "@types/node": "^22.10.2",
+    "@typescript/vfs": "^1.6.0",
     "marked": "^15.0.4",
     "source-map": "^0.7.4",
     "tsx": "^4.19.2",

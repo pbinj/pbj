@@ -5,10 +5,12 @@ This guide explains how to write effective documentation for PBinJ, focusing on 
 ## Code Examples
 
 Code examples are crucial for good documentation. In PBinJ, we use a special system to ensure our code examples are always up-to-date and working.
+This is done through the use of the `markdown-loader.ts` [vite](https://vitejs.dev/) plugin.   It attempts to transpile and run each example as a [vitest](https://vitest.dev/).  If it fails, the build will fail.   It should ensure that all our code examples are valid and up-to-date with the current version of PBinJ.  In addition it ensures that the sentax is correct.
 
 ### Basic Code Examples
 
-For basic code examples that don't need to be tested, use the standard Markdown code block syntax with the `ts` language identifier.
+For basic code examples that don't need to be tested, use the standard Markdown code block syntax with the `ts` language identifier.  Use this for
+examples that are showing code contracts or otherwise would be invalid typescript.  In general this should not be used and `typescript` should be used.
 
 ### Testable Code Examples
 

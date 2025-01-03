@@ -8,16 +8,17 @@ like branded types. We can use this type information for convenient tokens.
 
 Separate your interfaces from your implementation.
 
-```ts
-//filename=interfaces.ts
+```typescript
+//filename=/interfaces.ts
 import {  pbjKey } from "@pbinj/pbj";
 
+export class User {};
 // Define your interfaces
-interface LoggerService {
+export interface LoggerService {
   log(message: string): void;
 }
 
-interface DatabaseService {
+export interface DatabaseService {
   findUser(id: string): Promise<User>;
 }
 
@@ -28,19 +29,39 @@ export const loggerKey = pbjKey<LoggerService>("@yourservice/logger");
 export const dbKey = pbjKey<DatabaseService>("@yourservice/database");
 
 ```
+## Create Services
+
+```typescript
+// filename=/services.ts
+import type { LoggerService, DatabaseService } from "/interfaces";
+import { User } from "/interfaces";
+
+export class LoggerServiceImpl implements LoggerService {
+  log(message: string) {
+    console.log(message);
+  }
+}
+
+export class DatabaseServiceImpl implements DatabaseService {
+  async findUser(id: string) {
+    // Implementation
+    return new User();
+  }    
+}
+```
 
 ## Registering Services
 
 Register services with `context.register()`:
 
-```ts
-// filename=services.ts
+```typescript
+// filename=./pbj.ts
 import { context } from "@pbinj/pbj";
-import type { LoggerService, DatabaseService } from "./interfaces";
-import { loggerKey, dbKey } from "./services";
+import { LoggerServiceImpl, DatabaseServiceImpl } from "/services";
+import { loggerKey, dbKey } from "/interfaces";
 
-context.register(loggerKey, LoggerService);
-context.register(dbKey, DatabaseService);
+context.register(loggerKey, LoggerServiceImpl);
+context.register(dbKey, DatabaseServiceImpl);
 
 
 ```
