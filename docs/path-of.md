@@ -121,7 +121,6 @@ class ApiService {
 }
 ```
 
-@pbinj
 
 ### Environment Variables
 
