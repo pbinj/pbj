@@ -5,10 +5,10 @@
 Install like any other npm package:
 
 ```bash
-$ npm install @@pbinja
+$ npm install @pbinj/pbj
 ```
 
-```bash@pbinj
+```bash
 $ pnpm install @pbinj/pbj
 ```
 
