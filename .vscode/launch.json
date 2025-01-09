@@ -5,6 +5,8 @@
   "version": "0.2.0",
   "configurations": [
 
+
+
   {
     "name": "Launch Edge",
     "request": "launch",
@@ -49,7 +51,7 @@
       ]
     },
       {
-      "name": "markdown-loader",
+      "name": "markdown-loader constructor-injection.md",
       "type": "node",
       "request": "launch",
 
@@ -57,7 +59,7 @@
       "program": "${workspaceFolder}/docs/src/markdown-loader.ts",
       "cwd": "${workspaceFolder}/docs",
       "args": [
-        "./pbj-key.md"
+        "./constructor-injection.md"
       ],
       /*
        * Path to tsx binary

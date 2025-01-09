@@ -63,19 +63,18 @@ Environment variables:
 
 ```typescript
 import { pbj } from "@pbinj/pbj";
-import { promClientPBinJKey } from "@pbinj/pbj-prometheus";
+import { promClientPBinJKey, registerKey } from "@pbinj/pbj-prometheus";
 
 class CustomMetricsService {
   constructor(
     private prometheus = pbj(promClientPBinJKey),
-    register = pbj(registerKey)
-  ) {
-    this.requestCounter = new prometheus.Counter({
+    register = pbj(registerKey),
+    private requestCounter = new this.prometheus.Counter({
       name: "http_requests_total",
-      help: "Total HTTP requests",
+      help: "Total number of HTTP requests",
       labelNames: ["method", "status"],
-      registers: [register],
-    });
+    })
+  ) {
   }
 
   recordRequest(method: string, status: number) {
@@ -89,9 +88,10 @@ class CustomMetricsService {
 The plugin automatically monitors registered services:
 
 ```ts
-import { context } from "@pbinj/pbj";
+import { context, pbjKey } from "@pbinj/pbj";
 import { MetricsConfig } from "@pbinj/pbj-prometheus";
-
+const userServiceKey = pbjKey<UserService>("user-service");
+const authServiceKey = pbjKey<AuthService>("auth-service");
 // Monitor specific services
 context.register(MetricsConfig, {
   tags: [userServiceKey, authServiceKey],
@@ -123,7 +123,8 @@ const registry = pbj(registerKey);
 
 Core service for managing metrics:
 
-```ts
+```typescript
+import { pbj } from "@pbinj/pbj";
 import { MetricService } from "@pbinj/pbj-prometheus";
 
 class CustomService {
@@ -215,13 +216,12 @@ context.register(MetricsConfig, {
 
 // Create custom metrics
 class ApiMetrics {
-  constructor(private prometheus = pbj(promClientPBinJKey)) {
-    this.requestDuration = new prometheus.Histogram({
+  constructor(private prometheus = pbj(promClientPBinJKey), private requestDuration = new prometheus.Histogram({
       name: "api_request_duration_seconds",
       help: "API request duration",
       labelNames: ["method", "path", "status"],
       buckets: [0.1, 0.5, 1, 2, 5],
-    });
+    })) {
   }
 
   recordRequest(

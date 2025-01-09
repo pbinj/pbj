@@ -18,7 +18,7 @@ interface DatabaseService {
 }
 
 // Create a key
-const dbKey = Symbol("DatabaseService");
+export const dbKey:unique symbol = Symbol() ;
 
 // Augment the registry
 declare module "@pbinj/pbj" {
@@ -40,10 +40,11 @@ class LoggerService {
     console.log(message);
   }
 }
+const loggerKey:unique symbol = Symbol();
 
 declare module "@pbinj/pbj" {
   interface Registry {
-    [typeof LoggerService]: InstanceType<typeof LoggerService>;
+    [loggerKey]: InstanceType<typeof LoggerService>;
   }
 }
 
@@ -61,7 +62,7 @@ interface CacheService {
   set(key: string, value: string): Promise<void>;
 }
 
-const cacheKey = pbjKey<CacheService>("cache");
+const cacheKey:unique symbol = pbjKey<CacheService>("cache");
 
 declare module "@pbinj/pbj" {
   interface Registry {
@@ -86,8 +87,8 @@ interface AuthProvider {
   authenticate(token: string): Promise<boolean>;
 }
 
-const localAuthKey = pbjKey<AuthProvider>("local-auth");
-const oauthKey = pbjKey<AuthProvider>("oauth");
+const localAuthKey:unique symbol = pbjKey<AuthProvider>("local-auth");
+const oauthKey:unique symbol = pbjKey<AuthProvider>("oauth");
 
 declare module "@pbinj/pbj" {
   interface Registry {
@@ -112,7 +113,7 @@ interface User {
   name: string;
 }
 
-const userRepoKey = pbjKey<Repository<User>>("user-repository");
+const userRepoKey:unique symbol = Symbol();
 
 declare module "@pbinj/pbj" {
   interface Registry {
@@ -130,11 +131,11 @@ Create a dedicated types file for your registry declarations:
 ```ts
 // types/registry.ts
 import { pbjKey } from "@pbinj/pbj";
-import type { UserService, AuthService, LoggerService } from "../services";
+import type { UserService, AuthService, LoggerService } from "/services";
 
-export const userServiceKey = pbjKey<UserService>("user");
-export const authServiceKey = pbjKey<AuthService>("auth");
-export const loggerServiceKey = pbjKey<LoggerService>("logger");
+export const userServiceKey:unique symbol = Symbol();
+export const authServiceKey:unique symbol = Symbol();
+export const loggerServiceKey:unique symbol = Symbol();
 
 declare module "@pbinj/pbj" {
   interface Registry {
@@ -149,7 +150,7 @@ declare module "@pbinj/pbj" {
 
 ```ts
 // services/database/types.ts
-export const dbServiceSymbol = Symbol("DatabaseService");
+export const dbServiceSymbol:unique symbol = Symbol("DatabaseService");
 
 declare module "@pbinj/pbj" {
   interface Registry {
@@ -158,28 +159,7 @@ declare module "@pbinj/pbj" {
 }
 ```
 
-### 3. Group Related Services
-
-```ts
-import { pbjKey } from "@pbinj/pbj";
-
-// features/auth/types.ts
-export const authKeys = {
-  service: pbjKey<AuthService>("auth-service"),
-  provider: pbjKey<AuthProvider>("auth-provider"),
-  cache: pbjKey<AuthCache>("auth-cache"),
-} as const;
-
-declare module "@pbinj/pbj" {
-  interface Registry {
-    [authKeys.service]: AuthService;
-    [authKeys.provider]: AuthProvider;
-    [authKeys.cache]: AuthCache;
-  }
-}
-```
-
-### 4. Document Service Contracts
+### 3. Document Service Contracts
 
 ```ts
 /**
@@ -202,6 +182,7 @@ interface CacheService {
    */
   set(key: string, value: string, ttl?: number): Promise<void>;
 }
+const cacheServiceKey:unique symbol = pbjKey<CacheService>("cache");
 
 declare module "@pbinj/pbj" {
   interface Registry {
@@ -230,6 +211,14 @@ interface ApiClient {
 class ApiClientImpl implements ApiClient {
   constructor(private config: Config, private logger: LoggerService) {}
   //...
+  async get(path: string) {
+    this.logger.log(`GET ${path}`);
+    //...
+  }
+  async post(path: string, data: any) {
+    this.logger.log(`POST ${path}`);
+    //...
+  }
 }
 
 const configKey = pbjKey<Config>("config");
@@ -241,6 +230,7 @@ declare module "@pbinj/pbj" {
     [apiClientKey]: ApiClient;
   }
 }
+context.register(configKey, { apiUrl: "https://api.example.com", apiKey: "secret" });
 
 // Type-safe factory with dependencies
 context.register(
@@ -260,12 +250,22 @@ interface EmailProvider {
   sendEmail(to: string, subject: string, body: string): Promise<void>;
 }
 
-const emailKey = pbjKey<EmailProvider>("email");
+const emailKey:unique symbol = Symbol();
 
 declare module "@pbinj/pbj" {
   interface Registry {
     [emailKey]: EmailProvider;
   }
+}
+
+class AwsEmailProvider implements EmailProvider {
+
+  // ...
+  async sendEmail(){};
+}
+class MockEmailProvider implements EmailProvider {
+  // ...
+  async sendEmail(){};
 }
 
 // Register different implementations based on environment
@@ -274,23 +274,5 @@ if (process.env.NODE_ENV === "production") {
 } else {
   context.register(emailKey, () => new MockEmailProvider());
 }
-```
-
-### Testing Support
-
-```ts
-import { context } from "@pbinj/pbj";
-
-// test/mocks/registry.ts
-declare module "@pbinj/pbj" {
-  interface Registry {
-    [dbKey]: jest.Mocked<DatabaseService>;
-    [authKey]: jest.Mocked<AuthService>;
-  }
-}
-
-// test/setup.ts
-context.register(dbKey, () => createMock<DatabaseService>());
-context.register(authKey, () => createMock<AuthService>());
 ```
 

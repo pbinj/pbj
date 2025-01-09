@@ -28,6 +28,14 @@ unsubscribe();
 ## Dynamic Service Collection
 
 ```typescript
+import { pbjKey, context } from "@pbinj/pbj";
+
+interface Plugin {
+  initialize(): void;
+}
+
+const pluginKey = pbjKey<Plugin>("plugin");
+
 class PluginManager {
   constructor(private plugins: Plugin[] = context.listOf(pluginKey)) {
     /**
@@ -38,7 +46,9 @@ class PluginManager {
      **/
     context.onServiceAdded((...plugins) => {
       for (const plugin of plugins) {
-        plugin.initialize();
+        if (plugin.hasTag(pluginKey)) {
+          plugin.invoke().initialize();
+        }
       }
     });
   }
@@ -86,6 +96,8 @@ class RouterManager {
 1. **Cleanup Subscriptions**: Always store and call the unsubscribe function when the listener is no longer needed:
 
 ```typescript
+import { context } from "@pbinj/pbj";
+
 class ServiceManager {
   private unsubscribe?: () => void;
 
@@ -104,6 +116,12 @@ class ServiceManager {
 2. **Efficient Updates**: Batch updates when handling multiple services:
 
 ```typescript
+import { pbjKey, context } from "@pbinj/pbj";
+interface Feature {
+  //...
+}
+const featureKey = pbjKey<Feature>("feature");
+
 class FeatureManager {
   private updateScheduled = false;
 
@@ -117,6 +135,9 @@ class FeatureManager {
         });
       }
     });
+  }
+  updateFeatures(){
+    //...
   }
 }
 ```
@@ -133,7 +154,12 @@ class LoggerService {
 }
 const metricsKey = pbjKey<MetricsService>("metrics");
 const loggingKey = pbjKey<LoggerService>("logging");
-
+function updateMetrics() {
+  //...
+}
+function updateLoggers() {
+  //...
+}
 context.onServiceAdded((service) => {
     if (service.hasTag(metricsKey)) {
       updateMetrics();
@@ -151,4 +177,3 @@ context.onServiceAdded((service) => {
 - Use `hasTag()` to filter relevant service changes
 - The event provides the `ServiceDescriptor`, not the service instance
 - Multiple tags can be checked in a single listener
--

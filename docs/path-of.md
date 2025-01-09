@@ -5,9 +5,26 @@ The `pathOf` helper is a utility function that creates a type-safe getter for ac
 ## Basic Usage
 
 ```typescript
-import { pathOf, pbjKey } from "@pbinj/pbj";
+// filename=/config.ts, title=Config Classes
+import { pathOf, pbjKey, context } from "@pbinj/pbj";
+export class DatabaseConfig{
+  constructor(public host: string, public port: number){}
+}
+export interface Config {
+  database:DatabaseConfig;
+  users: string[];
+};
 
-const configKey = pbjKey<Config>("config");
+export const configKey = pbjKey<Config>("config");
+
+context.register(configKey, { database: new DatabaseConfig("localhost", 5432 ), users: ["user1", "user2"] });
+```
+
+Can be used like this:
+
+```typescript
+import { pathOf, pbjKey } from "@pbinj/pbj";
+import { configKey } from "/config";
 
 // Access nested property
 const dbHostGetter = pathOf(configKey, "database.host");
@@ -49,10 +66,10 @@ Access array elements using bracket notation:
 import { pathOf, pbjKey } from "@pbinj/pbj";
 
 interface AppConfig {
-  users: Array<{
+  users: {
     name: string;
     roles: string[];
-  }>;
+  }[];
 }
 
 const configKey = pbjKey<AppConfig>("config");
@@ -94,7 +111,8 @@ const nameGetter = pathOf(userKey, "name");
 
 ### Configuration Access
 
-```typescript
+```ts
+//title=Configuration Access
 import { pathOf, pbjKey } from "@pbinj/pbj";
 
 const configKey = pbjKey<{
@@ -108,8 +126,12 @@ const configKey = pbjKey<{
 }>("config");
 
 class ApiService {
-  private usersEndpoint = pathOf(configKey, "api.endpoints.users")();
-  private timeout = pathOf(configKey, "api.timeout", 5000)();
+  constructor(
+    private usersEndpoint = pathOf(configKey, "api.endpoints.users"), 
+    private timeout = pathOf(configKey, "api.timeout", 5000)
+    ) {
+    // Resolve the values when needed
+  }
 
   async fetchUsers() {
     // Use the resolved values
@@ -135,7 +157,7 @@ const getApiKey = pathOf(envPBinJKey, "API_KEY");
 class DatabaseService {
   constructor(
     private url =  pathOf(envPBinJKey, "DATABASE_URL"), 
-    private apiKey = ApiKey = pathOf(envPBinJKey, "API_KEY")){
+    private apiKey = pathOf(envPBinJKey, "API_KEY")){
   }
 }
 ```
@@ -197,58 +219,55 @@ const invalidGetter = pathOf(configKey, "database.invalid");
 
    ```typescript
    import { pathOf, pbjKey } from "@pbinj/pbj";
+  class User {
+    constructor(public id: number, public name: string) {}
+  }
+  const userKey = pbjKey<User>("user");
+  const nameGetter = pathOf(sessionKey, "user.name");
 
-   const userKey = pbjKey<User>("user");
-   const nameGetter = pathOf(sessionKey, "user.name");
-
-   context.register(userKey, nameGetter);
+   context.register(userKey, new User(id=1, name='Bob Loblaw'));
    ```
 
-2. **Centralize Path Definitions**
-
-   ```typescript
-   import { pathOf, pbjKey } from "@pbinj/pbj";
-
-   // paths.ts
-   export const configPaths = {
-     dbHost: pathOf(configKey, "database.host"),
-     dbPort: pathOf(configKey, "database.port"),
-     apiKey: pathOf(configKey, "api.key"),
-   };
-   ```
-
-3. **Handle Optional Values**
+2. **Handle Optional Values**
 
    ```typescript
    import { pathOf, pbjKey } from "@pbinj/pbj";
 
    class UserService {
-     private userRoles = pathOf(userKey, "roles", []);
+     constructor(private userRoles = pathOf(userKey, "roles", [])){}
 
      hasRole(role: string) {
-       return this.userRoles().includes(role);
+       return this.userRoles.includes(role);
      }
    }
    ```
 
-4. **Composition with Other Features**
+3. **Composition with Other Features**
 
    ```typescript
    import { pathOf, pbjKey } from "@pbinj/pbj";
-   
-   // Combine with async context
-   const sessionUser = pathOf(sessionKey, "user");
+   import express from 'express';
 
+   const app = express();
+
+   class User {
+     id: number;
+     name: string;
+   }
+   const sessionKey = pbjKey<{ user: User }>("session");
+   const requestScoped = context.scoped(sessionKey);
+
+   // Combine with async context
    app.use((req, res, next) => {
-     const requestScoped = context.scoped(sessionKey);
      requestScoped(next, { user: req.user });
    });
 
    class AuthService {
-     private currentUser = sessionUser;
+     constructor(private currentUser = pathOf(sessionKey, "user")){
+     }
 
      isAuthenticated() {
-       return Boolean(this.currentUser());
+       return Boolean(this.currentUser?.id);
      }
    }
    ```

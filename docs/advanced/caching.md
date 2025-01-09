@@ -7,12 +7,28 @@ PBinJ provides flexible caching capabilities through the `withCacheable` method 
 ### Enable/Disable Caching
 
 ```typescript
-import { context } from "@pbinj/pbj";
+import { context, pbj } from "@pbinj/pbj";
+class User {
+  constructor(public id: string, public name: string) {}
+}
+class UserRepository {
+  //...
+  findById(id: string) {
+    // Expensive operation
+    return new User(id, "John Doe");
+  }
+}
+class DatabaseService {
+  //...
+  constructor(private users = pbj(UserRepository)) {}
+}
 
 class UserService {
+  constructor(private db = pbj(DatabaseService)) {}
+
   async getUser(id: string) {
     // Expensive operation
-    return await db.users.findById(id);
+    return await this.db.users.findById(id);
   }
 }
 

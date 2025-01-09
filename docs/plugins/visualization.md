@@ -28,10 +28,11 @@ $ pbj-visualization ./path/to/your/pea.ts
 
 Or for more control embed it into your app.
 
-```ts
+```typescript
 import { register } from "@pbinj/pbj-visualization";
+import { context } from "@pbinj/pbj";
 
-register(app);
+register(context);
 ```
 
 By default, this will:
@@ -53,10 +54,10 @@ PBJ_PATH=/pbj        # Base path for the visualization UI
 Or programmatically:
 
 ```typescript
-import { register, ServerConfig, visualizationConfigKey } from "@pbinj/pbj-visualization";
+import { register, ServerConfig, serverConfigPBinJKey } from "@pbinj/pbj-visualization";
 import { context } from "@pbinj/pbj";
 
-context.register(visualizationConfigKey,  new ServerConfig(4000, "0.0.0.0", "/debug"));
+context.register(serverConfigPBinJKey,  new ServerConfig("4000", "0.0.0.0", "/debug"));
 register(context);
 
 ```
@@ -86,11 +87,10 @@ Shows the PBinJ logs in real time.
 ### Basic Setup
 
 ```typescript
-import express from "express";
 import { register } from "@pbinj/pbj-visualization";
-import { context } from "@pbinj/pbj";
+import { context, pbj } from "@pbinj/pbj";
+import express from "express";
 
-const app = express();
 class DatabaseService {
   // ...
 }
@@ -108,10 +108,10 @@ context.register(DatabaseService);
 context.register(UserService);
 context.register(AuthService);
 
-// Add visualization
-register(context);
+// Add visualization to your express app.
+const app = undefined; // Your express app
+register(context, app);
 
-app.listen(3000);
 ```
 
 
@@ -120,11 +120,13 @@ app.listen(3000);
 1. **Development Only**
    Consider enabling visualization only in development:
 
-   ```typescript
+```typescript
+   import { register } from "@pbinj/pbj-visualization";
+  
    if (process.env.NODE_ENV === "development") {
-     register(app);
+     register();
    }
-   ```
+```
 
 
 

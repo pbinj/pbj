@@ -41,7 +41,7 @@ describe("UserService", () => {
 
 ```ts
 import { context, pbj, pbjKey } from "@pbinj/pbj";
-import { describe, it } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 interface Logger {
   log(message: string): void;
@@ -73,15 +73,39 @@ describe("UserService", () => {
 ## Advanced Testing Patterns
 
 ### Testing Async Contexts
+```typescript
+//filename=/auth.ts
+import { pbj, pbjKey } from "@pbinj/pbj";
+
+export const sessionKey = pbjKey<Session>("session");
+
+export class User {
+
+}
+export class Session {
+  user: User | null;
+};
+export class AuthService {
+  constructor(private session = pbj(sessionKey)) {}
+
+  isAuthenticated() {
+    return Boolean(this.session?.user);
+  }
+}
+
+
+```
 
 ```typescript
+//filname=/auth.test.ts
 import { context, pbj, pbjKey } from "@pbinj/pbj";
-import { describe, it } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import "@pbinj/pbj/scope";
+import { Session, AuthService, sessionKey } from "/auth";
+
 
 describe("AuthService", () => {
   it("should handle session-scoped dependencies", async () => {
-    const sessionKey = pbjKey<Session>("session");
     const scopeHandler = context.scoped(sessionKey);
     const mockSession = { user: { id: "1", name: "Test" } };
 
@@ -96,14 +120,36 @@ describe("AuthService", () => {
 ### Testing Factory Injections
 
 ```typescript
-import { context, pbj, pbjKey } from "@pbinj/pbj";
-import { describe, it } from 'vitest';
+//filename=/data-service.ts
 
-interface ApiClient {
+import { context, pbj, pbjKey } from "@pbinj/pbj";
+
+export interface ApiClient {
   fetch(url: string): Promise<any>;
 }
 
-const apiClientKey = pbjKey<ApiClient>("api-client");
+export class ConfigService {
+  constructor(public apiUrl =  "http://localhost:3000") {
+  }
+}
+
+export class DataService{
+  constructor(private apiClient = pbj(apiClientKey)){}
+  getData(){
+    return this.apiClient.fetch("/data");
+  }
+}
+
+export const apiClientKey = pbjKey<ApiClient>("api-client");
+```
+
+Then test it like this:
+
+```typescript
+//filename=/data-service.test.ts
+import { describe, it, expect, vi } from 'vitest';
+import { apiClientKey, ApiClient, ConfigService, DataService } from "/data-service";
+import { context, pbj } from "@pbinj/pbj";
 
 describe("DataService", () => {
   it("should use configured API client", async () => {
@@ -127,7 +173,7 @@ describe("DataService", () => {
 
 ```typescript
 import { context, pbj, pbjKey } from "@pbinj/pbj";
-import { describe, it } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 interface Plugin {
   execute(): void;
@@ -158,6 +204,9 @@ describe("PluginManager", () => {
 
 ```ts
 import {  pbj, pbjKey, createNewContext } from "@pbinj/pbj";
+import { vi } from 'vitest';
+import {createMockLogger, createTestConfig} from "/database-mocks";
+import {loggerKey, configKey} from "/keys";
 
 // test/helpers.ts
 export function createTestContext() {
@@ -179,26 +228,13 @@ export function createMockLogger() {
 }
 ```
 
-### 2. Use Test-Specific Types
 
-```ts
-// test/types.ts
-export interface TestContext {
-  logger: jest.Mocked<Logger>;
-  config: TestConfig;
-}
+### 2. Organize Test Mocks
 
-declare module "@pbinj/pbj" {
-  interface Registry extends TestContext {
-    // Additional test-specific types
-  }
-}
-```
+```typescript
+import { vi } from 'vitest';
 
-### 3. Organize Test Mocks
-
-```ts
-// test/mocks/database.ts
+// filename=/database-mocks.ts
 export function createMockDatabase() {
   return {
     query: vi.fn(),
@@ -225,11 +261,12 @@ import { createNewContext, pbj, pbjKey } from "@pbinj/pbj";
 import { UserService } from "../services/user";
 import { EmailService } from "../services/email";
 import { DatabaseService } from "../services/database";
+import { vi } from 'vitest';
 
 describe("User Registration", () => {
   let context: Context;
-  let mockDb: jest.Mocked<DatabaseService>;
-  let mockEmail: jest.Mocked<EmailService>;
+  let mockDb: vi.Mocked<DatabaseService>;
+  let mockEmail: vi.Mocked<EmailService>;
 
   beforeEach(() => {
     context = createNewContext();

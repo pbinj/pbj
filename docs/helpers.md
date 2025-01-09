@@ -13,7 +13,7 @@ The `transform` function allows you to apply a transformation to a resolved serv
 
 ### Syntax
 
-```typescript
+```ts
 function transform<R, T extends PBinJKey<TRegistry>, TRegistry extends RegistryType = Registry>(
   service: T,
   transformer: (v: ValueOf<TRegistry, T>) => R
@@ -33,6 +33,15 @@ The result of applying the transformer function to the resolved service.
 
 ```typescript
 import { transform, pbjKey } from '@pbinj/pbj';
+
+interface User {
+  name: string;
+  email: string;
+}
+
+interface UserService {
+  getCurrentUser(): User;
+}
 
 const userService = pbjKey<UserService>('userService');
 

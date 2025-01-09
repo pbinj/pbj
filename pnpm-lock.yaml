@@ -43,6 +43,9 @@ importers:
       '@pbinj/pbj-visualization':
         specifier: workspace:*
         version: link:../packages/pbj-visualization
+      '@types/express':
+        specifier: ^5.0.0
+        version: 5.0.0
       '@types/node':
         specifier: ^22.10.2
         version: 22.10.2

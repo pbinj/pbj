@@ -10,7 +10,7 @@ Separate your interfaces from your implementation.
 
 ```typescript
 //filename=/interfaces.ts
-import {  pbjKey } from "@pbinj/pbj";
+import { pbjKey } from "@pbinj/pbj";
 
 export class User {};
 // Define your interfaces
@@ -33,8 +33,7 @@ export const dbKey = pbjKey<DatabaseService>("@yourservice/database");
 
 ```typescript
 // filename=/services.ts
-import type { LoggerService, DatabaseService } from "/interfaces";
-import { User } from "/interfaces";
+import { type LoggerService, type DatabaseService, User} from "/interfaces";
 
 export class LoggerServiceImpl implements LoggerService {
   log(message: string) {
@@ -55,7 +54,7 @@ export class DatabaseServiceImpl implements DatabaseService {
 Register services with `context.register()`:
 
 ```typescript
-// filename=./pbj.ts
+// filename=/pbj.ts
 import { context } from "@pbinj/pbj";
 import { LoggerServiceImpl, DatabaseServiceImpl } from "/services";
 import { loggerKey, dbKey } from "/interfaces";

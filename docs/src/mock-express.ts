@@ -1,5 +1,5 @@
 
-function expressLike() {
+export function express() {
     return {
         get() { },
         post() { },
@@ -7,8 +7,7 @@ function expressLike() {
         delete() { },
         use() { },
         listen() { }
-    };
+    } as any;
 }
-expressLike.json = () => { };
-expressLike.static = () => { };
-export default expressLike;
+export const json = express.json = express.static = () => { };
+export default express;

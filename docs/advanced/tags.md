@@ -22,12 +22,12 @@ class MetricsPlugin implements Plugin {
 const pluginKey = pbjKey<Plugin>("plugin");
 
 // Register services with tags
-context.register(AuthPlugin).withTags("plugin");
-context.register(LoggingPlugin).withTags("plugin");
-context.register(MetricsPlugin).withTags("plugin");
+context.register(AuthPlugin).withTags(pluginKey);
+context.register(LoggingPlugin).withTags(pluginKey);
+context.register(MetricsPlugin).withTags(pluginKey);
 
 // Retrieve all tagged services
-const plugins = context.listOf("plugin");
+const plugins = context.listOf(pluginKey);
 ```
 
 ## Multiple Tags
@@ -36,15 +36,20 @@ const plugins = context.listOf("plugin");
 
 import { pbjKey, context } from "@pbinj/pbj";
 class UserService {
+  id(){
+    return 1;
+  }
   //...
 }
+const userServiceKey = pbjKey<UserService>("user-service");
+const idableKey = pbjKey<{id:number}>("core");
 
 // Register with multiple tags
-context.register(UserService).withTags("service", "user", "core");
+context.register(UserService).withTags(userServiceKey, idableKey);
 
 // Services can be retrieved by any of their tags
-const services = context.listOf("service");
-const userServices = context.listOf("user");
+const services = context.listOf(idableKey);
+const userServices = context.listOf(userServiceKey);
 ```
 
 ## Type-Safe Tags
@@ -58,11 +63,13 @@ interface Handler {
 class AuthHandler implements Handler {
   handle(request: Request) {
     // Handle auth requests
+    return null as any;
   }
 }
 class LoggingHandler implements Handler {
   handle(request: Request) {
     // Handle logging requests
+    return null as any;
   }
 }
 
@@ -150,6 +157,7 @@ class UserHandler implements RouteHandler {
   method = "GET";
   handle(req: Request) {
     // Handle user requests
+    return null as any;
   }
 }
 class AuthHandler implements RouteHandler {
@@ -157,6 +165,7 @@ class AuthHandler implements RouteHandler {
   method = "POST";
   handle(req: Request) {
     // Handle auth requests
+    return null as any;
   }
 }
 
