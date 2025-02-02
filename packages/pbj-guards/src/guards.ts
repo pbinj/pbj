@@ -4,6 +4,10 @@ export const nullableSymbol = Symbol("@pbj/nullable");
 
 export const guardType = Symbol("@pbj/visualization/guardType");
 
+export type Guard<T> = ((value: unknown) => value is T) & {
+  [guardType]?: string;
+};
+
 export function isSymbol(x: unknown): x is symbol {
   return typeof x === "symbol";
 }
@@ -28,7 +32,7 @@ export function isObjectish(x: unknown): x is object {
 
 export function has(
   x: unknown,
-  k: PropertyKey,
+  k: PropertyKey
 ): x is { [k in PropertyKey]: unknown } {
   return isObjectish(x) && k in x;
 }
@@ -36,20 +40,22 @@ export function has(
 export function hasA<V>(
   x: unknown,
   k: PropertyKey,
-  guard: Guard<V>,
+  guard: Guard<V>
 ): x is { [k in PropertyKey]: V } {
   return has(x, k) ? guard(x[k]) : false;
 }
 
 export function isPrimitive(v: unknown): v is Primitive {
+  const type = typeof v;
   return (
-    typeof v === "string" ||
-    typeof v === "number" ||
-    typeof v === "boolean" ||
-    typeof v === "symbol" ||
-    typeof v === "bigint"
+    type === "string" ||
+    type === "number" ||
+    type === "boolean" ||
+    type === "symbol" ||
+    type === "bigint"
   );
 }
+
 export function isPrimitiveType(v: unknown): v is PrimitiveType {
   return (
     v === String ||
@@ -69,10 +75,6 @@ export function isNullish(v: unknown): v is null | undefined {
     ? (v?.nullable ?? false)
     : false;
 }
-
-export type Guard<T> = ((value: unknown) => value is T) & {
-  [guardType]?: string;
-};
 
 export function isRequired<V>(v: V): v is Exclude<V, null | undefined> {
   return v != null;

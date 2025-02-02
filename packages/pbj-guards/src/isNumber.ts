@@ -1,4 +1,4 @@
-import { hasA } from "./guards.js";
+import { guardType, hasA } from "./guards.js";
 import { type Config } from "./schema/schema.js";
 import type { NumberSubtype } from "./schema/json-schema.types.js";
 import { array } from "./isArray.js";
@@ -46,6 +46,7 @@ export const isNumber: IsNumber = Object.assign(
     return typeof v === "number";
   },
   {
+    [guardType]: "number",
     config(v: Partial<Omit<NumberSubtype, "type">>) {
       function isNumberGuard(val: unknown): val is number {
         return isNumber(val) && checkNumber(val, v);
@@ -53,7 +54,7 @@ export const isNumber: IsNumber = Object.assign(
       isNumberGuard.toSchema = () => ({ ...v, type: "number" });
       return isNumberGuard;
     },
-  },
+  }
 );
 
 export const isInteger: IsInteger = Object.assign(
@@ -61,6 +62,7 @@ export const isInteger: IsInteger = Object.assign(
     return Number.isInteger(v);
   },
   {
+    [guardType]: "integer",
     config: (v: Config<NumberSubtype> = {}) => {
       function isIntegerGuard(val: unknown): val is number {
         return isInteger(val) && checkNumber(val, v);
@@ -68,5 +70,5 @@ export const isInteger: IsInteger = Object.assign(
       isIntegerGuard.toSchema = () => ({ ...v, type: "integer" });
       return isIntegerGuard;
     },
-  },
+  }
 );
