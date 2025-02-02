@@ -54,7 +54,7 @@ export const isNumber: IsNumber = Object.assign(
       isNumberGuard.toSchema = () => ({ ...v, type: "number" });
       return isNumberGuard;
     },
-  }
+  },
 );
 
 export const isInteger: IsInteger = Object.assign(
@@ -70,5 +70,5 @@ export const isInteger: IsInteger = Object.assign(
       isIntegerGuard.toSchema = () => ({ ...v, type: "integer" });
       return isIntegerGuard;
     },
-  }
+  },
 );

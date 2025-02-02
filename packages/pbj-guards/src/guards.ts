@@ -32,7 +32,7 @@ export function isObjectish(x: unknown): x is object {
 
 export function has(
   x: unknown,
-  k: PropertyKey
+  k: PropertyKey,
 ): x is { [k in PropertyKey]: unknown } {
   return isObjectish(x) && k in x;
 }
@@ -40,7 +40,7 @@ export function has(
 export function hasA<V>(
   x: unknown,
   k: PropertyKey,
-  guard: Guard<V>
+  guard: Guard<V>,
 ): x is { [k in PropertyKey]: V } {
   return has(x, k) ? guard(x[k]) : false;
 }
