@@ -46,6 +46,7 @@ export interface Context<TRegistry extends RegistryType = Registry> {
     tkey: T,
     ...args: ServiceArgs<T, TRegistry> | []
   ): Promise<ValueOf<TRegistry, T>>;
+  logger: Logger;
 }
 export class Context<TRegistry extends RegistryType = Registry>
   implements Context<TRegistry>

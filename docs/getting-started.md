@@ -9,11 +9,11 @@ $ npm install @pbinj/pbj
 ```
 
 ```bash
-$ pnpm install @pbinj/pbj
+$ pnpm add @pbinj/pbj
 ```
 
 ```bash
-$ yarn install @pbinj/pbj
+$ yarn add @pbinj/pbj
 ```
 
 ## Basic Concepts
@@ -24,9 +24,7 @@ PBinJ is built around three core concepts:
 - `pbj()` - The function used to inject dependencies
 - `pbjKey` - Type-safe symbols for service registration
 
-## Basic Usage
 
-@pbinj
 
 ### 1. Service Registration
 
