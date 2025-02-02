@@ -1,5 +1,9 @@
 import type { Constructor, Fn, Primitive, PrimitiveType } from "./types.js";
 
+export const nullableSymbol = Symbol("@pbj/nullable");
+
+export const guardType = Symbol("@pbj/visualization/guardType");
+
 export function isSymbol(x: unknown): x is symbol {
   return typeof x === "symbol";
 }
@@ -24,7 +28,7 @@ export function isObjectish(x: unknown): x is object {
 
 export function has(
   x: unknown,
-  k: PropertyKey
+  k: PropertyKey,
 ): x is { [k in PropertyKey]: unknown } {
   return isObjectish(x) && k in x;
 }
@@ -32,12 +36,11 @@ export function has(
 export function hasA<V>(
   x: unknown,
   k: PropertyKey,
-  guard: isA<V>
+  guard: Guard<V>,
 ): x is { [k in PropertyKey]: V } {
   return has(x, k) ? guard(x[k]) : false;
 }
 
-export type isA<Out> = (v: unknown) => v is Out;
 export function isPrimitive(v: unknown): v is Primitive {
   return (
     typeof v === "string" ||
@@ -57,8 +60,6 @@ export function isPrimitiveType(v: unknown): v is PrimitiveType {
   );
 }
 
-export const nullableSymbol = Symbol("@pbj/nullable");
-
 export function isBoolean(v: unknown): v is boolean {
   return typeof v === "boolean";
 }
@@ -68,40 +69,13 @@ export function isNullish(v: unknown): v is null | undefined {
     ? (v?.nullable ?? false)
     : false;
 }
-export const guardType = Symbol("@pbj/visualization/guardType");
+
 export type Guard<T> = ((value: unknown) => value is T) & {
   [guardType]?: string;
 };
 
 export function isRequired<V>(v: V): v is Exclude<V, null | undefined> {
   return v != null;
-}
-
-export function isInteger(v: unknown): v is number {
-  return Number.isInteger(v);
-}
-
-export function isString(v: unknown): v is string {
-  return typeof v === "string";
-}
-export function isNumber(v: unknown): v is number {
-  return typeof v === "number";
-}
-
-export function isArray<T>(v: unknown, guard?: Guard<T>): v is T[] {
-  const isArr = Array.isArray(v);
-  if (!isArr) {
-    return false;
-  }
-  if (guard) {
-    for (const item of v) {
-      if (!guard(item)) {
-        return false;
-      }
-    }
-  }
-
-  return isArr;
 }
 
 export type AllOf<T> = T extends [

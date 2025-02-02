@@ -199,7 +199,7 @@ const userGuard = shape(
   {
     description: "A user in the system",
     title: "User",
-  }
+  },
 );
 
 const schema = toSchema(userGuard, {

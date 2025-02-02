@@ -452,15 +452,23 @@ export type SchemaObject = {
   | NullSubtype
   | ObjectSubtype
   | {
-      type: (
+      type:
+        | (
+            | "string"
+            | "number"
+            | "integer"
+            | "array"
+            | "boolean"
+            | "null"
+            | "object"
+          )[]
         | "string"
         | "number"
         | "integer"
         | "array"
         | "boolean"
         | "null"
-        | "object"
-      )[];
+        | "object";
     }
 );
 

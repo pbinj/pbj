@@ -1,13 +1,10 @@
 import { describe, it, expect } from "vitest";
-import {
-  array,
-  toSchemaNested,
-  allOf,
-  required,
-  shape,
-  $ref,
-} from "./schema.js";
-import { isString, isNumber, isBoolean } from "../guards.js";
+import { allOf, required, shape, $ref } from "../schema.js";
+import { toSchemaNested } from "../toSchemaNested.js";
+import { isBoolean } from "../../guards.js";
+import { isString } from "../../isString.js";
+import { isNumber } from "../../isNumber.js";
+import { array } from "../../isArray.js";
 
 describe("schema functions", () => {
   describe("array function", () => {
@@ -128,7 +125,7 @@ describe("schema functions", () => {
       shape({
         name: isString,
         age: isNumber,
-      })
+      }),
     );
     const guard = shape({
       stuff,
