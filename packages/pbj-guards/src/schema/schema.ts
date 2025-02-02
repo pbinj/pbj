@@ -1,4 +1,3 @@
-import { has, hasA, isFn, isObjectish } from "@pbinj/pbj/guards";
 import type {
   ArraySubtype,
   NumberSubtype,
@@ -9,15 +8,18 @@ import type {
 import {
   type AllOf,
   type Guard,
+  has,
+  hasA,
+  isFn,
+  isObjectish,
   isArray,
   isBoolean,
   isInteger,
   isNumber,
   isRequired,
   isString,
-} from "../guard.js";
-
-export const guardType = Symbol("@pbj/visualization/guardType");
+  guardType,
+} from "../guards.js";
 
 type Config<T> = Partial<Omit<T, "type">>;
 
@@ -104,7 +106,7 @@ export function $ref(ref: string, guard: Guard<any>) {
 }
 export function required(guard: Guard<any>) {
   function isRequiredGuard(
-    value: unknown,
+    value: unknown
   ): value is Exclude<ReturnType<typeof guard>, null | undefined> {
     return guard(value) && isRequired(value);
   }
@@ -121,14 +123,14 @@ export function required(guard: Guard<any>) {
 }
 export function shape<T extends Record<PropertyKey, Guard<any>>>(
   obj: T,
-  config: Config<ObjectSubtype> = {},
+  config: Config<ObjectSubtype> = {}
 ) {
   const entries = Object.entries(obj);
 
   const additionalProperties = config.additionalProperties ?? true;
 
   const ret = function isShapeGuard(
-    value: unknown,
+    value: unknown
   ): value is { [K in keyof T]: T[K] extends Guard<infer U> ? U : never } {
     if (!isObjectish(value)) {
       return false;
@@ -212,7 +214,7 @@ export function number(v: Partial<Omit<NumberSubtype, "type">>) {
 export function exactShape<T extends Record<string, Guard<any>>>(obj: T) {
   const entries = Object.entries(obj);
   function isShapeGuard(
-    value: unknown,
+    value: unknown
   ): value is { [K in keyof T]: T[K] extends Guard<infer U> ? U : never } {
     if (!isObjectish(value)) {
       return false;
@@ -272,7 +274,7 @@ export function string(opts: Partial<Omit<StringSubtype, "type">> = {}) {
 
 export function array(
   guard?: Guard<any>,
-  options: Omit<ArraySubtype, "type" | "items"> = {},
+  options: Omit<ArraySubtype, "type" | "items"> = {}
 ) {
   const ret = function isArrayGuard(v: unknown): v is any[] {
     return isArray(v, guard);
@@ -288,7 +290,7 @@ export function array(
 
 export function toSchema(
   v: Guard<any>,
-  config: Config<SchemaObject> = {},
+  config: Config<SchemaObject> = {}
 ): SchemaObject {
   return {
     $schema: "https://json-schema.org/draft/2020-12/schema",
@@ -302,7 +304,7 @@ export const toSchemaNested = (
   ctx: SchemaObject = {
     type: "object",
   },
-  key?: string,
+  key?: string
 ): SchemaObject => {
   if (has(v, guardType)) {
     if (isFn(v[guardType])) {

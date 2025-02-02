@@ -17,6 +17,7 @@
     "moduleResolution": "Bundler",
     "types": ["node"],
     "paths": {
+      "@pbinj/guards/*": ["./node_modules/@pbinj/pbj-guards/src/*.ts"],
       "@pbinj/pbj/*": ["./node_modules/@pbinj/pbj/src/*.ts"],
       "@pbinj/pbj": ["./node_modules/@pbinj/pbj/src/index.ts"]
     }

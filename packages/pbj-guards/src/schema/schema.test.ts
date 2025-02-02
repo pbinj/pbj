@@ -1,6 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { array, toSchemaNested, allOf, required, shape, $ref } from "./schema";
-import { isString, isNumber, isBoolean } from "../guard";
+import {
+  array,
+  toSchemaNested,
+  allOf,
+  required,
+  shape,
+  $ref,
+} from "./schema.js";
+import { isString, isNumber, isBoolean } from "../guards.js";
 
 describe("schema functions", () => {
   describe("array function", () => {
@@ -121,7 +128,7 @@ describe("schema functions", () => {
       shape({
         name: isString,
         age: isNumber,
-      }),
+      })
     );
     const guard = shape({
       stuff,

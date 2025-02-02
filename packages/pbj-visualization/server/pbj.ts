@@ -10,7 +10,7 @@ import { env } from "@pbinj/pbj/env";
 import express from "express";
 import { Server } from "http";
 import type { AddressInfo } from "net";
-import { anyOf, enums } from "./schema/schema.js";
+import { anyOf, enums } from "@pbinj/pbj-guards";
 import { Server as ServerIO } from "socket.io";
 
 const isAction = anyOf(enums("invoke", "invalidate"));
@@ -20,9 +20,10 @@ const isAction = anyOf(enums("invoke", "invalidate"));
  */
 const dirname = (() => {
   try {
+    //eslint-disable-next-line
     //@ts-ignore
     return new URL("..", import.meta.url).pathname;
-  } catch (e) {
+  } catch {
     return `${__dirname}/..`;
   }
 })();
@@ -31,7 +32,7 @@ export class ServerConfig {
   constructor(
     private _port = env("PJB_PORT", "0"),
     private _host = env("PJB_HOST", "localhost"),
-    private _path = env("PJB_PATH", "/"),
+    private _path = env("PJB_PATH", "/")
   ) {}
   get host() {
     return this._host + "";
@@ -66,7 +67,7 @@ export class ServerConfig {
 
 export async function register(
   ctx = context,
-  start = true,
+  start = true
 ): Promise<express.Express> {
   ctx.register(serverConfigPBinJKey, ServerConfig);
 
@@ -143,7 +144,7 @@ export async function register(
           timing: performance.now() - perf,
           message,
           service: asString(service[serviceSymbol]),
-        }),
+        })
       );
     } catch (e) {
       ctx.logger.error(`error {action} {service}`, {
@@ -184,7 +185,7 @@ export async function register(
     config.port = (server.address() as AddressInfo)?.port!;
     ctx.logger.info(
       "PBinJ visualization server started at: {url}",
-      config as any,
+      config as any
     );
     console.log("PBinJ visualization server started at: %s", config.url);
   }

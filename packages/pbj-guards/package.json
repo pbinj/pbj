@@ -1,0 +1,41 @@
+{
+  "name": "@pbinj/pbj-guards",
+  "version": "0.0.1",
+  "description": "A @pbinj/pbj package of guards",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pbinj/pbj.git"
+  },
+  "scripts": {
+    "build": "tsc && tsc -p tsconfig.cjs.json",
+    "watch": "tsc -w",
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "lint:check": "prettier --check --ignore-path ../../.prettierignore .",
+    "lint": "prettier --ignore-path ../../.prettierignore --write  ."
+  },
+  "keywords": [
+    "@pbinj/pbj",
+    "typescript",
+    "guards"
+  ],
+  "author": "Justin Spears <pbinj@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@pbinj/pbj": "workspace:*",
+    "@types/node": "^22.9.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.7.2",
+    "vite-tsconfig-paths": "^5.1.2",
+    "vitest": "^2.1.8"
+  },
+  "peerDependencies": {}
+}

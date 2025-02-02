@@ -58,9 +58,10 @@
   "dependencies": {
     "express": "^4.21.2",
     "socket.io": "^4.8.1",
-    "vite-tsconfig-paths": "^5.1.2"
+    "@pbinj/pbj-guards": "workspace:*"
   },
   "devDependencies": {
+    "vite-tsconfig-paths": "^5.1.2",
     "@mdi/font": "^7.4.47",
     "@pbinj/pbj": "workspace:*",
     "@tsconfig/node22": "^22.0.0",
