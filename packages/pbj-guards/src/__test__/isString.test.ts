@@ -77,7 +77,7 @@ describe("isString", () => {
         expect(isConstrainedString("hello")).toBe(true);
         expect(isConstrainedString("helloworld")).toBe(true);
         expect(isConstrainedString("hi")).toBe(false);
-        expect(isConstrainedString("helloworldtoolong")).toBe(false);
+        expect(isConstrainedString("helloWorldTooLong")).toBe(false);
         expect(isConstrainedString("Hello123")).toBe(false);
       });
     });

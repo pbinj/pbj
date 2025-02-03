@@ -1,4 +1,4 @@
-import { has } from "./guards.js";
+import { has } from "@pbinj/pbj-guards";
 import { asString } from "./pbjKey.js";
 import type { PBinJKey } from "./types.js";
 

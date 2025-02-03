@@ -1,6 +1,7 @@
-import { isFn, isPBinJ, isSymbol } from "./guards.js";
+import { isPBinJ } from "./guards.js";
 import { proxyKey } from "./symbols.js";
 import type { Fn, PBinJKey, PBinJKeyType } from "./types.js";
+import { isFn, isSymbol } from "@pbinj/pbj-guards";
 
 const pbjKeyMap = new WeakMap<{}, string>();
 const anonymousMap = new WeakMap<Fn, string>();

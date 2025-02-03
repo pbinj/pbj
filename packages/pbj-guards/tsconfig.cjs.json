@@ -4,8 +4,7 @@
     "module": "CommonJS",
     "moduleResolution": "classic",
     "outDir": "./dist/cjs",
-    "target": "ES2019",
     "declaration": false
   },
-  "exclude": ["src/__test__/**"]
+  "exclude": ["src/**/*.test.ts"]
 }

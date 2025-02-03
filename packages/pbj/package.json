@@ -57,11 +57,13 @@
     "@rollup/rollup-linux-x64-gnu": "*"
   },
   "dependencies": {
-    "@pbinj/pbj-guards": "link:../pbj-guards"
+    "@pbinj/pbj-guards": "workspace:*"
   },
   "scripts": {
     "test": "vitest run",
-    "build": "tsc && tsc -p tsconfig.cjs.json",
+    "build:esm": "tsc",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build": "${npm_execpath} run build:esm && ${npm_execpath} run build:cjs",
     "watch": "tsc -w",
     "clean": "rm -rf dist",
     "lint:check": "prettier --check --ignore-path ../../.prettierignore .",

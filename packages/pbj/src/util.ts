@@ -1,4 +1,4 @@
-import { hasA, isSymbol } from "./guards.js";
+import { hasA, isSymbol } from "@pbinj/pbj-guards";
 import { serviceSymbol } from "./symbols.js";
 import type { CKey, PBinJKey, Service } from "./types.js";
 
@@ -41,7 +41,7 @@ export function* filter<T>(it: Iterable<T>, fn: (v: T) => boolean) {
   }
 }
 /**
- * Concats a bunch of iterables, skipping nulls and undefined.
+ * Concat a bunch of iterables, skipping nulls and undefined.
  * @param it
  */
 export function* concat<T>(...it: (Iterable<T> | undefined | null)[]) {

@@ -179,7 +179,7 @@ importers:
   packages/pbj:
     dependencies:
       '@pbinj/pbj-guards':
-        specifier: link:../pbj-guards
+        specifier: workspace:*
         version: link:../pbj-guards
     optionalDependencies:
       '@rollup/rollup-linux-x64-gnu':
@@ -207,12 +207,6 @@ importers:
 
   packages/pbj-guards:
     devDependencies:
-      '@pbinj/pbj':
-        specifier: workspace:*
-        version: link:../pbj
-      '@types/node':
-        specifier: ^22.9.0
-        version: 22.10.2
       prettier:
         specifier: ^3.3.3
         version: 3.4.2
@@ -227,6 +221,10 @@ importers:
         version: 2.1.8(@types/node@22.10.2)(jsdom@25.0.1)
 
   packages/pbj-prometheus:
+    dependencies:
+      '@pbinj/pbj-guards':
+        specifier: workspace:*
+        version: link:../pbj-guards
     devDependencies:
       '@pbinj/pbj':
         specifier: workspace:*

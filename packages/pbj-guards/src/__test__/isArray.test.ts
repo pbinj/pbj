@@ -54,7 +54,7 @@ describe("array", () => {
   describe("schema generation", () => {
     it("should generate correct schema for array without guard", () => {
       const anyArrayGuard = array();
-      const schema = anyArrayGuard.toSchema({}, "test");
+      const schema = anyArrayGuard.toSchema({} as any, "test");
       expect(schema).toEqual({
         type: "array",
         items: undefined,

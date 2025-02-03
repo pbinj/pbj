@@ -43,5 +43,8 @@
   "peerDependencies": {
     "@pbinj/pbj": "workspace:*",
     "prom-client": "^15.1.3"
+  },
+  "dependencies": {
+    "@pbinj/pbj-guards": "workspace:*"
   }
 }

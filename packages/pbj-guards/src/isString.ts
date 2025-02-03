@@ -3,19 +3,7 @@ import { isNumber } from "./isNumber.js";
 import { StringSubtype } from "./schema/json-schema.types.js";
 import { guardType } from "./guards.js";
 
-interface BaseIsString {
-  (v: unknown): v is string;
-}
-
-interface IsString extends BaseIsString {
-  config: (opts: {
-    minLength?: number;
-    maxLength?: number;
-    pattern?: string;
-  }) => BaseIsString;
-}
-
-export const isString: IsString = Object.assign(
+export const isString = Object.assign(
   function isString(v: unknown): v is string {
     return typeof v === "string";
   },

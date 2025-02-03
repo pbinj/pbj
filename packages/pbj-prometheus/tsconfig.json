@@ -107,7 +107,10 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
     "paths": {
-      "@pbinj/pbj": ["./node_modules/@pbinj/pbj/src/index.ts"]
+      "@pbinj/pbj-guards": ["./node_modules/@pbinj/pbj-guards/src/index.ts"],
+      "@pbinj/pbj/*": ["./node_modules/@pbinj/pbj/src/*.ts"],
+      "@pbinj/pbj": ["./node_modules/@pbinj/pbj/src/index.ts"],
+      "prom-client": ["./node_modules/prom-client/index.d.ts"]
     }
   },
   "include": ["src"]
