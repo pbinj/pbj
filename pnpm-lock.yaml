@@ -37,6 +37,9 @@ importers:
       '@pbinj/pbj':
         specifier: workspace:*
         version: link:../packages/pbj
+      '@pbinj/pbj-guards':
+        specifier: workspace:*
+        version: link:../packages/pbj-guards
       '@pbinj/pbj-prometheus':
         specifier: workspace:*
         version: link:../packages/pbj-prometheus
