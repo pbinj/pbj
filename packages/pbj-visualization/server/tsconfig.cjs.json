@@ -5,13 +5,7 @@
     "module": "CommonJS",
     "moduleResolution": "node",
     "outDir": "../dist/cjs",
-    "declaration": false,
-    "skipLibCheck": true,
-    "paths": {
-      "@pbinj/pbj-guards": ["../node_modules/@pbinj/pbj-guards/src/index.ts"],
-      "@pbinj/pbj/*": ["../node_modules/@pbinj/pbj/src/*.ts"],
-      "@pbinj/pbj": ["../node_modules/@pbinj/pbj/src/index.ts"]
-    }
+    "declaration": false
   },
   "exclude": ["**/__test__/**", "**/*.test.ts"]
 }
