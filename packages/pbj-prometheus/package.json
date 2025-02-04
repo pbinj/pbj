@@ -15,7 +15,9 @@
     "url": "git+https://github.com/pbinj/pbj.git"
   },
   "scripts": {
-    "build": "tsc && tsc -p tsconfig.cjs.json",
+    "build:esm": "tsc",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build": "${npm_execpath} run build:esm && ${npm_execpath} run build:cjs",
     "watch": "tsc -w",
     "clean": "rm -rf dist",
     "test": "vitest run",
