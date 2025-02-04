@@ -1,3 +1,4 @@
+import { optional } from "./optional.js";
 import type { Constructor, Fn, Primitive, PrimitiveType } from "./types.js";
 
 export const nullableSymbol = Symbol("@pbj/nullable");
@@ -8,13 +9,19 @@ export type Guard<T> = ((value: unknown) => value is T) & {
   [guardType]?: string;
 };
 
-export function isSymbol(x: unknown): x is symbol {
-  return typeof x === "symbol";
-}
+export const isSymbol = Object.assign(
+  function isSymbolGuard(x: unknown): x is symbol {
+    return typeof x === "symbol";
+  },
+  { optional }
+);
 
-export function isFn(x: unknown): x is Fn {
-  return typeof x === "function";
-}
+export const isFn = Object.assign(
+  function isFnGuard(x: unknown): x is Fn {
+    return typeof x === "function";
+  },
+  { optional }
+);
 
 export function isConstructor(x: Constructor | Fn): x is Constructor {
   return !!x.prototype && !!x.prototype.constructor.name;
@@ -32,7 +39,7 @@ export function isObjectish(x: unknown): x is object {
 
 export function has(
   x: unknown,
-  k: PropertyKey,
+  k: PropertyKey
 ): x is { [k in PropertyKey]: unknown } {
   return isObjectish(x) && k in x;
 }
@@ -40,7 +47,7 @@ export function has(
 export function hasA<V>(
   x: unknown,
   k: PropertyKey,
-  guard: Guard<V>,
+  guard: Guard<V>
 ): x is { [k in PropertyKey]: V } {
   return has(x, k) ? guard(x[k]) : false;
 }
@@ -66,9 +73,12 @@ export function isPrimitiveType(v: unknown): v is PrimitiveType {
   );
 }
 
-export function isBoolean(v: unknown): v is boolean {
-  return typeof v === "boolean";
-}
+export const isBoolean = Object.assign(
+  function isBooleanGuard(v: unknown): v is boolean {
+    return typeof v === "boolean";
+  },
+  { optional, [guardType]: "boolean" }
+);
 
 export function isNullish(v: unknown): v is null | undefined {
   return v == null || hasA(v, nullableSymbol, isBoolean)

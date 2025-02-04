@@ -99,4 +99,18 @@ describe("isString", () => {
       });
     });
   });
+  describe("optional", () => {
+    it("should return true for undefined", () => {
+      const guard = isString.optional();
+      expect(guard(undefined)).toBe(true);
+    });
+    it("should return true for null", () => {
+      const guard = isString.optional();
+      expect(guard(null)).toBe(true);
+    });
+    it("should return true for string", () => {
+      const guard = isString.optional();
+      expect(guard("hello")).toBe(true);
+    });
+  });
 });

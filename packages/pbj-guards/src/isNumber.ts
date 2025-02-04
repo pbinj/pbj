@@ -1,23 +1,8 @@
 import { guardType, hasA } from "./guards.js";
 import { type Config } from "./schema/schema.js";
-import type { NumberSubtype } from "./schema/json-schema.types.js";
+import { type NumberSubtype } from "./schema/json-schema.types.js";
 import { array } from "./isArray.js";
-
-interface BaseIsNumber {
-  (v: unknown): v is number;
-}
-
-interface IsNumber extends BaseIsNumber {
-  config: (opts: Partial<Omit<NumberSubtype, "type">>) => BaseIsNumber;
-}
-
-interface BaseIsInteger {
-  (v: unknown): v is number;
-}
-
-interface IsInteger extends BaseIsInteger {
-  config: (opts: Partial<Omit<NumberSubtype, "type">>) => BaseIsInteger;
-}
+import { optional } from "./optional.js";
 
 function checkNumber(val: number, v: Config<NumberSubtype> = {}) {
   if (hasA(v, "minimum", isNumber) && val <= v.minimum) {
@@ -41,12 +26,13 @@ function checkNumber(val: number, v: Config<NumberSubtype> = {}) {
   }
   return true;
 }
-export const isNumber: IsNumber = Object.assign(
+export const isNumber = Object.assign(
   function (v: unknown): v is number {
     return typeof v === "number";
   },
   {
     [guardType]: "number",
+    optional,
     config(v: Partial<Omit<NumberSubtype, "type">>) {
       function isNumberGuard(val: unknown): val is number {
         return isNumber(val) && checkNumber(val, v);
@@ -54,15 +40,16 @@ export const isNumber: IsNumber = Object.assign(
       isNumberGuard.toSchema = () => ({ ...v, type: "number" });
       return isNumberGuard;
     },
-  },
+  }
 );
 
-export const isInteger: IsInteger = Object.assign(
+export const isInteger = Object.assign(
   function isInteger(v: unknown): v is number {
     return Number.isInteger(v);
   },
   {
     [guardType]: "integer",
+    optional,
     config: (v: Config<NumberSubtype> = {}) => {
       function isIntegerGuard(val: unknown): val is number {
         return isInteger(val) && checkNumber(val, v);
@@ -70,5 +57,5 @@ export const isInteger: IsInteger = Object.assign(
       isIntegerGuard.toSchema = () => ({ ...v, type: "integer" });
       return isIntegerGuard;
     },
-  },
+  }
 );
