@@ -1,5 +1,16 @@
 # @pbinj/pbj
 
+## 3.0.0
+
+### Minor Changes
+
+- 607ecc8: Moved guards logic to its own module
+
+### Patch Changes
+
+- Updated dependencies [607ecc8]
+  - @pbinj/pbj-guards@3.0.0
+
 ## 2.0.0
 
 ### Minor Changes
