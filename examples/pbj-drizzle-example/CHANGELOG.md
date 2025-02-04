@@ -1,5 +1,12 @@
 # @pbinj/pbj-drizzle-example
 
+## 1.1.1
+
+### Patch Changes
+
+- Updated dependencies [607ecc8]
+  - @pbinj/pbj@3.0.0
+
 ## 1.1.0
 
 ### Minor Changes
