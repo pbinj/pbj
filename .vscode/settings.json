@@ -1,13 +1,15 @@
 {
-    "cSpell.words": [
-        "invokable",
-        "Objectish",
-        "pbinj",
-        "pinia",
-        "vuetify"
-    ],
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnPaste": true,
-    "editor.formatOnSave": true,
-    "editor.formatOnType": true
+  "cSpell.words": [
+    "codepaths",
+    "invokable",
+    "nodenext",
+    "Objectish",
+    "pbinj",
+    "pinia",
+    "vuetify"
+  ],
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "editor.formatOnType": true
 }

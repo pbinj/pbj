@@ -1,5 +1,5 @@
 import { type Registry } from "./registry.js";
-import { isConstructor, isFn, isSymbol } from "./guards.js";
+import { isConstructor, isFn, isSymbol } from "@pbinj/pbj-guards";
 import { PBinJError } from "./errors.js";
 import type {
   Constructor,
@@ -23,11 +23,11 @@ import { Logger } from "./logger.js";
 
 export interface Context<TRegistry extends RegistryType = Registry> {
   register<TKey extends PBinJKey<TRegistry>>(
-    tkey: TKey,
+    typeKey: TKey,
     ...args: ServiceArgs<TKey, TRegistry> | []
   ): ServiceDescriptor<TRegistry, ValueOf<TRegistry, TKey>>;
   resolve<TKey extends PBinJKey<TRegistry>>(
-    tkey: TKey,
+    typeKey: TKey,
     ...args: ServiceArgs<TKey, TRegistry> | []
   ): ValueOf<TRegistry, TKey>;
   newContext<TTRegistry extends TRegistry = TRegistry>(): Context<TTRegistry>;
@@ -43,7 +43,7 @@ export interface Context<TRegistry extends RegistryType = Registry> {
     noInitial?: boolean,
   ): () => void;
   resolveAsync<T extends PBinJKey<TRegistry>>(
-    tkey: T,
+    typeKey: T,
     ...args: ServiceArgs<T, TRegistry> | []
   ): Promise<ValueOf<TRegistry, T>>;
 }
@@ -58,10 +58,10 @@ export class Context<TRegistry extends RegistryType = Registry>
 
   public onServiceAdded(
     fn: ServiceDescriptorListener,
-    intitialize = true,
+    initialize = true,
   ): () => void {
     this.logger.info("onServiceAdded: listener added");
-    if (intitialize) {
+    if (initialize) {
       for (const service of this.map.values()) {
         for (const fn of this.listeners) {
           fn(service);
@@ -235,10 +235,10 @@ export class Context<TRegistry extends RegistryType = Registry>
     });
   }
   resolve<TKey extends PBinJKey<TRegistry>>(
-    tkey: TKey,
+    typeKey: TKey,
     ...args: ServiceArgs<TKey, TRegistry> | []
   ): ValueOf<TRegistry, TKey> {
-    return this.register(tkey, ...args).invoke() as any;
+    return this.register(typeKey, ...args).invoke() as any;
   }
 
   newContext<TTRegistry extends TRegistry = TRegistry>() {

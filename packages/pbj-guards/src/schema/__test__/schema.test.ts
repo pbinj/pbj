@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { array, toSchemaNested, allOf, required, shape, $ref } from "./schema";
-import { isString, isNumber, isBoolean } from "../guard";
+import { allOf, required, shape, $ref } from "../schema.js";
+import { toSchemaNested } from "../toSchemaNested.js";
+import { isBoolean } from "../../guards.js";
+import { isString } from "../../isString.js";
+import { isNumber } from "../../isNumber.js";
+import { array } from "../../isArray.js";
 
 describe("schema functions", () => {
   describe("array function", () => {

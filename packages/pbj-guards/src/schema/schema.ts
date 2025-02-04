@@ -1,28 +1,25 @@
-import { has, hasA, isFn, isObjectish } from "@pbinj/pbj/guards";
 import type {
   ArraySubtype,
-  NumberSubtype,
   ObjectSubtype,
   SchemaObject,
-  StringSubtype,
 } from "./json-schema.types.js";
 import {
   type AllOf,
   type Guard,
-  isArray,
+  isObjectish,
   isBoolean,
-  isInteger,
-  isNumber,
   isRequired,
-  isString,
-} from "../guard.js";
+  guardType,
+} from "../guards.js";
+import { isString } from "../isString.js";
+import { isNumber, isInteger } from "../isNumber.js";
+import { toSchemaNested } from "./toSchemaNested.js";
 
-export const guardType = Symbol("@pbj/visualization/guardType");
-
-type Config<T> = Partial<Omit<T, "type">>;
+export type Config<T> = Partial<Omit<T, "type">>;
+export const parentSchema: unique symbol = Symbol();
 
 type Schema = SchemaObject & {
-  [parent]?: Schema;
+  [parentSchema]?: Schema;
   definitions?: Record<string, Schema>;
 };
 
@@ -89,7 +86,6 @@ export function allOf<T extends readonly Guard<any>[]>(...guards: T) {
   return allOfGuard;
 }
 
-const parent = Symbol();
 export function $ref(ref: string, guard: Guard<any>) {
   function isRefGuard(value: unknown): value is any {
     return true;
@@ -119,6 +115,23 @@ export function required(guard: Guard<any>) {
 
   return isRequiredGuard;
 }
+
+export function pickShape<T extends Record<PropertyKey, Guard<any>>>(obj: T) {
+  const keys = Object.keys(obj);
+  return function pickShapeGuard(value: unknown): {
+    [K in keyof T]: T[K] extends Guard<infer U> ? U : undefined;
+  } {
+    const v: any = {};
+    for (const k of keys) {
+      const check = (value as any)[k];
+      if (!obj[k](check)) {
+        v[k] = check;
+      }
+    }
+    return v;
+  };
+}
+
 export function shape<T extends Record<PropertyKey, Guard<any>>>(
   obj: T,
   config: Config<ObjectSubtype> = {},
@@ -145,7 +158,7 @@ export function shape<T extends Record<PropertyKey, Guard<any>>>(
   ret.toSchema = (ctx: Schema) => {
     const cur: Schema = {
       type: "object",
-      [parent]: ctx,
+      [parentSchema]: ctx,
       ...config,
       properties: {} as Record<string, Schema>,
     };
@@ -163,50 +176,6 @@ export function eq<T>(v: T): Guard<T> {
   }
   isEq.toSchema = () => ({ const: v });
   return isEq;
-}
-
-function checkNumber(val: number, v: Config<NumberSubtype> = {}) {
-  if (hasA(v, "minimum", isNumber) && val <= v.minimum) {
-    return false;
-  }
-  if (hasA(v, "maximum", isNumber) && val >= v.maximum) {
-    return false;
-  }
-  if (hasA(v, "multipleOf", isNumber) && val % v.multipleOf !== 0) {
-    return false;
-  }
-  if (hasA(v, "enum", array(isNumber)) && !v.enum.includes(val)) {
-    return false;
-  }
-  if (hasA(v, "exclusiveMinimum", isNumber) && val < v.exclusiveMinimum) {
-    return false;
-  }
-  if (hasA(v, "exclusiveMaximum", isNumber) && val > v.exclusiveMaximum) {
-    return false;
-  }
-  return true;
-}
-export function integer(v: Config<NumberSubtype> = {}) {
-  function isIntegerGuard(val: unknown): val is number {
-    if (!isInteger(val)) {
-      return false;
-    }
-
-    return checkNumber(val, v);
-  }
-  isIntegerGuard.toSchema = () => ({ ...v, type: "integer" });
-  return isIntegerGuard;
-}
-export function number(v: Partial<Omit<NumberSubtype, "type">>) {
-  function isNumberGuard(val: unknown): val is number {
-    if (!isNumber(val)) {
-      return false;
-    }
-
-    return checkNumber(val, v);
-  }
-  isNumberGuard.toSchema = () => ({ ...v, type: "number" });
-  return isNumberGuard;
 }
 
 export function exactShape<T extends Record<string, Guard<any>>>(obj: T) {
@@ -229,7 +198,7 @@ export function exactShape<T extends Record<string, Guard<any>>>(obj: T) {
   isShapeGuard.toSchema = (ctx: Schema) => {
     const cur: Schema = {
       type: "object",
-      [parent]: ctx,
+      [parentSchema]: ctx,
       properties: {} as Record<string, Schema>,
     };
     for (const [k, v] of entries) {
@@ -247,45 +216,6 @@ type AnyOf<T> = T extends [
   ? U | AnyOf<Rest>
   : never;
 
-export function string(opts: Partial<Omit<StringSubtype, "type">> = {}) {
-  function isStringGuard(v: unknown): v is string {
-    if (typeof v !== "string") {
-      return false;
-    }
-    if (hasA(opts, "minLength", isNumber) && v.length < opts.minLength) {
-      return false;
-    }
-    if (hasA(opts, "maxLength", isNumber) && v.length > opts.maxLength) {
-      return false;
-    }
-    if (hasA(opts, "pattern", isString) && !new RegExp(opts.pattern).test(v)) {
-      return false;
-    }
-    return true;
-  }
-  isStringGuard.toSchema = () => ({
-    type: "string",
-    ...opts,
-  });
-  return isStringGuard;
-}
-
-export function array(
-  guard?: Guard<any>,
-  options: Omit<ArraySubtype, "type" | "items"> = {},
-) {
-  const ret = function isArrayGuard(v: unknown): v is any[] {
-    return isArray(v, guard);
-  };
-  ret.toSchema = (ctx: SchemaObject, key: string): ArraySubtype => ({
-    type: "array",
-    items: guard ? toSchemaNested(guard, ctx, key) : undefined,
-    ...options,
-  });
-
-  return ret;
-}
-
 export function toSchema(
   v: Guard<any>,
   config: Config<SchemaObject> = {},
@@ -296,24 +226,6 @@ export function toSchema(
     ...toSchemaNested(v),
   } as SchemaObject;
 }
-
-export const toSchemaNested = (
-  v: Guard<any>,
-  ctx: SchemaObject = {
-    type: "object",
-  },
-  key?: string,
-): SchemaObject => {
-  if (has(v, guardType)) {
-    if (isFn(v[guardType])) {
-      return v[guardType](ctx, key);
-    } else {
-      return { type: v[guardType] as "string" };
-    }
-  }
-
-  return hasA(v, "toSchema", isFn) ? v.toSchema(ctx, key) : ctx;
-};
 
 export function tuple(...values: (string | number)[]) {
   function isTupleGuard(value: unknown): value is any[] {

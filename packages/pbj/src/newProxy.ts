@@ -1,6 +1,7 @@
-import { has, hasA, nullableSymbol } from "./guards.js";
+import { nullableSymbol } from "./guards.js";
+import { has, hasA, type Constructor, type Fn } from "@pbinj/pbj-guards";
 import { proxyKey, serviceDescriptorKey, serviceSymbol } from "./symbols.js";
-import type { Constructor, Fn, ServiceDescriptorI } from "./types.js";
+import type { ServiceDescriptorI } from "./types.js";
 
 export function newProxy<T extends Constructor>(
   key: unknown,

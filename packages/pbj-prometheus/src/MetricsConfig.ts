@@ -1,5 +1,5 @@
 import { env } from "@pbinj/pbj/env";
-import { isNullish } from "@pbinj/pbj/guards";
+import { isNullish } from "@pbinj/pbj-guards";
 import { type PBinJKey } from "@pbinj/pbj";
 
 export class MetricsConfig {

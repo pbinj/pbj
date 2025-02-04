@@ -9,11 +9,12 @@
   - [Factory Injection](factory-injection.md)
   - [ListOf](list-of.md)
   - [Registry](registry.md)
-  - [Async Resolution](async-resolution.md) 
+  - [Async Resolution](async-resolution.md)
 - Helpers
   - [Scope Context](scope.md)
   - [Environment Variables](env.md)
   - [Path Of](path-of.md)
+  - [Guards](./guards.md)
 - Plugins
   - [Metrics](./plugins/metrics.md)
   - [Visualization](./plugins/visualization.md)

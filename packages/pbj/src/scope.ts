@@ -1,5 +1,5 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import { has, hasA, isFn, isSymbol } from "./guards.js";
+import { has, hasA, isFn, isSymbol } from "@pbinj/pbj-guards";
 import { PBinJError } from "./errors.js";
 import { Context } from "./context.js";
 import { ServiceDescriptor } from "./ServiceDescriptor.js";
@@ -19,7 +19,7 @@ const serviceProxySymbol = pbjKey<Symbol>("@pbj/ServiceDescriptorProxy");
  * scoped to a specific context.   Note the requirement to use either a `Registry` key or
  * a `pbjKey`.
  *
- * @param key - pkey or registry key
+ * @param key - typeKey or registry key
  * @returns
  */
 const scoped: Context["scoped"] = function (this: Context, key) {

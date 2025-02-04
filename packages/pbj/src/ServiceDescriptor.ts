@@ -1,5 +1,5 @@
 import { keyOf } from "./util.js";
-import { has, isConstructor, isFn, isPrimitive } from "./guards.js";
+import { has, isConstructor, isFn, isPrimitive } from "@pbinj/pbj-guards";
 import { newProxy } from "./newProxy.js";
 import type { Registry } from "./registry.js";
 import { proxyKey, serviceSymbol } from "./symbols.js";
@@ -161,7 +161,7 @@ export class ServiceDescriptor<
     this._args = newArgs;
   }
   /**
-   * Set the args to be used with the service.   These can be other pbjs, or any other value.
+   * Set the args to be used with the service.   These can be other pbinj's, or any other value.
    * @param args
    * @returns
    */
@@ -182,7 +182,7 @@ export class ServiceDescriptor<
   }
   /**
    * You can turn off response caching by setting this to false.
-   * This is useful for things taht can not be cached.   Any pbj depending on a non-cacheable,
+   * This is useful for things that can not be cached.   Any pbj depending on a non-cacheable,
    * will be not cached.
    *
    * @param cacheable
@@ -407,7 +407,7 @@ export class ServiceDescriptor<
 }
 /**
  * The interceptor function, allows you to intercept the invocation of a service.  The
- * invocation may be a previous intercpetor.
+ * invocation may be a previous interceptor.
  */
 type InterceptFn<T> = (invoke: () => T) => T;
 

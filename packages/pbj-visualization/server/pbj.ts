@@ -10,7 +10,7 @@ import { env } from "@pbinj/pbj/env";
 import express from "express";
 import { Server } from "http";
 import type { AddressInfo } from "net";
-import { anyOf, enums } from "./schema/schema.js";
+import { anyOf, enums } from "@pbinj/pbj-guards";
 import { Server as ServerIO } from "socket.io";
 
 const isAction = anyOf(enums("invoke", "invalidate"));
@@ -20,9 +20,10 @@ const isAction = anyOf(enums("invoke", "invalidate"));
  */
 const dirname = (() => {
   try {
+    //eslint-disable-next-line
     //@ts-ignore
     return new URL("..", import.meta.url).pathname;
-  } catch (e) {
+  } catch {
     return `${__dirname}/..`;
   }
 })();
@@ -97,7 +98,7 @@ export async function register(
       res.send({ error: "name required." });
     }
 
-    let service: ServiceDescriptorI<Registry, any> | undefined = undefined;
+    let service: ServiceDescriptorI<Registry, unknown> | undefined = undefined;
     ctx.visit((v) => {
       if (v?.name && asString(v.name) === req.body.name) {
         service = v;
@@ -113,23 +114,23 @@ export async function register(
       res.send({ error: "Service was not found" });
       return;
     }
-    let value: any;
-    let perf = performance.now();
-    let message: string;
+    let value: unknown;
+    const perf = performance.now();
+    let message = "unknown";
     try {
       switch (action) {
         case "invalidate": {
           value = (
             ctx.register(service[serviceSymbol]) as ServiceDescriptorI<
               Registry,
-              any
+              unknown
             >
           )?.invalidate();
           message = "Service invalidated";
           break;
         }
         case "invoke": {
-          value = await ctx.resolveAsync(service[serviceSymbol] as any);
+          value = await ctx.resolveAsync(service[serviceSymbol]);
           message = "Service invoked";
           break;
         }
@@ -164,28 +165,26 @@ export async function register(
     io.on("connection", (socket) => {
       console.log("connected", socket.id);
       socket.emit("connected", `Connected ${socket.id}`);
-      const unsub = ctx.logger.onLogMessage((msg) => {
+      const unsubscribe = ctx.logger.onLogMessage((msg) => {
         socket.emit("log", msg);
       });
-      const unadd = ctx.onServiceAdded((service) => {
+      const addUnsubscribe = ctx.onServiceAdded((service) => {
         socket.emit("onServiceAdded", service);
       });
       socket.on("ping", (ping) => {
         ping?.emit("pong");
       });
       socket.on("disconnect", () => {
-        unsub?.();
-        unadd?.();
+        unsubscribe?.();
+        addUnsubscribe?.();
         console.log("disconnected");
       });
     });
     //In dev mode the os will assign a port (0) and then we will assign it back to the config.
     //this should allow vite to
-    config.port = (server.address() as AddressInfo)?.port!;
-    ctx.logger.info(
-      "PBinJ visualization server started at: {url}",
-      config as any,
-    );
+    config.port =
+      (server.address() as AddressInfo)?.port ?? config.port ?? 3000;
+    ctx.logger.info("PBinJ visualization server started at: " + config.url);
     console.log("PBinJ visualization server started at: %s", config.url);
   }
   return app;
