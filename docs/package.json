@@ -18,9 +18,9 @@
   },
   "devDependencies": {
     "@pbinj/pbj": "workspace:*",
+    "@pbinj/pbj-guards": "workspace:*",
     "@pbinj/pbj-visualization": "workspace:*",
     "@pbinj/pbj-prometheus": "workspace:*",
-    
     "@types/node": "^22.10.2",
     "marked": "^15.0.4",
     "source-map": "^0.7.4",
