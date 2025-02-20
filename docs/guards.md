@@ -217,9 +217,9 @@ Support for string formats and patterns:
 import { isString, shape, toSchema } from "@pbinj/pbj-guards";
 
 const userGuard = shape({
-  email: isString.config({ format: "email" }),
-  phone: isString.config({ pattern: "^\\+[1-9]\\d{1,14}$" }),
-  website: isString.config({ format: "uri" }),
+  email: isString({ format: "email" }),
+  phone: isString({ pattern: "^\\+[1-9]\\d{1,14}$" }),
+  website: isString({ format: "uri" }),
 });
 
 const schema = toSchema(userGuard);
