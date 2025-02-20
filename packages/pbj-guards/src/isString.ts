@@ -35,5 +35,5 @@ export const isString = Object.assign(
       });
       return isStringGuard;
     },
-  }
+  },
 );

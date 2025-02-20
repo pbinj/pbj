@@ -13,14 +13,14 @@ export const isSymbol = Object.assign(
   function isSymbolGuard(x: unknown): x is symbol {
     return typeof x === "symbol";
   },
-  { optional }
+  { optional },
 );
 
 export const isFn = Object.assign(
   function isFnGuard(x: unknown): x is Fn {
     return typeof x === "function";
   },
-  { optional }
+  { optional },
 );
 
 export function isConstructor(x: Constructor | Fn): x is Constructor {
@@ -39,7 +39,7 @@ export function isObjectish(x: unknown): x is object {
 
 export function has(
   x: unknown,
-  k: PropertyKey
+  k: PropertyKey,
 ): x is { [k in PropertyKey]: unknown } {
   return isObjectish(x) && k in x;
 }
@@ -47,7 +47,7 @@ export function has(
 export function hasA<V>(
   x: unknown,
   k: PropertyKey,
-  guard: Guard<V>
+  guard: Guard<V>,
 ): x is { [k in PropertyKey]: V } {
   return has(x, k) ? guard(x[k]) : false;
 }
@@ -77,7 +77,7 @@ export const isBoolean = Object.assign(
   function isBooleanGuard(v: unknown): v is boolean {
     return typeof v === "boolean";
   },
-  { optional, [guardType]: "boolean" }
+  { optional, [guardType]: "boolean" },
 );
 
 export function isNullish(v: unknown): v is null | undefined {
