@@ -1,5 +1,11 @@
 import { nullableSymbol } from "./guards.js";
-import {has as _has, hasA, type Constructor, type Fn, isObjectish} from "@pbinj/pbj-guards";
+import {
+  has as _has,
+  hasA,
+  type Constructor,
+  type Fn,
+  isObjectish,
+} from "@pbinj/pbj-guards";
 import { proxyKey, serviceDescriptorKey, serviceSymbol } from "./symbols.js";
 import type { ServiceDescriptorI } from "./types.js";
 
@@ -71,7 +77,7 @@ export function newProxy<T extends Constructor>(
       if (service.primitive) {
         return false;
       }
-      return isObjectish(val) ? (prop in val) : false;
+      return isObjectish(val) ? prop in val : false;
     },
     getPrototypeOf() {
       return Object.getPrototypeOf(service.invoke());
