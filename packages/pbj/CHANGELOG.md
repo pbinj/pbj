@@ -1,5 +1,12 @@
 # @pbinj/pbj
 
+## 3.0.1
+
+### Patch Changes
+
+- c144b5b: small bug fix in handling null values
+  - @pbinj/pbj-guards@3.0.1
+
 ## 3.0.0
 
 ### Minor Changes
