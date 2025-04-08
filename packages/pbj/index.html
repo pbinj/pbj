@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PB&J Browser Test</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        line-height: 1.6;
+      }
+      h1 {
+        color: #333;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 10px;
+      }
+      .test-container {
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+      .test-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+      .test-result {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 3px;
+      }
+      .success {
+        background-color: #e6ffe6;
+        border-left: 4px solid #4caf50;
+      }
+      .failure {
+        background-color: #ffebeb;
+        border-left: 4px solid #f44336;
+      }
+      .code {
+        font-family: monospace;
+        background-color: #f5f5f5;
+        padding: 2px 4px;
+        border-radius: 3px;
+      }
+      pre {
+        background-color: #f5f5f5;
+        padding: 10px;
+        border-radius: 5px;
+        overflow-x: auto;
+      }
+    </style>
+    <script>
+      function test(title, fn) {
+        const div = document
+          .getElementById("results")
+          .appendChild(document.createElement("div"));
+        div.classList.add("test-container");
+        const t = div.appendChild(document.createElement("div"));
+        t.classList.add("test-title");
+        t.innerText = title;
+        const result = div.appendChild(document.createElement("div"));
+        result.classList.add("test-result");
+        (async () => {
+          try {
+            result.innerText = "Running";
+            result.innerText = (await fn()) || "Success";
+            result.classList.add("success");
+          } catch (error) {
+            result.innerText = "Failure " + error.message;
+            result.classList.add("failure");
+          }
+        })();
+      }
+    </script>
+  </head>
+  <body>
+    <h1>PB&J Browser Test</h1>
+    <p>This is a simple test to make sure things work in the browser.</p>
+    <div id="results"></div>
+
+    <h2>Test Code</h2>
+    <pre id="test-code"></pre>
+
+    <!-- Then load the PB&J library -->
+    <script type="module" id="test-module">
+      // Import PB&J modules
+      import { context, pbjKey, pbj } from "./dist/browser/index.js";
+      import "./dist/browser/scope.js";
+
+      // Test 1: Basic Context Registration and Retrieval
+      test("Basic Context Registration and Retrieval", () => {
+        const testKey = pbjKey("test-value");
+        context.register(testKey, () => "Hello from PB&J!");
+        const value = context.resolve(testKey);
+
+        if (value !== "Hello from PB&J!") {
+          throw new Error("Value does not match expected output");
+        }
+      });
+
+      // Test 2: Proxy Object Access
+      test("Proxy Object Access", () => {
+        const objectKey = pbjKey("test-object");
+        context.register(objectKey, () => ({
+          name: "PB&J Object",
+          getValue: () => "Object Method Works!",
+        }));
+
+        const obj = context.resolve(objectKey);
+        const nameValue = obj.name;
+        const methodValue = obj.getValue();
+
+        if (
+          !(
+            nameValue === "PB&J Object" &&
+            methodValue === "Object Method Works!"
+          )
+        ) {
+          throw new Error("Object proxy does not work as expected");
+        }
+      });
+      test("Scope Creation and Usage", () => {
+        const scopedKey = pbjKey("scoped-value");
+        let failed = false;
+        // Create a scope and register a value within it
+        const inject = context.scoped(async () => {
+          inject("Scoped Value");
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          failed = failed || ctx.resolve(scopedKey) !== "Scoped Value";
+        });
+
+        // Try to access the scoped value outside the scope (should be undefined)
+        let outsideScopeValue;
+        try {
+          outsideScopeValue = context.get(scopedKey);
+        } catch (e) {
+          outsideScopeValue = "Not accessible (expected)";
+        }
+
+        if (failed) {
+          throw new Error("Scope does not work as expected");
+        }
+      });
+      test("Dependency Injection", () => {
+        // Create service keys
+        const serviceAKey = pbjKey("service-a");
+        const serviceBKey = pbjKey("service-b");
+
+        // Register service A
+        context.register(serviceAKey, () => ({
+          getName: () => "Service A",
+        }));
+
+        // Register service B with a dependency on service A
+        context.register(
+          serviceBKey,
+          (serviceA) => ({
+            serviceA,
+            getFullName() {
+              return this.serviceA.getName() + " used by Service B";
+            },
+          }),
+          pbj(serviceAKey),
+        );
+
+        // Get service B and use it
+        const serviceB = context.resolve(serviceBKey);
+        const result = serviceB.getFullName();
+
+        if (result !== "Service A used by Service B") {
+          throw new Error("Dependency injection does not work as expected");
+        }
+      });
+    </script>
+    <script>
+      document.getElementById("test-code").textContent =
+        document.getElementById("test-module").textContent;
+    </script>
+  </body>
+</html>
