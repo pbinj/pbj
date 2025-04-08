@@ -1,5 +1,18 @@
 # @pbinj/pbj-visualization
 
+## 3.0.1
+
+### Patch Changes
+
+- 74627ee: Fixed CLI script for pbj-visualization to ensure it works properly during installation. Added a CLI script wrapper in the package root, updated the server CLI script, and fixed package.json configuration. Also updated symbols in the core package for better compatibility.
+- 74627ee: Added browser support and various packaging fixes
+- Updated dependencies [74627ee]
+- Updated dependencies [74627ee]
+- Updated dependencies [c144b5b]
+- Updated dependencies [74627ee]
+  - @pbinj/pbj@3.0.1
+  - @pbinj/pbj-guards@3.0.1
+
 ## 3.0.0
 
 ### Minor Changes
