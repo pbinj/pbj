@@ -1,5 +1,11 @@
 import { nullableSymbol } from "./guards.js";
-import { has, hasA, type Constructor, type Fn } from "@pbinj/pbj-guards";
+import {
+  has as _has,
+  hasA,
+  type Constructor,
+  type Fn,
+  isObjectish,
+} from "@pbinj/pbj-guards";
 import { proxyKey, serviceDescriptorKey, serviceSymbol } from "./symbols.js";
 import type { ServiceDescriptorI } from "./types.js";
 
@@ -64,15 +70,14 @@ export function newProxy<T extends Constructor>(
       if (service.primitive) {
         return [];
       }
-      const keys = Reflect.ownKeys(value);
-      return keys;
+      return Reflect.ownKeys(value);
     },
     has(_target, prop) {
       const val = service.invoke();
       if (service.primitive) {
         return false;
       }
-      return prop in val;
+      return isObjectish(val) ? prop in val : false;
     },
     getPrototypeOf() {
       return Object.getPrototypeOf(service.invoke());
@@ -83,7 +88,7 @@ export function newProxy<T extends Constructor>(
 function isServiceDescriptor<T extends Fn | Constructor | unknown>(
   v: unknown,
 ): v is ServiceDescriptorI<any, T> {
-  return has(v, serviceSymbol);
+  return _has(v, serviceSymbol);
 }
 
 export const serviceDescriptor = <T extends Fn | Constructor | unknown>(
