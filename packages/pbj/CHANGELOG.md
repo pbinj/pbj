@@ -1,5 +1,19 @@
 # @pbinj/pbj
 
+## 4.0.0
+
+### Minor Changes
+
+- 74627ee: Added browser compatibility support. The package now includes browser-specific builds and configurations to ensure it works properly in browser environments, ESM, and CJS module systems.
+- 74627ee: Fixed CLI script for pbj-visualization to ensure it works properly during installation. Added a CLI script wrapper in the package root, updated the server CLI script, and fixed package.json configuration. Also updated symbols in the core package for better compatibility.
+
+### Patch Changes
+
+- c144b5b: small bug fix in handling null values
+- 74627ee: Added browser support and various packaging fixes
+- Updated dependencies [74627ee]
+  - @pbinj/pbj-guards@4.0.0
+
 ## 3.0.0
 
 ### Minor Changes
