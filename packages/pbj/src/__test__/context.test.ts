@@ -398,4 +398,12 @@ describe("proxy", () => {
       expect(b).toBe(1);
     });
   });
+  describe("null", ()=>{
+    it("should not blow up if a value is null", ()=>{
+      const ctx = createNewContext();
+      const factory = () => null as any;
+      const a = ctx.register(pbjKey<{ a: number }>("test-factory-a"), factory);
+      expect(a.invoke()).toBe(null);
+    });
+  })
 });
