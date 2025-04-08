@@ -1,17 +1,16 @@
-import { AsyncLocalStorage } from "node:async_hooks";
 import { has, hasA, isFn, isSymbol } from "@pbinj/pbj-guards";
 import { PBinJError } from "./errors.js";
 import { Context } from "./context.js";
 import { ServiceDescriptor } from "./ServiceDescriptor.js";
 import { keyOf } from "./util.js";
 import { type PBinJKey, type ServiceDescriptorI } from "./types.js";
-import { pbjKey } from "./pbjKey.js";
+import { serviceProxySymbol } from "./symbols.js";
+import { AsyncLocalStorage } from "node:async_hooks";
 
 //borrowed from https://eytanmanor.medium.com/should-you-use-asynclocalstorage-2063854356bb
 const asyncLocalStorage = new AsyncLocalStorage<
   Map<PBinJKey<any>, ServiceDescriptorI<any, any>>
 >();
-const serviceProxySymbol = pbjKey<Symbol>("@pbj/ServiceDescriptorProxy");
 
 /**
  * Scoping allows for a variable to be scoped to a specific context.  This is

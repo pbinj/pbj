@@ -4,8 +4,8 @@
     "module": "CommonJS",
     "moduleResolution": "classic",
     "outDir": "./dist/cjs",
-    "target": "ES2019",
+    "target": "ES2020",
     "declaration": false
   },
-  "exclude": ["src/__test__/**"]
+  "exclude": ["src/__test__/**", "src/process.browser.ts"]
 }
