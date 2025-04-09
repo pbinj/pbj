@@ -23,9 +23,43 @@ import { Logger } from "./logger.js";
 
 const EMPTY = [] as const;
 
+/**
+ * Class to handle initialization of services
+ */
+class ServiceInit<T> {
+  constructor(
+    private key: keyof T & string,
+    private scope: T,
+    public initialized = false
+  ) {}
+
+  /**
+   * Invoke the initialization method on the service
+   */
+  invoke() {
+    if (!this.key || this.initialized) {
+      return;
+    }
+
+    if (typeof this.scope[this.key] !== 'function') {
+      throw new PBinJError(`Initialization method '${String(this.key)}' is not a function`);
+    }
+
+    try {
+      // Call the initialization method
+      const result = (this.scope[this.key] as unknown as Function).call(this.scope);
+      this.initialized = true;
+      return result;
+    } catch (e) {
+      throw new PBinJError(`Error initializing service: ${String(e)}`);
+    }
+  }
+}
+
 export class ServiceDescriptor<
   TRegistry extends RegistryType,
   T extends Constructor | Fn | unknown,
+    V extends ValueOf<TRegistry, T> = ValueOf<TRegistry, T>,
 > implements ServiceDescriptorI<TRegistry, T>
 {
   static #dependencies = new Set<CKey>();
@@ -56,6 +90,7 @@ export class ServiceDescriptor<
   private _factory = false;
   private _isListOf = false;
   private interceptors?: InterceptFn<Returns<T>>[];
+  public initialize?: keyof V & string;
   public primitive?: boolean;
   public invalid = false;
   public optional = true;
@@ -63,6 +98,7 @@ export class ServiceDescriptor<
 
   public tags: PBinJKeyType<T>[] = [];
   private _name: string | undefined;
+  private _init?: ServiceInit<V>;
   [serviceSymbol]: PBinJKey<TRegistry>;
   constructor(
     key: PBinJKey<TRegistry>,
@@ -253,8 +289,17 @@ export class ServiceDescriptor<
     this.interceptors = [...(this.interceptors ?? []), ...interceptors];
     return this;
   }
+
+  /**
+   * Override the name of the service.  This is useful for debugging.
+   * @param name
+   */
   withName(name: string) {
     this._name = name;
+    return this;
+  }
+  withInitialize(method:keyof V & string ) {
+    this.initialize = method;
     return this;
   }
   /**
@@ -287,7 +332,7 @@ export class ServiceDescriptor<
     return this.tags.includes(tag);
   }
   invalidate = () => {
-    if (this.invoked === false) {
+    if (!this.invoked ) {
       return;
     }
     this.logger.debug("invalidating service");
@@ -312,7 +357,14 @@ export class ServiceDescriptor<
       return invoke.call(this);
     }
 
-    return this._invoke();
+    const ret = this._invoke();
+
+    // Setup initialization if needed
+    if (this.initialize && has(ret, this.initialize)) {
+      this._init = new ServiceInit<V>(this.initialize, ret as unknown as V);
+    }
+
+    return ret;
   };
 
   private _promise?: Promise<T> & { resolved?: boolean };
