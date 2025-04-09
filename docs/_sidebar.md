@@ -3,7 +3,7 @@
 - Registration
   - [Auto Registration](auto-registration.md)
   - [Manual Registration](manual-registration.md)
-  - [Initialization](initialization.md)]
+  - [Initialization](initialization.md)
 - Injection
   - [pbjKey](pbj-key.md)
   - [Constructor Injection](constructor-injection.md)

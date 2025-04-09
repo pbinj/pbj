@@ -226,7 +226,6 @@ class GoodService {
     this.initialized = true;
     this.cache = new Map();
     this.eventEmitter = new EventEmitter();
-    return 'Initialized';
   }
 }
 
@@ -238,7 +237,6 @@ class BadService {
     this.initialized = true;
     this.loadAllDataFromDatabase(); // This could fail
     this.connectToExternalService(); // This could fail
-    return 'Initialized';
   }
 }
 ```
@@ -253,7 +251,6 @@ class UserService {
   
   init() {
     this.initialized = true;
-    return 'Initialized';
   }
   
   getUser(id: number) {
@@ -283,7 +280,6 @@ class AsyncService {
     await this.loadConfiguration();
     
     this.initialized = true;
-    return 'Initialized';
   }
   
   private async connectToDatabase() {
@@ -338,7 +334,6 @@ class WellDesignedService {
     this.setupEventListeners();
     this.preloadData();
     this.startBackgroundTasks();
-    return 'Initialized';
   }
   
   private setupEventListeners() {
