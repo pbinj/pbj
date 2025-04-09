@@ -1,5 +1,18 @@
 # @pbinj/pbj
 
+## 4.0.0
+
+### Minor Changes
+
+- 3eb0a30: Added init support and better dependency intialization order
+
+### Patch Changes
+
+- 3eb0a30: Added intializable lifecycle to allow construction of objects out of order.
+- 866083c: Moved guards logic to its own module
+- Updated dependencies [866083c]
+  - @pbinj/pbj-guards@4.0.0
+
 ## 3.0.1
 
 ### Patch Changes

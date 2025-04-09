@@ -1,5 +1,11 @@
 # @pbinj/pbj-guards
 
+## 4.0.0
+
+### Patch Changes
+
+- 866083c: Moved guards logic to its own module
+
 ## 3.0.1
 
 ### Patch Changes
