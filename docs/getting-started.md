@@ -9,11 +9,11 @@ $ npm install @pbinj/pbj
 ```
 
 ```bash
-$ pnpm install @pbinj/pbj
+$ pnpm add @pbinj/pbj
 ```
 
 ```bash
-$ yarn install @pbinj/pbj
+$ yarn add @pbinj/pbj
 ```
 
 ## Basic Concepts
