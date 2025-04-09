@@ -321,51 +321,45 @@ export class Context<TRegistry extends RegistryType = Registry>
     // If we've already visited this key, we have a circular dependency
     // mark it as initialized to break the cycle, but don't return yet,
     // we need to continue to ensure the service is properly initialized
-    const isCircular = visitedKeys.size === visitedKeys.add(key).size;
-    if (isCircular) {
+    if (visitedKeys.size === visitedKeys.add(key).size) {
       this.logger.debug(
         "Detected circular dependency for {key}, marking as initialized",
         { key: asString(key) },
       );
       this.initializedServices.add(key);
-    }
-
-    try {
-      // Get the instance of the service
-      const instance = service.invoke();
 
       // For circular dependencies, we need to ensure all dependencies are marked as initialized
       // before calling the initialization method
-      if (isCircular) {
-        // Mark all dependencies as initialized
-        const dependencies = service.dependencies || new Set<CKey>();
-        for (const depKey of dependencies) {
-          if (!this.initializedServices.has(depKey)) {
-            this.initializedServices.add(depKey);
-            this.logger.debug(
-              "Marking dependency {depKey} as initialized due to circular dependency",
-              {
-                depKey: asString(depKey),
-              },
-            );
-          }
+
+      // Mark all dependencies as initialized
+      const dependencies = service.dependencies || new Set<CKey>();
+      for (const depKey of dependencies) {
+        if (!this.initializedServices.has(depKey)) {
+          this.initializedServices.add(depKey);
+          this.logger.debug(
+            "Marking dependency {depKey} as initialized due to circular dependency",
+            {
+              depKey: asString(depKey),
+            },
+          );
         }
       }
-
-      service.initializer?.invoke(instance);
-      this.logger.debug("Marked service as initialized {key}", {
-        key: asString(key),
-      });
-      this.initializedServices.add(key);
-
-      // Notify services waiting on this one
-      this._notifyDependentServices(key);
+    }
+    try {
+      // Get the instance of the service
+      service.initializer?.invoke(service.invoke());
     } catch (e) {
       this.logger.error("Error initializing service {key}: {error}", {
         key: asString(key),
         error: e,
       });
     }
+    this.logger.debug("Marked service as initialized {key}", {
+      key: asString(key),
+    });
+    this.initializedServices.add(key);
+    // Notify services waiting on this one
+    this._notifyDependentServices(key);
   }
 
   /**
@@ -378,16 +372,16 @@ export class Context<TRegistry extends RegistryType = Registry>
 
     // Check each waiting service to see if all its dependencies are now initialized
     for (const waitingKey of this.get(key)?.dependencies || []) {
-      const service = this.map.get(waitingKey);
-      if (!service) continue;
-      const dependencies = service.dependencies || new Set<CKey>();
-      const allDepsInitialized = Array.from(dependencies).every((depKey) =>
-        this.initializedServices.has(depKey),
-      );
-
-      if (allDepsInitialized) {
-        // All dependencies initialized, so initialize this service
-        this._initializeService(waitingKey);
+      const dependencies = this.map.get(waitingKey)?.dependencies;
+      if (dependencies) {
+        if (
+          Array.prototype.every.call(dependencies, (depKey) =>
+            this.initializedServices.has(depKey),
+          )
+        ) {
+          // All dependencies initialized, so initialize this service
+          this._initializeService(waitingKey);
+        }
       }
     }
   }
