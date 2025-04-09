@@ -249,13 +249,10 @@ export class Context<TRegistry extends RegistryType = Registry>
       const set = new Set<CKey>();
       // Initialize the service and its dependencies
       this._initializeService(key, set);
-
     }
 
     return result;
   }
-
- 
 
   newContext<TTRegistry extends TRegistry = TRegistry>() {
     this.logger.info("new context");
