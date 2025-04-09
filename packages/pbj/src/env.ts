@@ -1,6 +1,8 @@
 import { context, Context } from "./context.js";
 import { pbjKey } from "./pbjKey.js";
 import "./helpers.js";
+import { env as DefaultEnv } from "./process.js";
+
 declare module "./context.js" {
   interface Context {
     env<K extends keyof PBinJEnv & string, D extends string>(
@@ -15,18 +17,12 @@ declare module "./context.js" {
   }
 }
 
-export const Default = {
-  env: process.env,
-};
-
-type Env = typeof process.env;
-
 //make env easier to use.
-export interface PBinJEnv extends Env {}
+export interface PBinJEnv extends Record<string, string | undefined> {}
 
 export const envPBinJKey = pbjKey<PBinJEnv>("@pbj/env");
 
-context.register(envPBinJKey, () => Default.env);
+context.register(envPBinJKey, () => DefaultEnv);
 
 Context.prototype.env = function env<
   K extends keyof PBinJEnv & string,

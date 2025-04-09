@@ -1,28 +1,38 @@
 {
   "name": "@pbinj/pbj",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "license": "MIT",
   "description": "A lightweight Dependency Injection (DI) framework for Node.js, based on proxies.",
   "typings": "./dist/esm/index.d.ts",
   "type": "module",
   "exports": {
     ".": {
+      "types": "./dist/esm/index.d.ts",
+      "browser": "./dist/browser/index.js",
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
     },
     "./env": {
+      "types": "./dist/esm/env.d.ts",
+      "browser": "./dist/browser/env.js",
       "import": "./dist/esm/env.js",
       "require": "./dist/cjs/env.js"
     },
     "./scope": {
+      "types": "./dist/esm/scope.d.ts",
+      "browser": "./dist/browser/scope.js",
       "import": "./dist/esm/scope.js",
       "require": "./dist/cjs/scope.js"
     },
     "./logger": {
+      "types": "./dist/esm/logger.d.ts",
+      "browser": "./dist/browser/logger.js",
       "import": "./dist/esm/logger.js",
       "require": "./dist/cjs/logger.js"
     },
     "./pbjKey": {
+      "types": "./dist/esm/pbjKey.d.ts",
+      "browser": "./dist/browser/pbjKey.js",
       "import": "./dist/esm/pbjKey.js",
       "require": "./dist/cjs/pbjKey.js"
     }
@@ -49,7 +59,9 @@
     "@types/node": "^22.9.0",
     "@vitest/coverage-v8": "^2.1.5",
     "prettier": "^3.3.3",
+    "serve": "^14.2.4",
     "typescript": "^5.6.3",
+    "vite": "^6.0.6",
     "vite-tsconfig-paths": "^5.1.2",
     "vitest": "^2.1.8"
   },
@@ -63,10 +75,13 @@
     "test": "vitest run",
     "build:esm": "tsc",
     "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build": "${npm_execpath} run build:esm && ${npm_execpath} run build:cjs",
+    "build:browser": "vite build",
+    "build": "${npm_execpath} run build:esm && ${npm_execpath} run build:cjs && ${npm_execpath} run build:browser",
     "watch": "tsc -w",
     "clean": "rm -rf dist",
+    "browser": "serve .",
     "lint:check": "prettier --check --ignore-path ../../.prettierignore .",
     "lint": "prettier --ignore-path ../../.prettierignore --write  ."
-  }
+  },
+  "sideEffects": false
 }

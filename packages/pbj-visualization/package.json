@@ -1,6 +1,6 @@
 {
   "name": "@pbinj/pbj-visualization",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "type": "module",
   "typings": "./dist/esm/index.d.ts",
   "repository": {
@@ -9,7 +9,7 @@
   },
   "description": "A lightweight Dependency Injection (DI) framework for Node.js, based on proxies.",
   "bin": {
-    "pbj-visualization": "./dist/esm/cli.js"
+    "pbj-visualization": "./cli.js"
   },
   "author": "Justin Spears <speajus@gmail.com>",
   "license": "MIT",

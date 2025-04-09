@@ -12,9 +12,5 @@ export async function main(imports: string[] = process.argv.slice(2)) {
     console.log("importing ", arg);
     await import(arg);
   }
-  register();
+  await register();
 }
-main().catch((e) => {
-  console.trace(e);
-  process.exit(1);
-});
