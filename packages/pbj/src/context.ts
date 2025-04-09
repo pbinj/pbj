@@ -44,11 +44,7 @@ export interface Context<TRegistry extends RegistryType = Registry> {
     fn: ServiceDescriptorListener,
     noInitial?: boolean,
   ): () => void;
-  /**
-   * Initialize a service and all its dependencies
-   * @param service The service to initialize
-   */
-  initialize<T extends PBinJKey<TRegistry>>(service: T): void;
+
   resolveAsync<T extends PBinJKey<TRegistry>>(
     typeKey: T,
     ...args: ServiceArgs<T, TRegistry> | []
@@ -105,7 +101,6 @@ export class Context<TRegistry extends RegistryType = Registry>
    *
    * ```
    *
-   * @param service
    * @param fn
    */
   visit(fn: VisitFn<TRegistry, any>): void;
@@ -152,13 +147,6 @@ export class Context<TRegistry extends RegistryType = Registry>
     return this.map.get(key) ?? this.parent?.get(key);
   }
 
-  protected has(key: CKey): boolean {
-    return this.map.has(key) ?? this.parent?.has(key) ?? false;
-  }
-
-  protected set(key: CKey, value: ServiceDescriptor<TRegistry, any>) {
-    this.map.set(key, value);
-  }
 
   private invalidate(
     key: CKey,
@@ -283,16 +271,29 @@ export class Context<TRegistry extends RegistryType = Registry>
    */
   initialize<T extends PBinJKey<TRegistry>>(service: T): void {
     const key = keyOf(service);
-    const serviceDesc = this.map.get(key);
 
-    if (!serviceDesc) {
-      this.logger.warn("Cannot initialize service {key}: not found", { key: asString(key) });
-      return;
-    }
+    // Use the visit function to initialize the service and all its dependencies in the correct order
+    const visited = new Set<CKey>();
 
-    // First, prepare the dependency graph
-    this._prepareDependenciesForInitialization(key, serviceDesc);
+    this.visit(service, (serviceDesc) => {
+      const depKey = keyOf(serviceDesc[serviceSymbol]);
+
+      // Skip if already visited to avoid duplicate initialization
+      if (visited.has(depKey)) {
+        return null;
+      }
+
+      visited.add(depKey);
+
+      // Initialize the service if it has an initialize method and is not already initialized
+      if (serviceDesc.initialize && !this.initializedServices.has(depKey)) {
+        this._initializeService(depKey);
+      }
+
+      return null; // Continue visiting
+    });
   }
+
 
   /**
    * Check if all dependencies of a service are already initialized
@@ -686,6 +687,7 @@ export function createNewContext<TRegistry extends RegistryType>() {
 }
 
 declare global {
+  // noinspection ES6ConvertVarToLetConst
   var __pbj_context: Context<Registry> | undefined;
 }
 
