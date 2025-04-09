@@ -93,9 +93,9 @@ export type Returns<T> = T extends Constructor
     : T;
 export interface ServiceInitI {
   initialized: boolean;
-  invoke(instance:unknown): unknown;
+  invoke(instance: unknown): unknown;
   method: string;
-  invalidate():void;
+  invalidate(): void;
 }
 export interface ServiceDescriptorI<
   TRegistry extends RegistryType,

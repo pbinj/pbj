@@ -14,7 +14,8 @@ import type {
   PBinJKeyType,
   RegistryType,
   Returns,
-  ServiceDescriptorI, ServiceInitI,
+  ServiceDescriptorI,
+  ServiceInitI,
   ValueOf,
 } from "./types.js";
 import { asString } from "./pbjKey.js";
@@ -23,32 +24,29 @@ import { Logger } from "./logger.js";
 
 const EMPTY = [] as const;
 
-type InitFn = ()=>void;
+type InitFn = () => void;
 /**
  * Class to handle initialization of services
  */
 class ServiceInit<T extends Constructor> implements ServiceInitI {
   constructor(
     public method: keyof T & string,
-    public _factory?:Constructor,
-    public initialized = false
+    public _factory?: Constructor,
+    public initialized = false,
   ) {
     this.factory = _factory;
   }
 
-  private originalInit : InitFn | undefined;
+  private originalInit: InitFn | undefined;
 
-  invalidate(){
+  invalidate() {
     this.initialized = false;
   }
-  set factory(_factory:Constructor | undefined) {
+  set factory(_factory: Constructor | undefined) {
     this._factory = _factory;
     if (_factory) {
       // Store the original init method
       this.originalInit = _factory?.prototype?.[this.method];
-      if (!this.originalInit) {
-//        throw new PBinJError(`${this.method} is not a method on ${_factory.name}`);
-      }
     } else {
       this.initialized = true;
     }
@@ -56,24 +54,23 @@ class ServiceInit<T extends Constructor> implements ServiceInitI {
   /**
    * Invoke the initialization method on the service
    */
-  public invoke(scope:InstanceType<T>) {
-      if (this.initialized || !this.originalInit || !this.method) {
-        return;
-      }
-      this.initialized = true;
-      const result = this.originalInit.call(scope);
-
-      // No need to put the method back on the instance
-      // The original method is still on the prototype
-
-      return result;
+  public invoke(scope: InstanceType<T>) {
+    if (this.initialized || !this.originalInit || !this.method) {
+      return;
     }
+    this.initialized = true;
+    const ret = this.originalInit.call(scope);
+    if (this.factory?.prototype) {
+      this.factory.prototype[this.method] = this.originalInit;
+    }
+    return ret;
+  }
 }
 
 export class ServiceDescriptor<
   TRegistry extends RegistryType,
   T extends Constructor | Fn | unknown,
-    V extends ValueOf<TRegistry, T> = ValueOf<TRegistry, T>,
+  V extends ValueOf<TRegistry, T> = ValueOf<TRegistry, T>,
 > implements ServiceDescriptorI<TRegistry, T>
 {
   static #dependencies = new Set<CKey>();
@@ -179,7 +176,7 @@ export class ServiceDescriptor<
     this.invokable = isFn(_service);
     this._service = _service;
     this._factory = this.invokable && !isConstructor(_service as Fn<T>);
-    if (this.initializer){
+    if (this.initializer) {
       this.initializer.factory = this.service as any;
     }
     this.logger.debug("changed service");
@@ -315,13 +312,11 @@ export class ServiceDescriptor<
     this._name = name;
     return this;
   }
-  withInitialize(method?:keyof V & string ) {
+  withInitialize(method?: keyof V & string) {
     if (method) {
       this.initializer = new ServiceInit<V>(method, this.service as any);
-      this.initialize = method;
     } else {
       this.initializer = undefined;
-      this.initialize = undefined;
     }
     return this;
   }
@@ -355,14 +350,14 @@ export class ServiceDescriptor<
     return this.tags.includes(tag);
   }
   invalidate = () => {
-    if (!this.invoked ) {
+    if (!this.invoked) {
       return;
     }
     this.logger.debug("invalidating service");
     this.invalid = true;
     this.invoked = false;
     this._instance = undefined;
-    this.initializer?.invalidate
+    this.initializer?.invalidate;
     this.onChange?.();
   };
   /**
