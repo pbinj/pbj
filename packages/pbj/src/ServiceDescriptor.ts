@@ -36,7 +36,7 @@ class ServiceInit<T> {
   /**
    * Invoke the initialization method on the service
    */
-  invoke() {
+  public invoke() {
     if (!this.key || this.initialized) {
       return;
     }
@@ -98,7 +98,7 @@ export class ServiceDescriptor<
 
   public tags: PBinJKeyType<T>[] = [];
   private _name: string | undefined;
-  private _init?: ServiceInit<V>;
+  public _init?: ServiceInit<V>;
   [serviceSymbol]: PBinJKey<TRegistry>;
   constructor(
     key: PBinJKey<TRegistry>,

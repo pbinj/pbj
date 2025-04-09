@@ -110,6 +110,7 @@ export interface ServiceDescriptorI<
   proxy: Returns<T>;
   service: OfA<T> | undefined;
   args: Args<T>;
+  initialize?: keyof Returns<T> & string;
   /**
    * Set the args to be used with the service.   These can be other pbjs, or any other value.
    * @param args

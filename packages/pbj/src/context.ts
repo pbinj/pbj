@@ -265,34 +265,6 @@ export class Context<TRegistry extends RegistryType = Registry>
     return new Context<TTRegistry>(this);
   }
 
-  /**
-   * Initialize a service and all its dependencies
-   * @param service The service to initialize
-   */
-  initialize<T extends PBinJKey<TRegistry>>(service: T): void {
-    const key = keyOf(service);
-
-    // Use the visit function to initialize the service and all its dependencies in the correct order
-    const visited = new Set<CKey>();
-
-    this.visit(service, (serviceDesc) => {
-      const depKey = keyOf(serviceDesc[serviceSymbol]);
-
-      // Skip if already visited to avoid duplicate initialization
-      if (visited.has(depKey)) {
-        return null;
-      }
-
-      visited.add(depKey);
-
-      // Initialize the service if it has an initialize method and is not already initialized
-      if (serviceDesc.initialize && !this.initializedServices.has(depKey)) {
-        this._initializeService(depKey);
-      }
-
-      return null; // Continue visiting
-    });
-  }
 
 
   /**
@@ -304,73 +276,34 @@ export class Context<TRegistry extends RegistryType = Registry>
    */
   private _areDependenciesInitialized(
     key: CKey,
-    service: ServiceDescriptor<TRegistry, any>,
+    service: ServiceDescriptor<TRegistry, any> | undefined,
     visitedKeys: Set<CKey> = new Set()
   ): boolean {
-    // If already initialized, return true
-    if (this.initializedServices.has(key)) {
-      return true;
+    if (!service) {
+      return false;
     }
-
+    // If already initialized, return true
     // If we've already visited this key, we have a circular dependency
     // In this case, we'll allow initialization to proceed to break the cycle
-    if (visitedKeys.has(key)) {
+    if (this.initializedServices.has(key) || visitedKeys.size === visitedKeys.add(key).size) {
+      return true;
+    }
+    // Get dependencies
+
+    // Check if all explicit dependencies are initialized
+    if (!service.dependencies) {
       return true;
     }
 
-    // Add this key to the visited set
-    visitedKeys.add(key);
-
-    // Get dependencies
-    const dependencies = service.dependencies || new Set<CKey>();
-
-    // If there are no explicit dependencies, check the constructor arguments
-    if (dependencies.size === 0 && service.args && service.args.length > 0) {
-      // For each argument, check if it's a PBinJ proxy and if so, check if its key exists
-      for (const arg of service.args) {
-        if (isPBinJ(arg)) {
-          const depKey = keyOf(arg[proxyKey]);
-
-          // Skip if this is a circular dependency
-          if (visitedKeys.has(depKey)) {
-            continue;
-          }
-
-          // If the dependency is not registered, return false
-          if (!this.map.has(depKey)) {
-            return false;
-          }
-
-          // If the dependency is not initialized, check if its dependencies are initialized
-          if (!this.initializedServices.has(depKey)) {
-            const depService = this.map.get(depKey);
-            if (!depService || !this._areDependenciesInitialized(depKey, depService, visitedKeys)) {
-              return false;
-            }
-          }
+    for (const depKey of service.dependencies) {
+        // Skip if this is a circular dependency
+        if (visitedKeys.has(depKey) || this.initializedServices.has(depKey)) {
+          continue;
         }
-      }
-    }
-
-    // Check if all explicit dependencies are initialized
-    for (const depKey of dependencies) {
-      // Skip if this is a circular dependency
-      if (visitedKeys.has(depKey)) {
-        continue;
-      }
-
-      // If the dependency is not registered, return false
-      if (!this.map.has(depKey)) {
-        return false;
-      }
-
-      // If the dependency is not initialized, check if its dependencies are initialized
-      if (!this.initializedServices.has(depKey)) {
-        const depService = this.map.get(depKey);
-        if (!depService || !this._areDependenciesInitialized(depKey, depService, visitedKeys)) {
+        // If the dependency is not initialized, check if its dependencies are initialized
+        if (!this._areDependenciesInitialized(depKey, this.map.get(depKey), visitedKeys)) {
           return false;
         }
-      }
     }
 
     return true;
@@ -406,7 +339,7 @@ export class Context<TRegistry extends RegistryType = Registry>
 
     // If no dependencies, mark as ready to initialize
     if (dependencies.size === 0) {
-      this._initializeService(key, new Set(visitedKeys));
+      this._initializeService(key);
       return;
     }
 
@@ -472,15 +405,12 @@ export class Context<TRegistry extends RegistryType = Registry>
 
     // If we've already visited this key, we have a circular dependency
     // Mark it as initialized to break the cycle
-    if (visitedKeys.has(key)) {
+    // Add this key to the visited set
+    if (visitedKeys.size === visitedKeys.add(key).size) {
       this.logger.debug("Detected circular dependency for {key}, marking as initialized", { key: asString(key) });
       this.initializedServices.add(key);
       return;
     }
-
-    // Add this key to the visited set
-    visitedKeys.add(key);
-
     const service = this.map.get(key);
     if (!service) {
       this.logger.warn("Cannot initialize service {key}: not found", { key: asString(key) });
@@ -506,10 +436,7 @@ export class Context<TRegistry extends RegistryType = Registry>
     }
 
     try {
-      // Call the private _init method which contains the ServiceInit instance
-      // @ts-expect-error - accessing private property
-      if (service._init && typeof service._init.invoke === 'function') {
-        // @ts-expect-error - accessing private property
+      if (service._init) {
         const result = service._init.invoke();
         this.logger.debug("Initialized service {key} with result {result}", {
           key: asString(key),
@@ -537,6 +464,7 @@ export class Context<TRegistry extends RegistryType = Registry>
         key: asString(key),
         error: e,
       });
+      throw e;
     }
   }
 
@@ -595,6 +523,7 @@ export class Context<TRegistry extends RegistryType = Registry>
       this._initializePendingServices();
     }
   }
+
   scoped<R, TKey extends PBinJKeyType | (keyof TRegistry & symbol)>(
     _key: TKey,
   ): (next: () => R, ...args: ServiceArgs<TKey, TRegistry>) => R {
