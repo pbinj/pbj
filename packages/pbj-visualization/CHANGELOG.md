@@ -1,5 +1,16 @@
 # @pbinj/pbj-visualization
 
+## 3.0.2
+
+### Patch Changes
+
+- 866083c: Moved guards logic to its own module
+- Updated dependencies [3eb0a30]
+- Updated dependencies [3eb0a30]
+- Updated dependencies [866083c]
+  - @pbinj/pbj@3.0.2
+  - @pbinj/pbj-guards@3.0.2
+
 ## 3.0.1
 
 ### Patch Changes
