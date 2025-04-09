@@ -28,6 +28,7 @@ class MyService {
   constructor() {
     // Constructor logic
     console.log('MyService constructor called');
+    this.init();
   }
   
   // This method will be called during initialization
@@ -209,79 +210,6 @@ console.log(service.derivedMethod()); // 'Derived method called'
 // DerivedService initialized
 ```
 
-## Circular Dependencies
-
-The initialization system handles circular dependencies gracefully. When two services depend on each other, the system will detect the circular dependency and initialize both services correctly.
-
-```typescript
-import { pbj, createNewContext, pbjKey } from '@pbinj/pbj';
-
-// Define keys for the services
-const serviceAKey = pbjKey<ServiceA>('service-a');
-const serviceBKey = pbjKey<ServiceB>('service-b');
-
-// Service A depends on Service B
-class ServiceA {
-  public initialized = false;
-  
-  constructor(private b = pbj(serviceBKey)) {}
-  
-  init() {
-    console.log('ServiceA initialized');
-    this.initialized = true;
-    return 'ServiceA ready';
-  }
-  
-  getFromB() {
-    return this.b.getValue();
-  }
-  
-  getValue() {
-    return 'Value from ServiceA';
-  }
-}
-
-// Service B depends on Service A
-class ServiceB {
-  public initialized = false;
-  
-  constructor(private a = pbj(serviceAKey)) {}
-  
-  init() {
-    console.log('ServiceB initialized');
-    this.initialized = true;
-    return 'ServiceB ready';
-  }
-  
-  getFromA() {
-    return this.a.getValue();
-  }
-  
-  getValue() {
-    return 'Value from ServiceB';
-  }
-}
-
-const ctx = createNewContext();
-
-// Register both services with initialization
-ctx.register(serviceAKey, ServiceA).withInitialize('init');
-ctx.register(serviceBKey, ServiceB).withInitialize('init');
-
-// Resolving either service will initialize both services
-const serviceA = ctx.resolve(serviceAKey);
-const serviceB = ctx.resolve(serviceBKey);
-
-console.log(serviceA.initialized); // true
-console.log(serviceB.initialized); // true
-
-console.log(serviceA.getFromB()); // 'Value from ServiceB'
-console.log(serviceB.getFromA()); // 'Value from ServiceA'
-
-// Output:
-// ServiceA initialized
-// ServiceB initialized
-```
 
 ## Best Practices
 
@@ -319,7 +247,7 @@ class BadService {
 
 Always check if a service is initialized before using it, especially if the service is used outside the context of the dependency injection system.
 
-```typescript
+```ts
 class UserService {
   public initialized = false;
   
@@ -344,6 +272,8 @@ class UserService {
 For services that require asynchronous initialization, you can return a Promise from the initialization method.
 
 ```typescript
+import {createNewContext, pbj} from '@pbinj/pbj';
+
 class AsyncService {
   public initialized = false;
   
@@ -387,6 +317,8 @@ service.init().then(() => {
 Keep the constructor simple and focused on setting up dependencies, and use the initialization method for more complex setup.
 
 ```typescript
+import {createNewContext, pbj} from '@pbinj/pbj';
+
 class WellDesignedService {
   private logger: Logger;
   private config: Config;

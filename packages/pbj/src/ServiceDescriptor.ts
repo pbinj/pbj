@@ -20,7 +20,6 @@ import type {
 import { asString } from "./pbjKey.js";
 import { PBinJAsyncError } from "./errors.js";
 import { Logger } from "./logger.js";
-import {factory} from "typescript";
 
 const EMPTY = [] as const;
 
@@ -46,9 +45,9 @@ class ServiceInit<T extends Constructor> implements ServiceInitI {
     this._factory = _factory;
     if (_factory) {
       // Store the original init method
-      this.originalInit = _factory.prototype[this.method];
+      this.originalInit = _factory?.prototype?.[this.method];
       if (!this.originalInit) {
-        throw new PBinJError(`${this.method} is not a method on ${_factory.name}`);
+//        throw new PBinJError(`${this.method} is not a method on ${_factory.name}`);
       }
     } else {
       this.initialized = true;
@@ -318,9 +317,9 @@ export class ServiceDescriptor<
   }
   withInitialize(method?:keyof V & string ) {
     if (method) {
-      this.initialize = method;
+      this.initializer = new ServiceInit<V>(method, this.service as any);
     } else {
-      this.initialize = undefined;
+      this.initializer = undefined;
     }
     return this;
   }

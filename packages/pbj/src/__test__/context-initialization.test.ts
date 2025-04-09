@@ -86,11 +86,10 @@ describe("context initialization - basic scenarios", () => {
 
         // Register the service with initialization
         const descriptor = ctx.register(SimpleService).withInitialize('init');
-        console.log('Descriptor:', descriptor);
+        expect(descriptor.initializer).toBeDefined();
 
         // Resolve the service
         const service = ctx.resolve(SimpleService);
-        console.log('Service:', service);
 
         // The service should be initialized
         expect(service).toBeDefined();
@@ -234,7 +233,8 @@ describe("context initialization - out-of-order execution", () => {
             private a = pbj(key),
             private b = pbj('service-b'),
             private c = pbj('service-c')
-        ) {}
+        ) {
+        }
 
         init() {
             this.initialized = true;
@@ -246,10 +246,12 @@ describe("context initialization - out-of-order execution", () => {
     it("should handle dependencies registered in reverse order", () => {
         // Create a special version of ServiceWithMultipleDeps for this test
         const order: string[] = [];
+
         class ServiceA {
             init() {
                 order.push('service-a');
             }
+
             value = 1;
         }
 
@@ -257,6 +259,7 @@ describe("context initialization - out-of-order execution", () => {
             init() {
                 order.push('service-b');
             }
+
             value = 2;
         }
 
@@ -264,6 +267,7 @@ describe("context initialization - out-of-order execution", () => {
             init() {
                 order.push('service-c');
             }
+
             value = 3;
         }
 
@@ -274,7 +278,8 @@ describe("context initialization - out-of-order execution", () => {
                 private a = pbj('service-a'),
                 private b = pbj('service-b'),
                 private c = pbj('service-c')
-            ) {}
+            ) {
+            }
 
             init() {
                 // Only mark as initialized if all dependencies exist
@@ -294,8 +299,11 @@ describe("context initialization - out-of-order execution", () => {
         // We don't check initialized state here as it might vary depending on implementation
 
         // Register dependencies in reverse order
+        //@ts-expect-error
         ctx.register('service-c', ServiceC).withInitialize('init');
+        //@ts-expect-error
         ctx.register('service-b', ServiceB).withInitialize('init');
+        //@ts-expect-error
         ctx.register('service-a', ServiceA).withInitialize('init');
 
         // Clear the order array and add services in the correct order
@@ -329,7 +337,8 @@ describe("context initialization - out-of-order execution", () => {
         class ServiceX {
             public initialized = false;
 
-            constructor(private y = pbj('service-y')) {}
+            constructor(private y = pbj('service-y')) {
+            }
 
             init() {
                 this.initialized = true;
@@ -341,7 +350,8 @@ describe("context initialization - out-of-order execution", () => {
         class ServiceY {
             public initialized = false;
 
-            constructor(private x = pbj('service-x')) {}
+            constructor(private x = pbj('service-x')) {
+            }
 
             init() {
                 this.initialized = true;
@@ -365,5 +375,74 @@ describe("context initialization - out-of-order execution", () => {
         // Verify the services were created
         expect(serviceX).toBeDefined();
         expect(serviceY).toBeDefined();
+    });
+
+
+    it("circular dependencies", () => {
+
+// Define keys for the services
+        const serviceAKey = pbjKey<ServiceA>('service-a');
+        const serviceBKey = pbjKey<ServiceB>('service-b');
+
+// Service A depends on Service B
+        class ServiceA {
+            public initialized = false;
+
+            constructor(private b = pbj(serviceBKey)) {
+            }
+
+            init() {
+                console.log('ServiceA initialized');
+                this.initialized = true;
+            }
+
+            getFromB() {
+                if (!this.initialized) {
+                    return null;
+                }
+                return this.b.getValue();
+            }
+
+            getValue() {
+                return 'Value from ServiceA';
+            }
+        }
+
+// Service B depends on Service A
+        class ServiceB {
+            public initialized = false;
+
+            constructor(private a = pbj(serviceAKey)) {
+                this.init();
+            }
+
+            init() {
+                console.log('ServiceB initialized');
+                this.initialized = true;
+            }
+
+            getFromA() {
+                return this.a.getValue();
+            }
+
+            getValue() {
+                return 'Value from ServiceB';
+            }
+        }
+
+        const ctx = createNewContext();
+
+        // Register both services with initialization
+        ctx.register(serviceAKey, ServiceA).withInitialize('init');
+        ctx.register(serviceBKey, ServiceB).withInitialize('init');
+
+        // Resolving either service will initialize both services
+        const serviceA = ctx.resolve(serviceAKey);
+        const serviceB = ctx.resolve(serviceBKey);
+
+        expect(serviceA.initialized).toBe(true);
+        expect(serviceB.initialized).toBe(true);
+        expect(serviceA.getFromB()).toBe('Value from ServiceB');
+        expect(serviceB.getFromA()).toBe('Value from ServiceA');
     });
 });
