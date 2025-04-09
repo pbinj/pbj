@@ -73,6 +73,7 @@
   },
   "scripts": {
     "test": "vitest run",
+    "test:watch": "vitest watch",
     "build-esm": "tsc",
     "build-cjs": "tsc -p tsconfig.cjs.json",
     "build-browser": "vite build",
