@@ -91,7 +91,12 @@ export type Returns<T> = T extends Constructor
   : T extends Fn
     ? ReturnType<T>
     : T;
-
+export interface ServiceInitI {
+  initialized: boolean;
+  invoke(instance: unknown): unknown;
+  method: string;
+  invalidate(): void;
+}
 export interface ServiceDescriptorI<
   TRegistry extends RegistryType,
   T extends Constructor | Fn | unknown,
@@ -110,6 +115,7 @@ export interface ServiceDescriptorI<
   proxy: Returns<T>;
   service: OfA<T> | undefined;
   args: Args<T>;
+  initializer?: ServiceInitI;
   /**
    * Set the args to be used with the service.   These can be other pbjs, or any other value.
    * @param args

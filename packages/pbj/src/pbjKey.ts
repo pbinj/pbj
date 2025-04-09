@@ -1,7 +1,7 @@
 import { isPBinJ } from "./guards.js";
 import { proxyKey } from "./symbols.js";
-import type { Fn, PBinJKey, PBinJKeyType } from "./types.js";
-import { isFn, isSymbol } from "@pbinj/pbj-guards";
+import type { CKey, Constructor, Fn, PBinJKey, PBinJKeyType } from "./types.js";
+import { isConstructor, isFn, isSymbol } from "@pbinj/pbj-guards";
 
 const pbjKeyMap = new WeakMap<{}, string>();
 const anonymousMap = new WeakMap<Fn, string>();
@@ -18,18 +18,33 @@ export const pbjKeyName = (key: PBinJKeyType<any>) => {
 export function isPBinJKey(v: unknown): v is PBinJKeyType<unknown> {
   return pbjKeyMap.has(v as any);
 }
-export function asString(key: PBinJKey<any>) {
+export function asString(
+  key: PBinJKey<any> | CKey | Constructor | Fn | symbol | unknown,
+): string {
+  if (key == null) {
+    return "<unknown>";
+  }
+  if (typeof key === "string") {
+    return key;
+  }
   if (isPBinJ(key)) {
     const service = key[proxyKey];
     return asString(service);
   }
   if (isPBinJKey(key)) {
-    return pbjKeyName(key);
+    const ret = pbjKeyName(key);
+    if (ret != null) {
+      return ret;
+    }
   }
+
   if (isFn(key)) {
+    if (isConstructor(key)) {
+      return key.name;
+    }
     return key.name || anonymous(key);
   }
-  if (isSymbol(key)) {
+  if (isSymbol(key) && key.description) {
     return key.description;
   }
   return String(key);
