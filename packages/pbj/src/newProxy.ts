@@ -54,7 +54,7 @@ export function newProxy<T extends Constructor>(
         ? (val as any)[prop].bind(val)
         : (val as any)[prop];
     },
-    getOwnPropertyDescriptor(target, prop) {
+    getOwnPropertyDescriptor(_target, prop) {
       const val = service.invoke();
       if (Array.isArray(val)) {
         return undefined;

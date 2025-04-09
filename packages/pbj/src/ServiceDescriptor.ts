@@ -15,6 +15,7 @@ import type {
   RegistryType,
   Returns,
   ServiceDescriptorI,
+  ServiceInitI,
   ValueOf,
 } from "./types.js";
 import { asString } from "./pbjKey.js";
@@ -23,9 +24,53 @@ import { Logger } from "./logger.js";
 
 const EMPTY = [] as const;
 
+type InitFn = () => void;
+/**
+ * Class to handle initialization of services
+ */
+class ServiceInit<T extends Constructor> implements ServiceInitI {
+  constructor(
+    public method: keyof T & string,
+    public _factory?: Constructor,
+    public initialized = false,
+  ) {
+    this.factory = _factory;
+  }
+
+  private originalInit: InitFn | undefined;
+
+  invalidate() {
+    this.initialized = false;
+  }
+  set factory(_factory: Constructor | undefined) {
+    this._factory = _factory;
+    if (_factory) {
+      // Store the original init method
+      this.originalInit = _factory?.prototype?.[this.method];
+    } else {
+      this.initialized = true;
+    }
+  }
+  /**
+   * Invoke the initialization method on the service
+   */
+  public invoke(scope: InstanceType<T>) {
+    if (this.initialized || !this.originalInit || !this.method) {
+      return;
+    }
+    this.initialized = true;
+    const ret = this.originalInit.call(scope);
+    if (this.factory?.prototype) {
+      this.factory.prototype[this.method] = this.originalInit;
+    }
+    return ret;
+  }
+}
+
 export class ServiceDescriptor<
   TRegistry extends RegistryType,
   T extends Constructor | Fn | unknown,
+  V extends ValueOf<TRegistry, T> = ValueOf<TRegistry, T>,
 > implements ServiceDescriptorI<TRegistry, T>
 {
   static #dependencies = new Set<CKey>();
@@ -56,6 +101,7 @@ export class ServiceDescriptor<
   private _factory = false;
   private _isListOf = false;
   private interceptors?: InterceptFn<Returns<T>>[];
+  public initializer?: ServiceInit<V>;
   public primitive?: boolean;
   public invalid = false;
   public optional = true;
@@ -63,6 +109,7 @@ export class ServiceDescriptor<
 
   public tags: PBinJKeyType<T>[] = [];
   private _name: string | undefined;
+
   [serviceSymbol]: PBinJKey<TRegistry>;
   constructor(
     key: PBinJKey<TRegistry>,
@@ -129,6 +176,9 @@ export class ServiceDescriptor<
     this.invokable = isFn(_service);
     this._service = _service;
     this._factory = this.invokable && !isConstructor(_service as Fn<T>);
+    if (this.initializer) {
+      this.initializer.factory = this.service as any;
+    }
     this.logger.debug("changed service");
   }
 
@@ -253,8 +303,21 @@ export class ServiceDescriptor<
     this.interceptors = [...(this.interceptors ?? []), ...interceptors];
     return this;
   }
+
+  /**
+   * Override the name of the service.  This is useful for debugging.
+   * @param name
+   */
   withName(name: string) {
     this._name = name;
+    return this;
+  }
+  withInitialize(method?: keyof V & string) {
+    if (method) {
+      this.initializer = new ServiceInit<V>(method, this.service as any);
+    } else {
+      this.initializer = undefined;
+    }
     return this;
   }
   /**
@@ -287,13 +350,14 @@ export class ServiceDescriptor<
     return this.tags.includes(tag);
   }
   invalidate = () => {
-    if (this.invoked === false) {
+    if (!this.invoked) {
       return;
     }
     this.logger.debug("invalidating service");
     this.invalid = true;
     this.invoked = false;
     this._instance = undefined;
+    this.initializer?.invalidate;
     this.onChange?.();
   };
   /**
@@ -356,6 +420,7 @@ export class ServiceDescriptor<
     } else {
       try {
         resp = new (this.service as any)(...this.args);
+        this.initializer?.invoke(resp);
         if (this.error) {
           this.logger.info("service has recovered");
         }
@@ -403,6 +468,9 @@ export class ServiceDescriptor<
       dependencies: Array.from(this.dependencies ?? [], asString as any),
       args: this.args?.map(asString as any),
     };
+  }
+  get initialized() {
+    return this.initializer?.initialized ?? true;
   }
 }
 /**
