@@ -14,46 +14,61 @@ import type {
   PBinJKeyType,
   RegistryType,
   Returns,
-  ServiceDescriptorI,
+  ServiceDescriptorI, ServiceInitI,
   ValueOf,
 } from "./types.js";
 import { asString } from "./pbjKey.js";
 import { PBinJAsyncError } from "./errors.js";
 import { Logger } from "./logger.js";
+import {factory} from "typescript";
 
 const EMPTY = [] as const;
 
+type InitFn = ()=>void;
 /**
  * Class to handle initialization of services
  */
-class ServiceInit<T> {
+class ServiceInit<T extends Constructor> implements ServiceInitI {
   constructor(
-    private key: keyof T & string,
-    private scope: T,
+    public method: keyof T & string,
+    public _factory?:Constructor,
     public initialized = false
-  ) {}
+  ) {
+    this.factory = _factory;
+  }
 
+  private originalInit : InitFn | undefined;
+
+  invalidate(){
+    this.initialized = false;
+  }
+  set factory(_factory:Constructor | undefined) {
+    this._factory = _factory;
+    if (_factory) {
+      // Store the original init method
+      this.originalInit = _factory.prototype[this.method];
+      if (!this.originalInit) {
+        throw new PBinJError(`${this.method} is not a method on ${_factory.name}`);
+      }
+    } else {
+      this.initialized = true;
+    }
+  }
   /**
    * Invoke the initialization method on the service
    */
-  public invoke() {
-    if (!this.key || this.initialized) {
-      return;
-    }
-
-    if (typeof this.scope[this.key] !== 'function') {
-      throw new PBinJError(`Initialization method '${String(this.key)}' is not a function`);
-    }
-
-    try {
-      // Call the initialization method
-      const result = (this.scope[this.key] as unknown as Function).call(this.scope);
+  public invoke(scope:InstanceType<T>) {
+      if (this.initialized || !this.originalInit || !this.method) {
+        return;
+      }
       this.initialized = true;
+      const result = this.originalInit.call(scope);
+
+      // No need to put the method back on the instance
+      // The original method is still on the prototype
+
       return result;
-    } catch (e) {
-      throw new PBinJError(`Error initializing service: ${String(e)}`);
     }
-  }
 }
 
 export class ServiceDescriptor<
@@ -90,7 +105,7 @@ export class ServiceDescriptor<
   private _factory = false;
   private _isListOf = false;
   private interceptors?: InterceptFn<Returns<T>>[];
-  public initialize?: keyof V & string;
+  public initializer?: ServiceInit<V>;
   public primitive?: boolean;
   public invalid = false;
   public optional = true;
@@ -98,7 +113,7 @@ export class ServiceDescriptor<
 
   public tags: PBinJKeyType<T>[] = [];
   private _name: string | undefined;
-  public _init?: ServiceInit<V>;
+
   [serviceSymbol]: PBinJKey<TRegistry>;
   constructor(
     key: PBinJKey<TRegistry>,
@@ -165,6 +180,9 @@ export class ServiceDescriptor<
     this.invokable = isFn(_service);
     this._service = _service;
     this._factory = this.invokable && !isConstructor(_service as Fn<T>);
+    if (this.initializer){
+      this.initializer.factory = this.service as any;
+    }
     this.logger.debug("changed service");
   }
 
@@ -298,8 +316,12 @@ export class ServiceDescriptor<
     this._name = name;
     return this;
   }
-  withInitialize(method:keyof V & string ) {
-    this.initialize = method;
+  withInitialize(method?:keyof V & string ) {
+    if (method) {
+      this.initialize = method;
+    } else {
+      this.initialize = undefined;
+    }
     return this;
   }
   /**
@@ -339,6 +361,7 @@ export class ServiceDescriptor<
     this.invalid = true;
     this.invoked = false;
     this._instance = undefined;
+    this.initializer?.invalidate
     this.onChange?.();
   };
   /**
@@ -357,14 +380,7 @@ export class ServiceDescriptor<
       return invoke.call(this);
     }
 
-    const ret = this._invoke();
-
-    // Setup initialization if needed
-    if (this.initialize && has(ret, this.initialize)) {
-      this._init = new ServiceInit<V>(this.initialize, ret as unknown as V);
-    }
-
-    return ret;
+    return this._invoke();
   };
 
   private _promise?: Promise<T> & { resolved?: boolean };
@@ -408,6 +424,7 @@ export class ServiceDescriptor<
     } else {
       try {
         resp = new (this.service as any)(...this.args);
+        this.initializer?.invoke(resp);
         if (this.error) {
           this.logger.info("service has recovered");
         }
@@ -455,6 +472,9 @@ export class ServiceDescriptor<
       dependencies: Array.from(this.dependencies ?? [], asString as any),
       args: this.args?.map(asString as any),
     };
+  }
+  get initialized() {
+    return this.initializer?.initialized ?? true;
   }
 }
 /**
