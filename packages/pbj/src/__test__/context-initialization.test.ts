@@ -824,9 +824,8 @@ describe("context initialization - out-of-order execution", () => {
             const serviceA = ctx.resolve(serviceAKey);
             const serviceB = ctx.resolve(serviceBKey);
 
-            // Manually call the init methods
-            serviceA.init();
-            serviceB.init();
+            // The initialization should happen automatically during resolution
+            // No need to manually call init methods
 
             // Verify that the services are initialized
             expect(serviceA.initialized).toBe(true);

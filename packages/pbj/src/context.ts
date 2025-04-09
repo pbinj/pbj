@@ -240,9 +240,18 @@ export class Context<TRegistry extends RegistryType = Registry>
     typeKey: TKey,
     ...args: ServiceArgs<TKey, TRegistry> | []
   ): ValueOf<TRegistry, TKey> {
+    const service = this.register(typeKey, ...args);
+    const result = service.invoke() as any;
 
-    return this.register(typeKey, ...args).invoke() as any;
+    // If the service has an initialization method, initialize it
+    if (service.initialize && result) {
+      const key = keyOf(typeKey);
 
+      // Initialize the service and its dependencies
+      this._initializeService(key, new Set());
+    }
+
+    return result;
   }
 
   newContext<TTRegistry extends TRegistry = TRegistry>() {
@@ -306,7 +315,7 @@ export class Context<TRegistry extends RegistryType = Registry>
     }
 
     // Skip if no initialization method
-    if (!service.initializer) {
+    if (!service.initialize) {
       this.initializedServices.add(key);
       this._notifyDependentServices(key);
       return;
@@ -325,7 +334,12 @@ export class Context<TRegistry extends RegistryType = Registry>
       // Get the instance of the service
       const instance = service.invoke();
 
-       service.initializer?.invoke(instance);
+      // Call the initialization method on the instance
+      if (instance && typeof instance[service.initialize] === 'function') {
+        instance[service.initialize]();
+        this.logger.debug("Initialized service {key}", { key: asString(key) });
+      }
+
       this.logger.debug("Marked service as initialized {key}", { key: asString(key) });
       this.initializedServices.add(key);
 
