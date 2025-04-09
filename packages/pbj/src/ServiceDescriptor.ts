@@ -318,8 +318,10 @@ export class ServiceDescriptor<
   withInitialize(method?:keyof V & string ) {
     if (method) {
       this.initializer = new ServiceInit<V>(method, this.service as any);
+      this.initialize = method;
     } else {
       this.initializer = undefined;
+      this.initialize = undefined;
     }
     return this;
   }

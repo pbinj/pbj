@@ -803,7 +803,7 @@ describe("context initialization - out-of-order execution", () => {
 
                 getFromA() {
                     // Check if a is defined and has getValue method
-                    if (this.a && typeof this.a.getValue === 'function') {
+                    if (this.initialized && this.a && typeof this.a.getValue === 'function') {
                         return this.a.getValue();
                     }
                     return null;

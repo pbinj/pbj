@@ -249,9 +249,37 @@ export class Context<TRegistry extends RegistryType = Registry>
 
       // Initialize the service and its dependencies
       this._initializeService(key, new Set());
+
+      // For circular dependencies, we need to ensure all services are fully initialized
+      // This is a second pass to make sure everything is properly initialized
+      this._ensureAllServicesInitialized();
     }
 
     return result;
+  }
+
+  /**
+   * Ensure all services with initialization methods are initialized
+   * This is needed for circular dependencies
+   */
+  private _ensureAllServicesInitialized(): void {
+    // Get all services with initialization methods
+    const servicesToInitialize = Array.from(this.map.entries())
+      .filter(([key, service]) => service.initialize && !this.initializedServices.has(key));
+
+    // Initialize each service
+    for (const [key, service] of servicesToInitialize) {
+      this._initializeService(key, new Set());
+    }
+
+    // For circular dependencies, we need to ensure all services can access each other
+    // This is done by resolving all services again after initialization
+    for (const [key, service] of this.map.entries()) {
+      if (service.initialize && this.initializedServices.has(key)) {
+        // Re-invoke the service to ensure it has access to all dependencies
+        service.invoke();
+      }
+    }
   }
 
   newContext<TTRegistry extends TRegistry = TRegistry>() {
@@ -322,17 +350,32 @@ export class Context<TRegistry extends RegistryType = Registry>
     }
 
     // If we've already visited this key, we have a circular dependency
-    // Mark it as initialized to break the cycle
-    if (visitedKeys.size === visitedKeys.add(key).size) {
+    // Mark it as initialized to break the cycle, but don't return yet
+    // We need to continue to ensure the service is properly initialized
+    const isCircular = visitedKeys.size === visitedKeys.add(key).size;
+    if (isCircular) {
       this.logger.debug("Detected circular dependency for {key}, marking as initialized", { key: asString(key) });
       this.initializedServices.add(key);
-      this._notifyDependentServices(key);
-      return;
     }
 
     try {
       // Get the instance of the service
       const instance = service.invoke();
+
+      // For circular dependencies, we need to ensure all dependencies are marked as initialized
+      // before calling the initialization method
+      if (isCircular) {
+        // Mark all dependencies as initialized
+        const dependencies = service.dependencies || new Set<CKey>();
+        for (const depKey of dependencies) {
+          if (!this.initializedServices.has(depKey)) {
+            this.initializedServices.add(depKey);
+            this.logger.debug("Marking dependency {depKey} as initialized due to circular dependency", {
+              depKey: asString(depKey)
+            });
+          }
+        }
+      }
 
       // Call the initialization method on the instance
       if (instance && typeof instance[service.initialize] === 'function') {
