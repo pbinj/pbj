@@ -372,16 +372,15 @@ export class Context<TRegistry extends RegistryType = Registry>
 
     // Check each waiting service to see if all its dependencies are now initialized
     for (const waitingKey of this.get(key)?.dependencies || []) {
-      const dependencies = this.map.get(waitingKey)?.dependencies;
-      if (dependencies) {
-        if (
-          Array.prototype.every.call(dependencies, (depKey) =>
-            this.initializedServices.has(depKey),
-          )
-        ) {
-          // All dependencies initialized, so initialize this service
-          this._initializeService(waitingKey);
-        }
+      const dependencies = this.get(waitingKey)?.dependencies;
+      if (!dependencies) continue;
+      if (
+        Array.prototype.every.call(dependencies, (depKey) =>
+          this.initializedServices.has(depKey),
+        )
+      ) {
+        // All dependencies initialized, so initialize this service
+        this._initializeService(waitingKey);
       }
     }
   }
