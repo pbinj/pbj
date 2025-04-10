@@ -1,5 +1,15 @@
 # @pbinj/pbj
 
+## 3.0.3
+
+### Patch Changes
+
+- 70e0610: Fix packaging nerd
+- 70e0610: Fix module esm/cjs madness
+- Updated dependencies [70e0610]
+- Updated dependencies [70e0610]
+  - @pbinj/pbj-guards@3.0.3
+
 ## 3.0.2
 
 ### Patch Changes
