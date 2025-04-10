@@ -2,6 +2,7 @@
   "name": "@pbinj/pbj-visualization",
   "version": "3.0.2",
   "typings": "./dist/esm/index.d.ts",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pbinj/pbj.git"
@@ -59,12 +60,12 @@
   "dependencies": {
     "express": "^4.21.2",
     "socket.io": "^4.8.1",
-    "@pbinj/pbj-guards": "workspace:*"
+    "@pbinj/pbj-guards": "workspace:*",
+    "@pbinj/pbj": "workspace:*"
   },
   "devDependencies": {
     "vite-tsconfig-paths": "^5.1.2",
     "@mdi/font": "^7.4.47",
-    "@pbinj/pbj": "workspace:*",
     "@tsconfig/node22": "^22.0.0",
     "@types/d3": "^7.4.3",
     "@types/express": "^5.0.0",

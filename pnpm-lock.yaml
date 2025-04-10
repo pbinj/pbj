@@ -256,6 +256,9 @@ importers:
 
   packages/pbj-visualization:
     dependencies:
+      '@pbinj/pbj':
+        specifier: workspace:*
+        version: link:../pbj
       '@pbinj/pbj-guards':
         specifier: workspace:*
         version: link:../pbj-guards
@@ -269,9 +272,6 @@ importers:
       '@mdi/font':
         specifier: ^7.4.47
         version: 7.4.47
-      '@pbinj/pbj':
-        specifier: workspace:*
-        version: link:../pbj
       '@tsconfig/node22':
         specifier: ^22.0.0
         version: 22.0.0

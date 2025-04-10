@@ -7,14 +7,14 @@
   "exports": {
     ".": {
       "types": "./dist/esm/index.d.ts",
-      "browser": "./dist/browser/index.js",
       "import": "./dist/esm/index.js",
+      "browser": "./dist/browser/index.js",
       "require": "./dist/cjs/index.js"
     },
     "./env": {
       "types": "./dist/esm/env.d.ts",
-      "browser": "./dist/browser/env.js",
       "import": "./dist/esm/env.js",
+      "browser": "./dist/browser/env.js",
       "require": "./dist/cjs/env.js"
     },
     "./scope": {
