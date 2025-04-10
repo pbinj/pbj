@@ -1,8 +1,13 @@
 import { defineConfig } from "vitest/config";
-import tsConfigPaths from "vite-tsconfig-paths";
+import { resolve } from "path";
 
 export default defineConfig({
-  plugins: [tsConfigPaths()],
+  resolve: {
+    alias: {
+      "@pbinj/pbj-guards": resolve(__dirname, "../pbj-guards/src"),
+      "@pbinj/pbj": resolve(__dirname, "src/index.ts"),
+    },
+  },
   test: {
     setupFiles: ["./src/__test__/setup.ts"],
     include: ["./src/__test__/**/*.test.ts"],
