@@ -2,7 +2,6 @@
   "name": "@pbinj/pbj-guards",
   "version": "3.0.2",
   "description": "A @pbinj/pbj package of guards",
-  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/esm/index.d.ts",
