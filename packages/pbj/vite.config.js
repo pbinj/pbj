@@ -12,7 +12,8 @@ export default defineConfig({
   resolve: {
     extensions,
     alias: {
-      "@pbinj/pbj-guards": resolve(__dirname, "../pbj-guards/src/index.ts"),
+      "@pbinj/pbj-guards": resolve(__dirname, "../pbj-guards/src"),
+      "@pbinj/pbj":resolve(__dirname, "src/index.ts"),
       "node:async_hooks": resolve(__dirname, "src/async-local.browser.js"),
     },
   },
