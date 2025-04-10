@@ -5,4 +5,4 @@
 "@pbinj/pbj": patch
 ---
 
-Fix module esm/cjs madness
+Fix packaging nerd

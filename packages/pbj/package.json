@@ -4,7 +4,6 @@
   "license": "MIT",
   "description": "A lightweight Dependency Injection (DI) framework for Node.js, based on proxies.",
   "typings": "./dist/esm/index.d.ts",
-  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/esm/index.d.ts",
