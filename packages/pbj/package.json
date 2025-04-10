@@ -73,7 +73,7 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest watch",
-    "build-esm": "tsc",
+    "build-esm": "tsc -p tsconfig.esm.json",
     "build-cjs": "tsc -p tsconfig.cjs.json",
     "build-browser": "vite build",
     "build": "${npm_execpath} run build-esm && ${npm_execpath} run build-cjs && ${npm_execpath} run build-browser",
