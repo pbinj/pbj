@@ -401,7 +401,7 @@ export class ServiceDescriptor<
     let resp;
     const args = this.args.map(v=> {
       if (isPBinJKey(v)) {
-        return this.resolver?.resolve?.call(this.resolver, v);
+        return this.resolver?.resolve(v);
       }
 
       return v;

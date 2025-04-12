@@ -241,6 +241,7 @@ export class Context<TRegistry extends RegistryType = Registry>
     ...args: ServiceArgs<TKey, TRegistry> | []
   ): ValueOf<TRegistry, TKey> {
     const service = this.register(typeKey, ...args);
+
     const result = service.invoke() as any;
 
     // If the service has an initialization method, initialize it

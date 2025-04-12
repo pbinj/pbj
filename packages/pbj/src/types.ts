@@ -72,12 +72,14 @@ type FactoryParameters<T extends Factory<any>> = T extends Constructor
 
 type FactoryArgs<T, F = any> = F extends Factory<T>
   ? [F, ...ParamArr<FactoryParameters<F>>] | ParamArr<FactoryParameters<F>>
-    : [T | PBinJKeyType<T>];
+    : [T | PBinJKeyType<T>] ;
 
 
 export type ServiceArgs<T, TRegistry extends RegistryType> =
       T extends PBinJKeyType<infer TValue> ? FactoryArgs<TValue> :
-        T extends keyof TRegistry ? FactoryArgs<TRegistry[T]> : [];
+        T extends keyof TRegistry ? FactoryArgs<TRegistry[T]> :
+            T extends Constructor ? FactoryArgs<InstanceType<T>> :
+                T extends Fn ? FactoryArgs<ReturnType<T>> : [];
 
 
 type OrKey<V> = V | PBinJKeyType<V>;

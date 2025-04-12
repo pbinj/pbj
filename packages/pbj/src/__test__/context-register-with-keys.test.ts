@@ -206,4 +206,14 @@ describe("context register with pbjKeys as arguments", () => {
     const service2 = ctx.resolve(serviceKey);
     expect(service2.getDependencyValue()).toBe("mock dependency");
   });
+
+  it('should allow for a key to resolve a key', ()=>{
+    const ctx = createNewContext();
+    const key1 = pbjKey<string>("a");
+    const key2 = pbjKey<string>("b");
+    const fn = (a:string,b:string)=>(a +" "+ b);
+    ctx.register(key1, "a");
+    ctx.register(key2, fn, "b", key1);
+    expect(ctx.resolve(fn, key1, key2)).toEqual("a b a");
+  })
 });
