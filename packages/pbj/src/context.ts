@@ -24,11 +24,11 @@ import { Logger } from "./logger.js";
 export interface Context<TRegistry extends RegistryType = Registry> {
   register<TKey extends PBinJKey<TRegistry>>(
     typeKey: TKey,
-    ...args: ServiceArgs<TKey, TRegistry> | []
+    ...args: ServiceArgs<TKey, TRegistry>
   ): ServiceDescriptor<TRegistry, ValueOf<TRegistry, TKey>>;
   resolve<TKey extends PBinJKey<TRegistry>>(
     typeKey: TKey,
-    ...args: ServiceArgs<TKey, TRegistry> | []
+    ...args: ServiceArgs<TKey, TRegistry>
   ): ValueOf<TRegistry, TKey>;
   newContext<TTRegistry extends TRegistry = TRegistry>(): Context<TTRegistry>;
   pbj<T extends PBinJKey<TRegistry>>(service: T): ValueOf<TRegistry, T>;
@@ -215,6 +215,7 @@ export class Context<TRegistry extends RegistryType = Registry>
       },
       this.logger.createChild(asString(serviceKey)!),
     );
+    newInst.resolver = this;
 
     this.map.set(key, newInst);
     void this.notifyAdd(newInst);
@@ -243,12 +244,9 @@ export class Context<TRegistry extends RegistryType = Registry>
     const result = service.invoke() as any;
 
     // If the service has an initialization method, initialize it
-    if (service.initializer && result) {
-      const key = keyOf(typeKey);
-
-      const set = new Set<CKey>();
+    if (service.initializer ) {
       // Initialize the service and its dependencies
-      this._initializeService(key, set);
+      this._initializeService(keyOf(typeKey));
     }
 
     return result;
@@ -330,23 +328,29 @@ export class Context<TRegistry extends RegistryType = Registry>
     });
     this.initializedServices.add(key);
     // Notify services waiting on this one
-    this._notifyDependentServices(key);
+    this._notifyDependentServices(key, service);
   }
 
   /**
    * Notify services that were waiting for a dependency to be initialized
    * @param key The dependency key that was just initialized
+   * @param service The service that was just initialized
    */
-  private _notifyDependentServices(key: CKey): void {
+  private _notifyDependentServices(key: CKey, service?: ServiceDescriptor<TRegistry, any>): void {
     // Remove this dependency from the pending list
     this.pendingInitialization.delete(key);
 
     // Check each waiting service to see if all its dependencies are now initialized
-    for (const waitingKey of this.get(key)?.dependencies || []) {
-      const dependencies = this.get(waitingKey)?.dependencies;
-      if (!dependencies) continue;
+    if (!(service?.dependencies && service.dependencies.size > 0)) {
+      return;
+    }
+    for (const waitingKey of service?.dependencies ) {
+      const dep = this.get(waitingKey);
+      if (!(dep && dep.dependencies)) {
+        continue;
+      }
       if (
-        Array.prototype.every.call(dependencies, (depKey) =>
+        Array.prototype.every.call(dep.dependencies, (depKey) =>
           this.initializedServices.has(depKey),
         )
       ) {
@@ -358,7 +362,7 @@ export class Context<TRegistry extends RegistryType = Registry>
 
   scoped<R, TKey extends PBinJKeyType | (keyof TRegistry & symbol)>(
     _key: TKey,
-  ): (next: () => R, ...args: ServiceArgs<TKey, TRegistry>) => R {
+  ): (next: () => R, ...args: ServiceArgs<TKey,TRegistry>) => R {
     this.logger.error("scoped not enabled");
     throw new PBinJError(
       "async not enabled, please add 'import \"@pbinj/pbj/scope\";' to your module to enable async support",

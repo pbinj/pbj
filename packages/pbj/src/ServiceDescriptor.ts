@@ -18,9 +18,10 @@ import type {
   ServiceInitI,
   ValueOf,
 } from "./types.js";
-import { asString } from "./pbjKey.js";
+import {asString, isPBinJKey} from "./pbjKey.js";
 import { PBinJAsyncError } from "./errors.js";
 import { Logger } from "./logger.js";
+import {Context} from "./context";
 
 const EMPTY = [] as const;
 
@@ -82,13 +83,7 @@ export class ServiceDescriptor<
     return new ServiceDescriptor(key, service, EMPTY as any, false, false);
   }
 
-  static singleton<T extends Constructor | Fn>(service: T, ...args: Args<T>) {
-    return new ServiceDescriptor(service, service, args, true);
-  }
 
-  static factory<T extends Constructor | Fn>(service: T, ...args: Args<T>) {
-    return new ServiceDescriptor(service, service, args, false);
-  }
 
   //  public readonly [serviceSymbol]: PBinJKey<TRegistry>;
   dependencies?: Set<CKey>;
@@ -106,6 +101,7 @@ export class ServiceDescriptor<
   public invalid = false;
   public optional = true;
   public error?: { message: string };
+  public resolver: {resolve: Context<TRegistry>["resolve"]} | undefined;
 
   public tags: PBinJKeyType<T>[] = [];
   private _name: string | undefined;
@@ -204,12 +200,15 @@ export class ServiceDescriptor<
     }
     this.invalidate();
     newArgs.forEach((arg) => {
-      if (has(arg, proxyKey)) {
+      if (isPBinJKey(arg)){
+        this.addDependency(keyOf(arg));
+      }else if (has(arg, proxyKey)) {
         this.addDependency(arg[proxyKey] as CKey);
       }
     });
     this._args = newArgs;
   }
+
   /**
    * Set the args to be used with the service.   These can be other pbinj's, or any other value.
    * @param args
@@ -400,8 +399,15 @@ export class ServiceDescriptor<
     }
     ServiceDescriptor.#dependencies.clear();
     let resp;
+    const args = this.args.map(v=> {
+      if (isPBinJKey(v)) {
+        return this.resolver?.resolve?.call(this.resolver, v);
+      }
+
+      return v;
+    })
     if (this._factory) {
-      const val = this.service(...this.args);
+      const val = this.service(...args);
       this.addDependency(...ServiceDescriptor.#dependencies);
 
       if (val instanceof Promise) {
@@ -419,7 +425,7 @@ export class ServiceDescriptor<
       resp = val;
     } else {
       try {
-        resp = new (this.service as any)(...this.args);
+        resp = new (this.service as any)(...args);
         this.initializer?.invoke(resp);
         if (this.error) {
           this.logger.info("service has recovered");

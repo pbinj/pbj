@@ -1,8 +1,12 @@
 import { destroySymbol, removeSymbol, serviceSymbol } from "./symbols.js";
 
-export type Constructor<T = any> = new (...args: any[]) => T;
+export interface Constructor<T = any> {
+  new (...args: any[]):T;
+}
 
-export type Fn<T = any> = (...args: any[]) => T | Promise<T>;
+export interface  Fn<T = any> {
+  (...args: any[]): Awaited<T>;
+}
 
 //This is just a fake type to make key tracking easier.
 export type CKey = { __brand: "ContextKey" };
@@ -54,29 +58,41 @@ export interface RegistryType {
 }
 
 export type PBinJKeyType<T = any> = symbol & { [serviceSymbol]: T };
-export type Rest<T extends any[]> = T extends [any, ...infer U] ? U : [];
 
 export type OfA<T> = Constructor<T> | Fn<T> | T;
 //The second argument is usually a factory.  It could also be a value.   This tries to enforce if it is a factory, it should
 // return the right type.   It is a little broken, because if the first argument is a factory (and key) than the second argument
-// should be treated like an argument.   Which seems asymetrical but is I think correct.
+// should be treated like an argument.   Which seems asymmetrical but is I think correct.
+type Factory<T> = Constructor<T> | Fn<T>;
+type FactoryParameters<T extends Factory<any>> = T extends Constructor
+  ? ParamArr<ConstructorParameters<T>>
+  : T extends Fn
+    ? ParamArr<Parameters<T>>
+    : [];
 
-export type ServiceArgs<TKey, TRegistry extends RegistryType> =
-  TKey extends PBinJKeyType<infer TValue>
-    ? ParamArr<TValue>
-    : TKey extends keyof TRegistry
-      ? ParamArr<TRegistry[TKey]>
-      : TKey extends Constructor
-        ? ConstructorParameters<TKey>
-        : TKey extends Fn
-          ? Parameters<TKey>
-          : [];
+type FactoryArgs<T, F = any> = F extends Factory<T>
+  ? [F, ...ParamArr<FactoryParameters<F>>] | ParamArr<FactoryParameters<F>>
+    : [T | PBinJKeyType<T>];
+
+
+export type ServiceArgs<T, TRegistry extends RegistryType> =
+      T extends PBinJKeyType<infer TValue> ? FactoryArgs<TValue> :
+        T extends keyof TRegistry ? FactoryArgs<TRegistry[T]> : [];
+
+
+type OrKey<V> = V | PBinJKeyType<V>;
+
+type ParamOrPBinJKeyType<T> =
+    T extends [infer First, ...infer Rest] ?
+     [ OrKey<First>, ...ParamOrPBinJKeyType<Rest> ] : [];
 
 type ParamArr<
-  T,
-  TFn extends Fn<T> = Fn<T>,
-  TCon extends Constructor<T> = Constructor<T>,
-> = [TFn, ...Parameters<TFn>] | [TCon, ...ConstructorParameters<TCon>] | [T];
+  T
+> = T extends Constructor ?
+    ParamOrPBinJKeyType<ConstructorParameters<T>> :
+        T extends Fn ?
+            ParamOrPBinJKeyType<Parameters<T>> :
+              T;
 
 const EMPTY = [] as const;
 type EmptyTuple = typeof EMPTY;
@@ -117,7 +133,7 @@ export interface ServiceDescriptorI<
   args: Args<T>;
   initializer?: ServiceInitI;
   /**
-   * Set the args to be used with the service.   These can be other pbjs, or any other value.
+   * Set the args to be used with the service.   These can be other pbj's, or any other value.
    * @param args
    * @returns
    */
@@ -130,7 +146,7 @@ export interface ServiceDescriptorI<
   withService(service: T): this;
   /**
    * You can turn off response caching by setting this to false.
-   * This is useful for things taht can not be cached.   Any pbj depending on a non-cacheable,
+   * This is useful for things that can not be cached.   Any pbj depending on a non-cacheable,
    * will be not cached.
    *
    * @param cacheable
@@ -143,8 +159,8 @@ export interface ServiceDescriptorI<
    * This will not throw an error if the service is not found. The proxy however
    * will continue to exist, just any access to it will return undefined.
    *
-   * You can use `isNullish` from the guards to check if the service if a proxy is actually
-   * nullish.
+   * You can use `isNullish` from the guards to check if the service
+   * is a proxy is actually nullish.
    *
    * @param optional
    * @returns
