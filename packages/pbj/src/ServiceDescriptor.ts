@@ -18,9 +18,10 @@ import type {
   ServiceInitI,
   ValueOf,
 } from "./types.js";
-import { asString } from "./pbjKey.js";
+import {asString, isPBinJKey} from "./pbjKey.js";
 import { PBinJAsyncError } from "./errors.js";
 import { Logger } from "./logger.js";
+import {ContextI} from "./context-types";
 
 const EMPTY = [] as const;
 
@@ -59,11 +60,10 @@ class ServiceInit<T extends Constructor> implements ServiceInitI {
       return;
     }
     this.initialized = true;
-    const ret = this.originalInit.call(scope);
+    this.originalInit.call(scope);
     if (this.factory?.prototype) {
       this.factory.prototype[this.method] = this.originalInit;
     }
-    return ret;
   }
 }
 
@@ -109,6 +109,7 @@ export class ServiceDescriptor<
 
   public tags: PBinJKeyType<T>[] = [];
   private _name: string | undefined;
+  public context:ContextI<TRegistry> | undefined;
 
   [serviceSymbol]: PBinJKey<TRegistry>;
   constructor(
@@ -192,7 +193,7 @@ export class ServiceDescriptor<
 
   set args(newArgs: Args<T>) {
     /**
-     * If the args are the same, we don't need to invalidate.  Also
+     * If the args are the same, we don't need to invalidate.  Also,
      * if the value hasn't been invoked, we don't need to invalidate.
      */
     //if (newArgs === this._args || (this._args?.length === newArgs.length &&
@@ -206,12 +207,14 @@ export class ServiceDescriptor<
     newArgs.forEach((arg) => {
       if (has(arg, proxyKey)) {
         this.addDependency(arg[proxyKey] as CKey);
+      }else if (isPBinJKey(arg)) {
+        this.addDependency(keyOf(arg));
       }
     });
     this._args = newArgs;
   }
   /**
-   * Set the args to be used with the service.   These can be other pbinj's, or any other value.
+   * Set the args to be used with the service.   These can be other pbj's, or any other value.
    * @param args
    * @returns
    */
@@ -253,7 +256,7 @@ export class ServiceDescriptor<
    * This will not throw an error if the service is not found. The proxy however
    * will continue to exist, just any access to it will return undefined.
    *
-   * You can use `isNullish` from the guards to check if the service if a proxy is actually
+   * You can use `isNullish` from the guards to check if the service is a proxy is actually
    * nullish.
    *
    * @param optional
@@ -280,7 +283,7 @@ export class ServiceDescriptor<
    * @param tags
    * @returns
    */
-  withTags(...tags: PBinJKeyType<any>[]) {
+  withTags(...tags: PBinJKeyType[]) {
     this.tags = tags;
     return this;
   }
@@ -320,20 +323,7 @@ export class ServiceDescriptor<
     }
     return this;
   }
-  /**
-   * Check to see if the current service has a dependency.
-   * @param key
-   * @returns
-   */
-  hasDependency(key: CKey) {
-    if (this._isListOf) {
-      if (this._cacheable && !this.invalid) {
-        return this._instance?.map(proxyKey).includes(key);
-      }
-      return this.invoke()?.map(proxyKey).includes(key);
-    }
-    return this.dependencies?.has(key) ?? false;
-  }
+
   /**
    * Add a dependency to the service.  This is used to track dependencies.
    * @param keys
@@ -365,22 +355,22 @@ export class ServiceDescriptor<
    *
    * @returns
    */
-  invoke = (): Returns<T> => {
+  invoke = (ctx:ContextI<any>): Returns<T> => {
     if (this.interceptors?.length) {
       const invoke = this.interceptors?.reduceRight(
         (next: () => Returns<T>, interceptor) => {
           return () => interceptor.call(this, next);
         },
-        this._invoke,
+          ()=>this._invoke(ctx),
       );
       return invoke.call(this);
     }
 
-    return this._invoke();
+    return this._invoke(ctx);
   };
 
   private _promise?: Promise<T> & { resolved?: boolean };
-  _invoke = (): Returns<T> => {
+  _invoke = (context: ContextI<TRegistry> ): Returns<T> => {
     if (this._promise) {
       throw new PBinJAsyncError(this[serviceSymbol], this._promise);
     }
@@ -400,8 +390,14 @@ export class ServiceDescriptor<
     }
     ServiceDescriptor.#dependencies.clear();
     let resp;
+    const args = this.args.map(v=>{
+      if (isPBinJKey(v)) {
+        return context.resolve(v);
+      }
+      return v;
+    });
     if (this._factory) {
-      const val = this.service(...this.args);
+      const val = this.service(...args);
       this.addDependency(...ServiceDescriptor.#dependencies);
 
       if (val instanceof Promise) {
@@ -419,7 +415,7 @@ export class ServiceDescriptor<
       resp = val;
     } else {
       try {
-        resp = new (this.service as any)(...this.args);
+        resp = new (this.service as any)(...args);
         this.initializer?.invoke(resp);
         if (this.error) {
           this.logger.info("service has recovered");
@@ -452,6 +448,9 @@ export class ServiceDescriptor<
     this._isListOf = true;
     return this;
   }
+  hasDependency(key: CKey) {
+    return this.dependencies?.has(key) ?? false;
+  }
   toJSON() {
     return {
       name: this.name,
@@ -477,8 +476,8 @@ export class ServiceDescriptor<
  * The interceptor function, allows you to intercept the invocation of a service.  The
  * invocation may be a previous interceptor.
  */
-type InterceptFn<T> = (invoke: () => T) => T;
+type InterceptFn<T> = (invoke: (ctx:ContextI<any>) => T) => T;
 
-export type ServiceDescriptorListener = (
-  service: ServiceDescriptor<any, any>,
+export type ServiceDescriptorListener<T extends RegistryType = Registry> = (
+  service: ServiceDescriptorI<T, any>,
 ) => void;

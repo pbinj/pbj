@@ -1,4 +1,5 @@
 import { destroySymbol, removeSymbol, serviceSymbol } from "./symbols.js";
+import {ContextI} from "./context-types";
 
 export type Constructor<T = any> = new (...args: any[]) => T;
 
@@ -181,7 +182,7 @@ export interface ServiceDescriptorI<
    * @param key
    * @returns
    */
-  hasDependency(key: CKey): boolean;
+  //hasDependency(key: CKey): boolean;
   /**
    * Add a dependency to the service.  This is used to track dependencies.
    * @param keys
@@ -195,17 +196,19 @@ export interface ServiceDescriptorI<
    *
    * @returns
    */
-  invoke(): Returns<T>;
+  invoke(context: ContextI<TRegistry>): Returns<T>;
 
   asArray(): this;
 
   invalidate(): void;
+
+  toJSON():unknown;
 }
 /**
  * The interceptor function, allows you to intercept the invocation of a service.  The
  * invocation may be a previous interceptor.
  */
-type InterceptFn<T> = (invoke: () => T) => T;
+type InterceptFn<T> = (invoke: (ctx:ContextI<any>) => T) => T;
 
 export type ServiceDescriptorListener = (
   service: ServiceDescriptorI<any, any>,
