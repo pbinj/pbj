@@ -6,10 +6,19 @@ This guide covers testing strategies using PBinJ's dependency injection system, 
 
 ### Creating Test Contexts
 
-Use `createNewContext()` to create isolated contexts for each test:
+Use `runBeforeEachTest` and `runAfterEachTest` from `@pbinj/pbj/test' to create isolated contexts for each test:
+With vitest it shoul dlook like
+
+```typescript
+import { runBeforeEachTest, runAfterEachTest } from "@pbinj/pbj/test";
+import { describe, beforeEach, afterEach, it} from 'vitest';
+
+beforeEach(runBeforeEachTest);
+afterEach(runAfterEachTest);
+
+```
 
 ```ts
-import { createNewContext, pbj, pbjKey } from "@pbinj/pbj";
 import { describe, beforeEach, it} from 'vitest';
 class DatabaseService {
   constructor() {
@@ -24,9 +33,6 @@ class UserService {
 describe("UserService", () => {
   let context: Context;
 
-  beforeEach(() => {
-    context = createNewContext();
-  });
 
   it("should create user", () => {
     const userService = context.resolve(UserService);
@@ -157,11 +163,10 @@ describe("PluginManager", () => {
 ### 1. Create Test Helpers
 
 ```ts
-import {  pbj, pbjKey, createNewContext } from "@pbinj/pbj";
+import {  pbj, pbjKey } from "@pbinj/pbj";
 
 // test/helpers.ts
 export function createTestContext() {
-  const context = createNewContext();
 
   // Register common mocks
   context.register(loggerKey, createMockLogger());

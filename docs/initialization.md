@@ -19,7 +19,7 @@ To use the initialization system, you need to:
 3. Resolve the service
 
 ```typescript
-import { pbj, createNewContext } from '@pbinj/pbj';
+import { pbj, context } from '@pbinj/pbj';
 
 // Define a service with an initialization method
 class MyService {
@@ -52,14 +52,11 @@ class MyService {
   }
 }
 
-// Create a context
-const ctx = createNewContext();
-
 // Register the service with the initialization method
-ctx.register(MyService).withInitialize('init');
+context.register(MyService).withInitialize('init');
 
 // Resolve the service - this will automatically call the init method
-const service = ctx.resolve(MyService);
+const service = context.resolve(MyService);
 
 // The service is now initialized and ready to use
 console.log(service.doSomething()); // 'Hello from MyService'
@@ -70,7 +67,7 @@ console.log(service.doSomething()); // 'Hello from MyService'
 The initialization system ensures that services are initialized in the correct order based on their dependencies. A service will only be initialized after all its dependencies have been initialized.
 
 ```typescript
-import { pbj, createNewContext, pbjKey } from '@pbinj/pbj';
+import { pbj, context, pbjKey } from '@pbinj/pbj';
 
 // Define a key for the database service
 const dbKey = pbjKey<Database>('database');
@@ -131,18 +128,17 @@ class UserService {
   }
 }
 
-const ctx = createNewContext();
 
 // Register all services with initialization methods
-ctx.register(dbKey, Database).withInitialize('init');
-ctx.register(UserRepository).withInitialize('init');
-ctx.register(UserService).withInitialize('init');
+context.register(dbKey, Database).withInitialize('init');
+context.register(UserRepository).withInitialize('init');
+context.register(UserService).withInitialize('init');
 
 // Resolving UserService will initialize all services in the correct order:
 // 1. Database
 // 2. UserRepository
 // 3. UserService
-const userService = ctx.resolve(UserService);
+const userService = context.resolve(UserService);
 
 // Output:
 // Database initialized
@@ -155,7 +151,7 @@ const userService = ctx.resolve(UserService);
 The initialization system works correctly with class inheritance. When a derived class overrides the initialization method, it can call the base class's initialization method using `super`.
 
 ```typescript
-import { pbj, createNewContext } from '@pbinj/pbj';
+import { pbj, context } from '@pbinj/pbj';
 
 // Base service with initialization
 class BaseService {
@@ -191,14 +187,13 @@ class DerivedService extends BaseService {
   }
 }
 
-const ctx = createNewContext();
 
 // Register the derived service with initialization
-ctx.register(DerivedService).withInitialize('init');
+context.register(DerivedService).withInitialize('init');
 
 // Resolving the derived service will call its init method,
 // which will also call the base class's init method
-const service = ctx.resolve(DerivedService);
+const service = context.resolve(DerivedService);
 
 console.log(service.initialized); // true
 console.log(service.derivedInitialized); // true
@@ -269,7 +264,7 @@ class UserService {
 For services that require asynchronous initialization, you can return a Promise from the initialization method.
 
 ```typescript
-import {createNewContext, pbj} from '@pbinj/pbj';
+import {context, pbj} from '@pbinj/pbj';
 
 class AsyncService {
   public initialized = false;
@@ -296,11 +291,10 @@ class AsyncService {
 }
 
 // Register the service
-const ctx = createNewContext();
-ctx.register(AsyncService).withInitialize('init');
+context.register(AsyncService).withInitialize('init');
 
 // Resolve and initialize the service
-const service = ctx.resolve(AsyncService);
+const service = context.resolve(AsyncService);
 
 // The init method returns a Promise, so you can await it if needed
 service.init().then(() => {
@@ -313,7 +307,7 @@ service.init().then(() => {
 Keep the constructor simple and focused on setting up dependencies, and use the initialization method for more complex setup.
 
 ```typescript
-import {createNewContext, pbj} from '@pbinj/pbj';
+import {context, pbj} from '@pbinj/pbj';
 
 class WellDesignedService {
   private logger: Logger;

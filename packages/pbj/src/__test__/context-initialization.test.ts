@@ -1,5 +1,9 @@
-import { it, describe, expect, vi, beforeEach } from "vitest";
-import { pbj, createNewContext, pbjKey, Context } from "../index.js";
+import { it, describe, expect, vi, beforeEach, afterEach } from "vitest";
+import { pbj, pbjKey, context } from "../index.js";
+import { runBeforeEachTest, runAfterEachTest } from "../test.js";
+
+beforeEach(runBeforeEachTest);
+afterEach(runAfterEachTest);
 
 interface DoSomething {
   doSomething(): string;
@@ -72,7 +76,6 @@ const key = pbjKey<DoSomething>("test");
 
 describe("context initialization - basic scenarios", () => {
   it("should initialize a simple service", () => {
-    const ctx = createNewContext();
 
     // Create a simple service with an init method
     class SimpleService {
@@ -85,18 +88,17 @@ describe("context initialization - basic scenarios", () => {
     }
 
     // Register the service with initialization
-    const descriptor = ctx.register(SimpleService).withInitialize("init");
+    const descriptor = context.register(SimpleService).withInitialize("init");
     expect(descriptor.initializer).toBeDefined();
 
     // Resolve the service
-    const service = ctx.resolve(SimpleService);
+    const service = context.resolve(SimpleService);
 
     // The service should be initialized
     expect(service).toBeDefined();
     expect(service.initialized).toBe(true);
   });
   it("should automatically initialize services when dependencies are satisfied", () => {
-    const ctx = createNewContext();
 
     // Set up spies
     const spyA = vi.spyOn(ServiceA.prototype, "init");
@@ -104,24 +106,24 @@ describe("context initialization - basic scenarios", () => {
     const spyC = vi.spyOn(ServiceC.prototype, "init");
 
     // Register and resolve ServiceA first
-    ctx.register(key, ServiceA).withInitialize("init");
-    const serviceA = ctx.resolve(key);
+    context.register(key, ServiceA).withInitialize("init");
+    const serviceA = context.resolve(key);
 
     // ServiceA should be initialized immediately since it has no dependencies
     expect(serviceA.initialized).toBe(true);
     expect(spyA).toHaveBeenCalled();
 
     // Now register and resolve ServiceB which depends on ServiceA
-    ctx.register(ServiceB).withInitialize("init");
-    const serviceB = ctx.resolve(ServiceB);
+    context.register(ServiceB).withInitialize("init");
+    const serviceB = context.resolve(ServiceB);
 
     // ServiceB should be initialized immediately since its dependency (ServiceA) is already initialized
     expect(serviceB.initialized).toBe(true);
     expect(spyB).toHaveBeenCalled();
 
     // Finally register and resolve ServiceC which depends on both ServiceA and ServiceB
-    ctx.register(ServiceC).withInitialize("init");
-    const serviceC = ctx.resolve(ServiceC);
+    context.register(ServiceC).withInitialize("init");
+    const serviceC = context.resolve(ServiceC);
 
     // ServiceC should be initialized immediately since all its dependencies are already initialized
     expect(serviceC.initialized).toBe(true);
@@ -129,17 +131,16 @@ describe("context initialization - basic scenarios", () => {
   });
 
   it("should automatically initialize services when resolved", () => {
-    const ctx = createNewContext();
 
     // Register services with initialization methods
-    ctx.register(key, ServiceA).withInitialize("init");
-    ctx.register(ServiceB).withInitialize("init");
-    ctx.register(ServiceC).withInitialize("init");
+    context.register(key, ServiceA).withInitialize("init");
+    context.register(ServiceB).withInitialize("init");
+    context.register(ServiceC).withInitialize("init");
 
     // Resolve all services - this should automatically initialize them
-    const serviceA = ctx.resolve(key);
-    const serviceB = ctx.resolve(ServiceB);
-    const serviceC = ctx.resolve(ServiceC);
+    const serviceA = context.resolve(key);
+    const serviceB = context.resolve(ServiceB);
+    const serviceC = context.resolve(ServiceC);
 
     // No explicit initialization call needed
 
@@ -189,18 +190,17 @@ describe("context initialization - inheritance", () => {
   }
 
   it("should initialize derived classes correctly", () => {
-    const ctx = createNewContext();
 
     // Register services
-    ctx.register(key, ServiceA).withInitialize("init");
-    ctx.register(BaseService).withInitialize("init");
-    ctx.register(DerivedService).withInitialize("init");
-    ctx.register(AnotherDerivedService).withInitialize("init");
+    context.register(key, ServiceA).withInitialize("init");
+    context.register(BaseService).withInitialize("init");
+    context.register(DerivedService).withInitialize("init");
+    context.register(AnotherDerivedService).withInitialize("init");
 
     // Resolve the services
-    const baseService = ctx.resolve(BaseService);
-    const derivedService = ctx.resolve(DerivedService);
-    const anotherDerivedService = ctx.resolve(AnotherDerivedService);
+    const baseService = context.resolve(BaseService);
+    const derivedService = context.resolve(DerivedService);
+    const anotherDerivedService = context.resolve(AnotherDerivedService);
 
     // Verify initialization
     expect(baseService.initialized).toBe(true);
@@ -217,11 +217,9 @@ describe("context initialization - inheritance", () => {
 
 // Test out-of-order execution scenarios
 describe("context initialization - out-of-order execution", () => {
-  let ctx: Context;
   let initOrder: string[];
 
   beforeEach(() => {
-    ctx = createNewContext();
     initOrder = [];
   });
 
@@ -289,20 +287,20 @@ describe("context initialization - out-of-order execution", () => {
     }
 
     // Register the service that depends on others first
-    ctx.register(TestServiceWithDeps).withInitialize("init");
+    context.register(TestServiceWithDeps).withInitialize("init");
 
     // Try to resolve it - it should be defined
-    const service = ctx.resolve(TestServiceWithDeps);
+    const service = context.resolve(TestServiceWithDeps);
     expect(service).toBeDefined();
     // We don't check initialized state here as it might vary depending on implementation
 
     // Register dependencies in reverse order
     //@ts-expect-error
-    ctx.register("service-c", ServiceC).withInitialize("init");
+    context.register("service-c", ServiceC).withInitialize("init");
     //@ts-expect-error
-    ctx.register("service-b", ServiceB).withInitialize("init");
+    context.register("service-b", ServiceB).withInitialize("init");
     //@ts-expect-error
-    ctx.register("service-a", ServiceA).withInitialize("init");
+    context.register("service-a", ServiceA).withInitialize("init");
 
     // Clear the order array and add services in the correct order
     order.length = 0;
@@ -311,7 +309,7 @@ describe("context initialization - out-of-order execution", () => {
     order.push("service-c");
 
     // Now resolve the service again - it should be initialized
-    const updatedService = ctx.resolve(TestServiceWithDeps);
+    const updatedService = context.resolve(TestServiceWithDeps);
     updatedService.init(); // Manually call init
     expect(updatedService.initialized).toBe(true);
 
@@ -364,15 +362,15 @@ describe("context initialization - out-of-order execution", () => {
 
     // Register the circular dependencies
     //@ts-expect-error
-    ctx.register("service-x", ServiceX).withInitialize("init");
+    context.register("service-x", ServiceX).withInitialize("init");
     //@ts-expect-error
-    ctx.register("service-y", ServiceY).withInitialize("init");
+    context.register("service-y", ServiceY).withInitialize("init");
 
     // Resolve both services - this should handle the circular dependency
     //@ts-expect-error
-    const serviceX = ctx.resolve("service-x");
+    const serviceX = context.resolve("service-x");
     //@ts-expect-error
-    const serviceY = ctx.resolve("service-y");
+    const serviceY = context.resolve("service-y");
 
     // Verify the services were created
     expect(serviceX).toBeDefined();
@@ -450,7 +448,6 @@ describe("context initialization - out-of-order execution", () => {
 
   describe("context initialization - basic scenarios", () => {
     it("should initialize a simple service", () => {
-      const ctx = createNewContext();
 
       // Create a simple service with an init method
       class SimpleService {
@@ -463,18 +460,17 @@ describe("context initialization - out-of-order execution", () => {
       }
 
       // Register the service with initialization
-      const descriptor = ctx.register(SimpleService).withInitialize("init");
+      const descriptor = context.register(SimpleService).withInitialize("init");
       expect(descriptor.initializer).toBeDefined();
 
       // Resolve the service
-      const service = ctx.resolve(SimpleService);
+      const service = context.resolve(SimpleService);
 
       // The service should be initialized
       expect(service).toBeDefined();
       expect(service.initialized).toBe(true);
     });
     it("should automatically initialize services when dependencies are satisfied", () => {
-      const ctx = createNewContext();
 
       // Set up spies
       const spyA = vi.spyOn(ServiceA.prototype, "init");
@@ -482,24 +478,24 @@ describe("context initialization - out-of-order execution", () => {
       const spyC = vi.spyOn(ServiceC.prototype, "init");
 
       // Register and resolve ServiceA first
-      ctx.register(key, ServiceA).withInitialize("init");
-      const serviceA = ctx.resolve(key);
+      context.register(key, ServiceA).withInitialize("init");
+      const serviceA = context.resolve(key);
 
       // ServiceA should be initialized immediately since it has no dependencies
       expect(serviceA.initialized).toBe(true);
       expect(spyA).toHaveBeenCalled();
 
       // Now register and resolve ServiceB which depends on ServiceA
-      ctx.register(ServiceB).withInitialize("init");
-      const serviceB = ctx.resolve(ServiceB);
+      context.register(ServiceB).withInitialize("init");
+      const serviceB = context.resolve(ServiceB);
 
       // ServiceB should be initialized immediately since its dependency (ServiceA) is already initialized
       expect(serviceB.initialized).toBe(true);
       expect(spyB).toHaveBeenCalled();
 
       // Finally register and resolve ServiceC which depends on both ServiceA and ServiceB
-      ctx.register(ServiceC).withInitialize("init");
-      const serviceC = ctx.resolve(ServiceC);
+      context.register(ServiceC).withInitialize("init");
+      const serviceC = context.resolve(ServiceC);
 
       // ServiceC should be initialized immediately since all its dependencies are already initialized
       expect(serviceC.initialized).toBe(true);
@@ -507,17 +503,16 @@ describe("context initialization - out-of-order execution", () => {
     });
 
     it("should automatically initialize services when resolved", () => {
-      const ctx = createNewContext();
 
       // Register services with initialization methods
-      ctx.register(key, ServiceA).withInitialize("init");
-      ctx.register(ServiceB).withInitialize("init");
-      ctx.register(ServiceC).withInitialize("init");
+      context.register(key, ServiceA).withInitialize("init");
+      context.register(ServiceB).withInitialize("init");
+      context.register(ServiceC).withInitialize("init");
 
       // Resolve all services - this should automatically initialize them
-      const serviceA = ctx.resolve(key);
-      const serviceB = ctx.resolve(ServiceB);
-      const serviceC = ctx.resolve(ServiceC);
+      const serviceA = context.resolve(key);
+      const serviceB = context.resolve(ServiceB);
+      const serviceC = context.resolve(ServiceC);
 
       // No explicit initialization call needed
 
@@ -567,18 +562,17 @@ describe("context initialization - out-of-order execution", () => {
     }
 
     it("should initialize derived classes correctly", () => {
-      const ctx = createNewContext();
 
       // Register services
-      ctx.register(key, ServiceA).withInitialize("init");
-      ctx.register(BaseService).withInitialize("init");
-      ctx.register(DerivedService).withInitialize("init");
-      ctx.register(AnotherDerivedService).withInitialize("init");
+      context.register(key, ServiceA).withInitialize("init");
+      context.register(BaseService).withInitialize("init");
+      context.register(DerivedService).withInitialize("init");
+      context.register(AnotherDerivedService).withInitialize("init");
 
       // Resolve the services
-      const baseService = ctx.resolve(BaseService);
-      const derivedService = ctx.resolve(DerivedService);
-      const anotherDerivedService = ctx.resolve(AnotherDerivedService);
+      const baseService = context.resolve(BaseService);
+      const derivedService = context.resolve(DerivedService);
+      const anotherDerivedService = context.resolve(AnotherDerivedService);
 
       // Verify initialization
       expect(baseService.initialized).toBe(true);
@@ -595,11 +589,9 @@ describe("context initialization - out-of-order execution", () => {
 
   // Test out-of-order execution scenarios
   describe("context initialization - out-of-order execution", () => {
-    let ctx: Context;
     let initOrder: string[];
 
     beforeEach(() => {
-      ctx = createNewContext();
       initOrder = [];
     });
 
@@ -667,20 +659,20 @@ describe("context initialization - out-of-order execution", () => {
       }
 
       // Register the service that depends on others first
-      ctx.register(TestServiceWithDeps).withInitialize("init");
+      context.register(TestServiceWithDeps).withInitialize("init");
 
       // Try to resolve it - it should be defined
-      const service = ctx.resolve(TestServiceWithDeps);
+      const service = context.resolve(TestServiceWithDeps);
       expect(service).toBeDefined();
       // We don't check initialized state here as it might vary depending on implementation
 
       // Register dependencies in reverse order
       //@ts-expect-error
-      ctx.register("service-c", ServiceC).withInitialize("init");
+      context.register("service-c", ServiceC).withInitialize("init");
       //@ts-expect-error
-      ctx.register("service-b", ServiceB).withInitialize("init");
+      context.register("service-b", ServiceB).withInitialize("init");
       //@ts-expect-error
-      ctx.register("service-a", ServiceA).withInitialize("init");
+      context.register("service-a", ServiceA).withInitialize("init");
 
       // Clear the order array and add services in the correct order
       order.length = 0;
@@ -689,7 +681,7 @@ describe("context initialization - out-of-order execution", () => {
       order.push("service-c");
 
       // Now resolve the service again - it should be initialized
-      const updatedService = ctx.resolve(TestServiceWithDeps);
+      const updatedService = context.resolve(TestServiceWithDeps);
       updatedService.init(); // Manually call init
       expect(updatedService.initialized).toBe(true);
 
@@ -742,15 +734,15 @@ describe("context initialization - out-of-order execution", () => {
 
       // Register the circular dependencies
       //@ts-expect-error
-      ctx.register("service-x", ServiceX).withInitialize("init");
+      context.register("service-x", ServiceX).withInitialize("init");
       //@ts-expect-error
-      ctx.register("service-y", ServiceY).withInitialize("init");
+      context.register("service-y", ServiceY).withInitialize("init");
 
       // Resolve both services - this should handle the circular dependency
       //@ts-expect-error
-      const serviceX = ctx.resolve("service-x");
+      const serviceX = context.resolve("service-x");
       //@ts-expect-error
-      const serviceY = ctx.resolve("service-y");
+      const serviceY = context.resolve("service-y");
 
       // Verify the services were created
       expect(serviceX).toBeDefined();
@@ -817,15 +809,14 @@ describe("context initialization - out-of-order execution", () => {
         }
       }
 
-      const ctx = createNewContext();
 
       // Register both services with initialization
-      ctx.register(serviceAKey, ServiceA).withInitialize("init");
-      ctx.register(serviceBKey, ServiceB).withInitialize("init");
+      context.register(serviceAKey, ServiceA).withInitialize("init");
+      context.register(serviceBKey, ServiceB).withInitialize("init");
 
       // Resolving either service will initialize both services
-      const serviceA = ctx.resolve(serviceAKey);
-      const serviceB = ctx.resolve(serviceBKey);
+      const serviceA = context.resolve(serviceAKey);
+      const serviceB = context.resolve(serviceBKey);
 
       // The initialization should happen automatically during resolution
       // No need to manually call init methods
