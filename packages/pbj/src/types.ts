@@ -1,5 +1,5 @@
 import { destroySymbol, removeSymbol, serviceSymbol } from "./symbols.js";
-import {ContextI} from "./context-types";
+import {RegisterArgs} from "./context-types";
 
 export type Constructor<T = any> = new (...args: any[]) => T;
 
@@ -29,20 +29,6 @@ export type ValueOf<TRegistry extends RegistryType, T> =
           ? TRegistry[T]
           : never;
 
-export type Primitive = string | number | boolean | symbol | bigint;
-export type PrimitiveType = String | Number | Boolean | Symbol | BigInt;
-export type PrimitiveValue<T extends PrimitiveType> = T extends String
-  ? string
-  : T extends Number
-    ? number
-    : T extends Boolean
-      ? boolean
-      : T extends Symbol
-        ? symbol
-        : T extends BigInt
-          ? bigint
-          : never;
-
 export type VisitFn<
   TRegistry extends RegistryType,
   T extends PBinJKey<TRegistry>,
@@ -55,7 +41,6 @@ export interface RegistryType {
 }
 
 export type PBinJKeyType<T = any> = symbol & { [serviceSymbol]: T };
-export type Rest<T extends any[]> = T extends [any, ...infer U] ? U : [];
 
 export type OfA<T> = Constructor<T> | Fn<T> | T;
 //The second argument is usually a factory.  It could also be a value.   This tries to enforce if it is a factory, it should
@@ -103,20 +88,16 @@ export interface ServiceDescriptorI<
   T extends Constructor | Fn | unknown,
 > {
   [serviceSymbol]: PBinJKey<TRegistry>;
-  dependencies?: Set<CKey>;
-  invoked: boolean;
   primitive?: boolean;
-  invalid: boolean;
   optional: boolean;
   tags: PBinJKeyType<T>[];
   invokable: boolean;
   description?: string;
   name?: string;
   cacheable: boolean;
-  proxy: Returns<T>;
   service: OfA<T> | undefined;
   args: Args<T>;
-  initializer?: ServiceInitI;
+  initializer?: string;
   /**
    * Set the args to be used with the service.   These can be other pbjs, or any other value.
    * @param args
@@ -176,27 +157,22 @@ export interface ServiceDescriptorI<
    * @returns
    */
   withInterceptors(...interceptors: InterceptFn<Returns<T>>[]): this;
+  /**
+   * Override the name of the service.  This is useful for debugging.
+   * @param name
+   */
   withName(name: string): this;
-  /**
-   * Check to see if the current service has a dependency.
-   * @param key
-   * @returns
-   */
-  //hasDependency(key: CKey): boolean;
-  /**
-   * Add a dependency to the service.  This is used to track dependencies.
-   * @param keys
-   * @returns
-   */
-  addDependency(...keys: CKey[]): this;
-  hasTag(tag: PBinJKeyType<any>): boolean;
 
   /**
-   * Invokes the service and returns the value.  This is where the main resolution happens.
    *
-   * @returns
    */
-  invoke(context: ContextI<TRegistry>): Returns<T>;
+  withInitialize(method?: keyof T & string): this;
+
+  /**
+   * Checks if the dependency has a tag
+   * @param tag
+   */
+  hasTag(tag: PBinJKeyType): boolean;
 
   asArray(): this;
 
@@ -208,8 +184,10 @@ export interface ServiceDescriptorI<
  * The interceptor function, allows you to intercept the invocation of a service.  The
  * invocation may be a previous interceptor.
  */
-type InterceptFn<T> = (invoke: (ctx:ContextI<any>) => T) => T;
+export type InterceptFn<T> = (invoke: () => T) => T;
 
-export type ServiceDescriptorListener = (
-  service: ServiceDescriptorI<any, any>,
-) => void;
+export type FactoryOf<
+    TRegistry extends RegistryType,
+    TKey extends PBinJKey<TRegistry>,
+    TArgs extends RegisterArgs<TRegistry, TKey>,
+> = TKey extends (Constructor | Fn) ? TKey : TArgs[0] extends Constructor | Fn ? TArgs[0] : never;

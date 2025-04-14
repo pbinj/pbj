@@ -14,9 +14,11 @@ import type {
 } from "./types.js";
 import {
   ServiceDescriptor,
-  type ServiceDescriptorListener,
-} from "./ServiceDescriptor.js";
-import { filterMap, isInherited, keyOf } from "./util.js";
+} from "./service-descriptor.js";
+import {
+  ServiceContext
+} from "./service-context";
+import {filterMap, isInherited, keyOf, Listener, listener} from "./util.js";
 import { pbjKey, isPBinJKey, asString } from "./pbjKey.js";
 import { isAsyncError } from "./errors.js";
 import { Logger } from "./logger.js";
@@ -26,8 +28,8 @@ export class Context<TRegistry extends RegistryType = Registry>
   implements ContextI<TRegistry>
 {
   //this thing is used to keep track of dependencies.
-  protected map = new Map<CKey, ServiceDescriptorI<TRegistry, any>>();
-  private listeners: ServiceDescriptorListener[] = [];
+  protected map = new Map<CKey, ServiceContext<TRegistry, any>>();
+  private listeners = listener<ServiceContext<TRegistry, any>>();
   // Track services that have been initialized
   private initializedServices = new Set<CKey>();
   // Track services that are pending initialization
@@ -36,26 +38,21 @@ export class Context<TRegistry extends RegistryType = Registry>
   constructor(private readonly parent?: Context<any>) {}
 
   public onServiceAdded(
-    fn: ServiceDescriptorListener,
+    fn:Listener<ServiceContext<TRegistry, any>>,
     initialize = true,
   ): () => void {
     this.logger.info("onServiceAdded: listener added");
+    const ret = this.listeners.subscribe(fn);
     if (initialize) {
-      for (const service of this.map.values()) {
-        for (const fn of this.listeners) {
-          fn(service);
-        }
-      }
+      Array.prototype.forEach.call(this.map.values(),this.listeners);
     }
-    this.listeners.push(fn);
-    return () => {
-      this.listeners = this.listeners.filter((v) => v !== fn);
-    };
+
+    return ret;
   }
 
   pbj<T extends PBinJKey<TRegistry>>(service: T): ValueOf<TRegistry, T>;
   pbj(service: unknown): unknown {
-    return (this.get(keyOf(service as any)) ?? this.register(service as any))
+    return (this.get(keyOf(service as any)) ?? this._register(service as any))
       .proxy;
   }
 
@@ -111,17 +108,17 @@ export class Context<TRegistry extends RegistryType = Registry>
           this._visit(dep, fn, seen);
         }
       }
-      fn(ctx);
+      fn(ctx.description);
     }
   }
 
-  get(key: CKey): ServiceDescriptorI<TRegistry, any> | undefined {
+  get(key: CKey): ServiceContext<TRegistry, any> | undefined {
     return this.map.get(key) ?? this.parent?.get(key);
   }
 
   private invalidate(
     key: CKey,
-    ctx?: ServiceDescriptorI<TRegistry, any>,
+    ctx?: ServiceContext<TRegistry, any>,
     seen = new Set<CKey>(),
   ) {
     if (seen.size === seen.add(key).size) {
@@ -137,7 +134,7 @@ export class Context<TRegistry extends RegistryType = Registry>
     ctx.invalidate();
     this.logger.warn("invalidating service {key}", { key: asString(key) });
     for (const [k, v] of this.map) {
-      if (v.hasDependency(key)) {
+      if (v.description.hasDependency(key)) {
         this.invalidate(k, v, seen);
       }
     }
@@ -147,11 +144,17 @@ export class Context<TRegistry extends RegistryType = Registry>
       this.pendingInitialization.add(key);
     }
   }
-
   register<TKey extends PBinJKey<TRegistry>>(
+      serviceKey: TKey,
+      ...origArgs: RegisterArgs<TRegistry, TKey> | []
+  ): ServiceDescriptorI<TRegistry, ValueOf<TRegistry, TKey>> {
+   return this._register(serviceKey, ...origArgs).description;
+  }
+
+  protected _register<TKey extends PBinJKey<TRegistry>>(
     serviceKey: TKey,
     ...origArgs: RegisterArgs<TRegistry, TKey> | []
-  ): ServiceDescriptorI<TRegistry, ValueOf<TRegistry, TKey>> {
+  ):ServiceContext<TRegistry, ValueOf<TRegistry, TKey>> {
     const key = keyOf(serviceKey);
 
     let service: Constructor | Fn | unknown = serviceKey;
@@ -161,32 +164,33 @@ export class Context<TRegistry extends RegistryType = Registry>
       service = args.shift();
     }
 
-    let inst = this.map.get(key);
+    let inst = this.map.get(key) as ServiceContext<TRegistry, ValueOf<TRegistry, TKey>>;
 
     if (inst) {
       if (origArgs?.length) {
         this.logger.info("modifying registered service {key}", {
           key: asString(serviceKey),
         });
-
-        inst.args = args;
-        inst.service = service;
+        //@ts-expect-error
+        inst.description.args = args;
+        //@ts-expect-error
+        inst.description.service = service;
       }
       if (inst.invalid) {
         this.invalidate(key);
       }
       return inst;
     }
-    const newInst = new ServiceDescriptor<TRegistry, ValueOf<TRegistry, TKey>>(
-      serviceKey,
-      service as any,
-      args as any,
-      true,
-      isFn(service),
-      undefined,
-      () => {
-        this.invalidate(key);
-      },
+    const newInst = new ServiceContext<TRegistry, ValueOf<TRegistry, TKey>>(
+        this,
+        new ServiceDescriptor(
+          serviceKey,
+          service as any,
+          args as any,
+          true,
+          isFn(service),
+          undefined,
+        ),
       this.logger.createChild(asString(serviceKey)!),
     );
 
@@ -197,35 +201,24 @@ export class Context<TRegistry extends RegistryType = Registry>
     });
     return newInst;
   }
-  private notifyAdd(inst: ServiceDescriptor<TRegistry, any>) {
+  private notifyAdd(inst: ServiceContext<TRegistry, any>) {
     return new Promise<void>((resolve) => {
       setTimeout(
-        (listeners) => {
-          listeners.forEach((fn) => fn(inst));
-          resolve();
+        () => {
+          this.listeners(inst);
+          resolve()
         },
         0,
-        this.listeners,
+
       );
     });
   }
+
   resolve<TKey extends PBinJKey<TRegistry>>(
     typeKey: TKey,
     ...args: RegisterArgs<TRegistry, TKey> | []
   ): ValueOf<TRegistry, TKey> {
-    const service = this.register(typeKey, ...args);
-    const result = service.invoke(this) as any;
-
-    // If the service has an initialization method, initialize it
-    if (service.initializer && result) {
-      const key = keyOf(typeKey);
-
-      const set = new Set<CKey>();
-      // Initialize the service and its dependencies
-      this._initializeService(key, set);
-    }
-
-    return result;
+   return this._register(typeKey, ...args).invoke();
   }
 
   newContext<TTRegistry extends TRegistry = TRegistry>() {
@@ -277,7 +270,7 @@ export class Context<TRegistry extends RegistryType = Registry>
       // before calling the initialization method
 
       // Mark all dependencies as initialized
-      const dependencies = service.dependencies || new Set<CKey>();
+      const dependencies = service.description.dependencies || new Set<CKey>();
       for (const depKey of dependencies) {
         if (!this.initializedServices.has(depKey)) {
           this.initializedServices.add(depKey);
@@ -345,16 +338,16 @@ export class Context<TRegistry extends RegistryType = Registry>
 
     if (sym) {
       yield* filterMap(this.map.values(), (v) =>
-        v.tags.includes(service as any) ? v.proxy : undefined,
+        v.description.tags.includes(service as any) ? v.proxy : undefined,
       );
     } else if (isFn(service)) {
       if (isConstructor(service)) {
         yield* filterMap(this.map.values(), (v) =>
-          isInherited(v.service, service) ? v.proxy : undefined,
+          isInherited(v.description.service, service) ? v.proxy : undefined,
         );
       } else {
         yield* filterMap(this.map.values(), (v) =>
-          v.service && v.service === service ? v.proxy : undefined,
+          v.description.service && v.description.description === service ? v.proxy : undefined,
         );
       }
     }
@@ -378,20 +371,19 @@ export class Context<TRegistry extends RegistryType = Registry>
   listOf<T extends PBinJKey<TRegistry>>(
     service: T,
   ): Array<ValueOf<TRegistry, T>> {
-    const ret = this.register(
+    const ret = this._register(
       isPBinJKey(service) ? service : pbjKey(String(service)),
       () => Array.from(this._listOf(service)),
-    ).withCacheable(false);
+    );
+    ret.description.withCacheable(false);
 
     //any time a new item is added invalidate the list, this should allow for things to be cached.
     // we would also need to invalidate on tags changes.
-    this.listeners.push(() => {
-      ret.invalidate();
-    });
+    this.listeners.subscribe(()=>{ret.invalidate()});
 
     return ret.proxy as any;
   }
-  toJSON() {
+  toJSON():unknown {
     return Array.from(this.map.values()).map((v) => v.toJSON());
   }
   async resolveAsync<T extends PBinJKey<TRegistry>>(
@@ -423,7 +415,7 @@ export function createNewContext<TRegistry extends RegistryType>() {
 
 declare global {
   // noinspection ES6ConvertVarToLetConst
-  var __pbj_context: Context<Registry> | undefined;
+  var __pbj_context: Context | undefined;
 }
 
 //Make this work when pbj is imported from multiple locations.

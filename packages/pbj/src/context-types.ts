@@ -8,7 +8,8 @@ import type {
     ValueOf, VisitFn
 } from "./types";
 import type {Registry} from "./registry";
-import { type ServiceDescriptorListener} from "./ServiceDescriptor";
+import {Listener} from "./util";
+import {ServiceContext} from "./service-context";
 
 /**
  * This needs to make all the arguments for a type.
@@ -64,7 +65,7 @@ export interface ContextI<TRegistry extends RegistryType = Registry> extends Res
         fn: VisitFn<TRegistry, T>,
     ): void;
     onServiceAdded(
-        fn: ServiceDescriptorListener,
+        fn:Listener<ServiceContext<TRegistry, any>>,
         noInitial?: boolean,
     ): () => void;
 

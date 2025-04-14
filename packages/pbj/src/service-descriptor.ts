@@ -1,9 +1,6 @@
-import { keyOf } from "./util.js";
-import { has, isConstructor, isFn, isPrimitive } from "@pbinj/pbj-guards";
-import { newProxy } from "./newProxy.js";
+import {  isConstructor, isFn, } from "@pbinj/pbj-guards";
 import type { Registry } from "./registry.js";
-import { proxyKey, serviceSymbol } from "./symbols.js";
-import { PBinJError } from "./errors.js";
+import {  serviceSymbol } from "./symbols.js";
 import type {
   Args,
   CKey,
@@ -15,62 +12,19 @@ import type {
   RegistryType,
   Returns,
   ServiceDescriptorI,
-  ServiceInitI,
+  InterceptFn,
   ValueOf,
 } from "./types.js";
-import {asString, isPBinJKey} from "./pbjKey.js";
-import { PBinJAsyncError } from "./errors.js";
+import {asString} from "./pbjKey.js";
 import { Logger } from "./logger.js";
 import {ContextI} from "./context-types";
+import {listener} from "./util";
 
 const EMPTY = [] as const;
-
-type InitFn = () => void;
-/**
- * Class to handle initialization of services
- */
-class ServiceInit<T extends Constructor> implements ServiceInitI {
-  constructor(
-    public method: keyof T & string,
-    public _factory?: Constructor,
-    public initialized = false,
-  ) {
-    this.factory = _factory;
-  }
-
-  private originalInit: InitFn | undefined;
-
-  invalidate() {
-    this.initialized = false;
-  }
-  set factory(_factory: Constructor | undefined) {
-    this._factory = _factory;
-    if (_factory) {
-      // Store the original init method
-      this.originalInit = _factory?.prototype?.[this.method];
-    } else {
-      this.initialized = true;
-    }
-  }
-  /**
-   * Invoke the initialization method on the service
-   */
-  public invoke(scope: InstanceType<T>) {
-    if (this.initialized || !this.originalInit || !this.method) {
-      return;
-    }
-    this.initialized = true;
-    this.originalInit.call(scope);
-    if (this.factory?.prototype) {
-      this.factory.prototype[this.method] = this.originalInit;
-    }
-  }
-}
 
 export class ServiceDescriptor<
   TRegistry extends RegistryType,
   T extends Constructor | Fn | unknown,
-  V extends ValueOf<TRegistry, T> = ValueOf<TRegistry, T>,
 > implements ServiceDescriptorI<TRegistry, T>
 {
   static #dependencies = new Set<CKey>();
@@ -92,25 +46,22 @@ export class ServiceDescriptor<
 
   //  public readonly [serviceSymbol]: PBinJKey<TRegistry>;
   dependencies?: Set<CKey>;
-  private _instance?: Returns<T>;
   public invoked = false;
   private _cacheable = true;
   private _service?: OfA<T>;
   private _args: Args<T> = [] as any;
-  private _proxy?: Returns<T>;
-  private _factory = false;
-  private _isListOf = false;
-  private interceptors?: InterceptFn<Returns<T>>[];
-  public initializer?: ServiceInit<V>;
+  public factory = false;
+  public isListOf = false;
+  public interceptors?: InterceptFn<Returns<T>>[];
+  public initializer?: string;
   public primitive?: boolean;
-  public invalid = false;
   public optional = true;
   public error?: { message: string };
 
   public tags: PBinJKeyType<T>[] = [];
   private _name: string | undefined;
   public context:ContextI<TRegistry> | undefined;
-
+  public onChange = listener<ServiceDescriptor<any, any>>();
   [serviceSymbol]: PBinJKey<TRegistry>;
   constructor(
     key: PBinJKey<TRegistry>,
@@ -119,7 +70,6 @@ export class ServiceDescriptor<
     cacheable = true,
     public invokable = true,
     public description?: string,
-    private onChange?: () => void,
     private logger = new Logger(),
   ) {
     this[serviceSymbol] = key;
@@ -144,11 +94,7 @@ export class ServiceDescriptor<
     this._name = name;
   }
 
-  get proxy(): Returns<T> {
-    const key = keyOf(this[serviceSymbol]);
-    ServiceDescriptor.#dependencies.add(key);
-    return (this._proxy ??= newProxy(key, this));
-  }
+
 
   set cacheable(_cacheable: boolean) {
     if (this._cacheable === _cacheable) {
@@ -170,16 +116,11 @@ export class ServiceDescriptor<
     if (this._service === _service) {
       return;
     }
-    if (this.invoked) {
-      this.invalid = true;
-    }
-    this.invalidate();
     this.invokable = isFn(_service);
     this._service = _service;
-    this._factory = this.invokable && !isConstructor(_service as Fn<T>);
-    if (this.initializer) {
-      this.initializer.factory = this.service as any;
-    }
+    this.factory = this.invokable && !isConstructor(_service as Fn<T>);
+
+    this.invalidate();
     this.logger.debug("changed service");
   }
 
@@ -191,7 +132,7 @@ export class ServiceDescriptor<
     return this._args!;
   }
 
-  set args(newArgs: Args<T>) {
+  set args(newArgs:Args<T>) {
     /**
      * If the args are the same, we don't need to invalidate.  Also,
      * if the value hasn't been invoked, we don't need to invalidate.
@@ -200,17 +141,7 @@ export class ServiceDescriptor<
     // this._args.every((v, i) => v === newArgs[i] && !isPBinJ(v)))) {
     // return;
     //}
-    if (this.invoked) {
-      this.invalid = true;
-    }
-    this.invalidate();
-    newArgs.forEach((arg) => {
-      if (has(arg, proxyKey)) {
-        this.addDependency(arg[proxyKey] as CKey);
-      }else if (isPBinJKey(arg)) {
-        this.addDependency(keyOf(arg));
-      }
-    });
+
     this._args = newArgs;
   }
   /**
@@ -304,6 +235,7 @@ export class ServiceDescriptor<
    */
   withInterceptors(...interceptors: InterceptFn<Returns<T>>[]) {
     this.interceptors = [...(this.interceptors ?? []), ...interceptors];
+    this.invalidate();
     return this;
   }
 
@@ -313,139 +245,31 @@ export class ServiceDescriptor<
    */
   withName(name: string) {
     this._name = name;
+    this.invalidate();
     return this;
   }
-  withInitialize(method?: keyof V & string) {
-    if (method) {
-      this.initializer = new ServiceInit<V>(method, this.service as any);
-    } else {
-      this.initializer = undefined;
-    }
+  withInitialize(method?: string) {
+      this.initializer = method;
+      this.invalidate();
     return this;
   }
 
   /**
    * Add a dependency to the service.  This is used to track dependencies.
-   * @param keys
+   * @param tag {PBinJKeyType} - The tag to add.
    * @returns
    */
-  addDependency(...keys: CKey[]) {
-    if (keys.length) {
-      const set = (this.dependencies ??= new Set<CKey>());
-      keys.forEach((v) => set.add(v));
-    }
-    return this;
-  }
-  hasTag(tag: PBinJKeyType<any>) {
+
+  hasTag(tag: PBinJKeyType) {
     return this.tags.includes(tag);
   }
   invalidate = () => {
-    if (!this.invoked) {
-      return;
-    }
-    this.logger.debug("invalidating service");
-    this.invalid = true;
-    this.invoked = false;
-    this._instance = undefined;
-    this.initializer?.invalidate;
-    this.onChange?.();
-  };
-  /**
-   * Invokes the service and returns the value.  This is where the main resolution happens.
-   *
-   * @returns
-   */
-  invoke = (ctx:ContextI<any>): Returns<T> => {
-    if (this.interceptors?.length) {
-      const invoke = this.interceptors?.reduceRight(
-        (next: () => Returns<T>, interceptor) => {
-          return () => interceptor.call(this, next);
-        },
-          ()=>this._invoke(ctx),
-      );
-      return invoke.call(this);
-    }
-
-    return this._invoke(ctx);
+       this.onChange(this);
   };
 
-  private _promise?: Promise<T> & { resolved?: boolean };
-  _invoke = (context: ContextI<TRegistry> ): Returns<T> => {
-    if (this._promise) {
-      throw new PBinJAsyncError(this[serviceSymbol], this._promise);
-    }
-    if (!this.invokable) {
-      return this.service as Returns<T>;
-    }
-    if (!this.invalid && this.invoked && this.cacheable) {
-      return this._instance as Returns<T>;
-    }
-    if (!isFn(this.service)) {
-      this.logger.error(`service '{service}' is not a function`, {
-        service: asString(this.service as any),
-      });
-      throw new PBinJError(
-        `service '${String(this.service)}' is not a function and is not configured as a value, to configure as a value set invokable to false on the service description`,
-      );
-    }
-    ServiceDescriptor.#dependencies.clear();
-    let resp;
-    const args = this.args.map(v=>{
-      if (isPBinJKey(v)) {
-        return context.resolve(v);
-      }
-      return v;
-    });
-    if (this._factory) {
-      const val = this.service(...args);
-      this.addDependency(...ServiceDescriptor.#dependencies);
-
-      if (val instanceof Promise) {
-        this._promise = val;
-        this.logger.debug("waiting for promise");
-        this._promise.then((v) => {
-          this.logger.debug("resolved promise");
-          this._promise = undefined;
-          this.invalid = false;
-          this.invoked = true;
-          this._instance = v as any;
-        });
-        throw new PBinJAsyncError(this[serviceSymbol], val);
-      }
-      resp = val;
-    } else {
-      try {
-        resp = new (this.service as any)(...args);
-        this.initializer?.invoke(resp);
-        if (this.error) {
-          this.logger.info("service has recovered");
-        }
-        this.error = undefined;
-      } catch (e) {
-        const obj = { message: String(e) };
-        this.logger.error("error invoking service {message}", obj);
-        this.invalidate();
-        this.error = obj;
-        throw e;
-      }
-    }
-
-    this.addDependency(...ServiceDescriptor.#dependencies);
-    this.invoked = true;
-    this.primitive = isPrimitive(resp);
-    if (resp == null && !this.optional) {
-      throw new PBinJError(
-        `service '${String(this[serviceSymbol])}' is not optional and returned null`,
-      );
-    }
-    if (this.cacheable) {
-      this._instance = resp;
-    }
-
-    return resp;
-  };
   asArray() {
-    this._isListOf = true;
+    this.isListOf = true;
+    this.invalidate();
     return this;
   }
   hasDependency(key: CKey) {
@@ -460,24 +284,12 @@ export class ServiceDescriptor<
       optional: this.optional,
       tags: this.tags.map(asString),
       invoked: this.invoked,
-      invalid: this.invalid,
       primitive: this.primitive,
-      listOf: this._isListOf,
+      listOf: this.isListOf,
       error: this.error,
       dependencies: Array.from(this.dependencies ?? [], asString as any),
       args: this.args?.map(asString as any),
     };
   }
-  get initialized() {
-    return this.initializer?.initialized ?? true;
-  }
-}
-/**
- * The interceptor function, allows you to intercept the invocation of a service.  The
- * invocation may be a previous interceptor.
- */
-type InterceptFn<T> = (invoke: (ctx:ContextI<any>) => T) => T;
 
-export type ServiceDescriptorListener<T extends RegistryType = Registry> = (
-  service: ServiceDescriptorI<T, any>,
-) => void;
+}

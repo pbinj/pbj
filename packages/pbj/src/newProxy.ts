@@ -7,16 +7,16 @@ import {
   isObjectish,
 } from "@pbinj/pbj-guards";
 import { proxyKey, serviceDescriptorKey, serviceSymbol } from "./symbols.js";
-import type { ServiceDescriptorI } from "./types.js";
+import type {RegistryType, Returns, ServiceDescriptorI} from "./types.js";
+import {ServiceContext} from "./service-context";
 
-export function newProxy<T extends Constructor>(
-  key: unknown,
-  service: ServiceDescriptorI<any, any>,
-) {
-  return new Proxy({} as InstanceType<T>, {
+export function newProxy<T, TRegistry extends RegistryType, V extends Returns<T>>(
+  service:ServiceContext<TRegistry, T>
+):V {
+  return new Proxy({} as any, {
     get(_target, prop) {
       if (prop === proxyKey) {
-        return key;
+        return service.key;
       }
       if (prop === serviceDescriptorKey) {
         return service;
@@ -59,10 +59,10 @@ export function newProxy<T extends Constructor>(
       if (Array.isArray(val)) {
         return undefined;
       }
-      return Reflect.getOwnPropertyDescriptor(val, prop);
+      return Reflect.getOwnPropertyDescriptor(val as any, prop);
     },
     set(_target, prop, value) {
-      service.invoke()[prop] = value;
+      (service.invoke() as any)[prop] = value;
       return true;
     },
     ownKeys() {
@@ -70,7 +70,7 @@ export function newProxy<T extends Constructor>(
       if (service.primitive) {
         return [];
       }
-      return Reflect.ownKeys(value);
+      return Reflect.ownKeys(value as any);
     },
     has(_target, prop) {
       const val = service.invoke();

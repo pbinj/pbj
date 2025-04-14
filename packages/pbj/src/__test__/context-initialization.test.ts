@@ -19,7 +19,6 @@ class ServiceA implements DoSomething {
 
   init() {
     this.initialized = true;
-    return "ServiceA initialized";
   }
 }
 
@@ -229,12 +228,14 @@ describe("context initialization - out-of-order execution", () => {
 
     constructor(
       private a = pbj(key),
+      //@ts-expect-error
       private b = pbj("service-b"),
+      //@ts-expect-error - strings are only good for testing
       private c = pbj("service-c"),
     ) {}
 
     init() {
-      this.initialized = true;
+      this.initialized = true;g
       initOrder.push("ServiceWithMultipleDeps");
       return "ServiceWithMultipleDeps initialized";
     }
