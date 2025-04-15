@@ -15,10 +15,11 @@ import type {
   InterceptFn,
   ValueOf,
 } from "./types.js";
-import {asString} from "./pbjKey.js";
+import {asString, isPBinJKey} from "./pbjKey.js";
 import { Logger } from "./logger.js";
 import {ContextI} from "./context-types";
-import {listener} from "./util";
+import {keyOf, listener} from "./util";
+import {isPBinJ} from "./guards";
 
 const EMPTY = [] as const;
 
@@ -57,7 +58,13 @@ export class ServiceDescriptor<
   public primitive?: boolean;
   public optional = true;
   public error?: { message: string };
-
+  /**
+   * When true, the service is invalid and needs to be re-invoked.
+   * Once it is invoked, it is no longer invalid.  This is used for
+   * caching and invalidation.
+   */
+  public invalid = true;
+  public key: PBinJKey<TRegistry>;
   public tags: PBinJKeyType<T>[] = [];
   private _name: string | undefined;
   public context:ContextI<TRegistry> | undefined;
@@ -72,7 +79,9 @@ export class ServiceDescriptor<
     public description?: string,
     private logger = new Logger(),
   ) {
+
     this[serviceSymbol] = key;
+    this.key = key;
     this.args = args as Args<T>;
     this._cacheable = cacheable;
     if (!invokable) {
@@ -133,16 +142,33 @@ export class ServiceDescriptor<
   }
 
   set args(newArgs:Args<T>) {
-    /**
-     * If the args are the same, we don't need to invalidate.  Also,
-     * if the value hasn't been invoked, we don't need to invalidate.
-     */
-    //if (newArgs === this._args || (this._args?.length === newArgs.length &&
-    // this._args.every((v, i) => v === newArgs[i] && !isPBinJ(v)))) {
-    // return;
-    //}
+    if(newArgs === this._args) {
+      return;
+    }
 
-    this._args = newArgs;
+    if (newArgs.length !== this._args.length || newArgs.some((v, i) => v !== this._args[i])) {
+      this.logger.debug("changed args");
+      newArgs.map(v=>{
+
+        if(isPBinJKey(v)){
+          this.addDependency(keyOf(v));
+        }else if (isPBinJ(v)){
+          this.addDependency((v as any)[serviceSymbol]);
+        }
+
+        return v;
+      })
+      this._args = newArgs;
+      this.invalidate();
+    }
+
+  }
+  addDependency(...keys: CKey[]) {
+    if (keys.length) {
+      const set = (this.dependencies ??= new Set<CKey>());
+      keys.forEach((v) => set.add(v));
+    }
+    return this;
   }
   /**
    * Set the args to be used with the service.   These can be other pbj's, or any other value.
@@ -254,6 +280,12 @@ export class ServiceDescriptor<
     return this;
   }
 
+  withListOf(isList:boolean) {
+    this.isListOf = isList;
+    this.invalidate();
+    return this;
+  }
+
   /**
    * Add a dependency to the service.  This is used to track dependencies.
    * @param tag {PBinJKeyType} - The tag to add.
@@ -264,7 +296,11 @@ export class ServiceDescriptor<
     return this.tags.includes(tag);
   }
   invalidate = () => {
-       this.onChange(this);
+    if (!this.invalid) {
+      this.logger.debug("invalidating service");
+      this.invalid = true;
+      this.onChange(this);
+    }
   };
 
   asArray() {
@@ -287,6 +323,8 @@ export class ServiceDescriptor<
       primitive: this.primitive,
       listOf: this.isListOf,
       error: this.error,
+      invalid: this.invalid,
+      factory: this.factory,
       dependencies: Array.from(this.dependencies ?? [], asString as any),
       args: this.args?.map(asString as any),
     };

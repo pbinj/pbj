@@ -1,45 +1,39 @@
 import {ContextI} from "./context-types";
 import {CKey, RegistryType, Returns, ServiceInitI} from "./types";
 import {PBinJAsyncError, PBinJError} from "./errors";
-import {proxyKey, serviceSymbol} from "./symbols";
-import {has, isFn, isPrimitive} from "@pbinj/pbj-guards";
+import { serviceSymbol} from "./symbols";
+import {hasA, isFn, isPrimitive} from "@pbinj/pbj-guards";
 import {asString, isPBinJKey} from "./pbjKey";
 import {ServiceDescriptor} from "./service-descriptor";
 import {Logger} from "./logger";
 import {keyOf} from "./util";
 import {newProxy} from "./newProxy";
+import {Context} from "./context";
 interface ErrorMsg {
     message: string;
 }
 export class ServiceContext<TRegistry extends RegistryType, T> {
     static #dependencies = new Set<CKey>();
     private _proxy?: Returns<T>;
-    private _factory = false;
     private error:ErrorMsg | undefined;
+    private onDestroy?: () => void;
+
     constructor(private context: ContextI<TRegistry>,
                 public description: ServiceDescriptor<TRegistry, T>,
                 private logger = new Logger(),
 
-) {}
+) {
+      this.onDestroy = description.onChange.subscribe(()=>{
+          this.invalidate();
+      });
+    }
    get dependencies() {
         return this.description.dependencies;
     }
    get key(){
         return keyOf(this.description[serviceSymbol]);
    }
-   set  args(newArgs: any[]){
-        if (this.invoked) {
-            this.invalid = true;
-        }
-        this.invalidate();
-        newArgs.forEach((arg) => {
-            if (has(arg, proxyKey)) {
-                this.addDependency(arg[proxyKey] as CKey);
-            }else if (isPBinJKey(arg)) {
-                this.addDependency(keyOf(arg));
-            }
-        });
-    }
+
     /**
      * Invokes the service and returns the value.  This is where the main resolution happens.
      *
@@ -59,19 +53,34 @@ export class ServiceContext<TRegistry extends RegistryType, T> {
         return this._invoke();
     };
     invalid = true;
-    invoked = false;
+    _invoked = false;
     primitive = false;
     _instance?: Returns<T>;
     initializer?: ServiceInitI;
 
+    set invoked(v: boolean) {
+        this._invoked = v;
+        this.description.invalid =  this.invalid = !v;
+    }
+    get invoked() {
+        return this._invoked;
+    }
     get initialized() {
         return this.invoked ? this.initializer?.initialized ?? true : false;
     }
+
     public invalidate(){
+        //This prevents loops where we invalidate ourselves.
+        if (this.invalid) {
+            return;
+        }
         this.invalid = true;
         this.invoked = false;
         this._instance = undefined;
         this.initializer?.invalidate();
+        if (this.context instanceof Context) {
+            this.context.invalidate(this.key, this);
+        }
     }
 
     private _promise?: Promise<T> & { resolved?: boolean };
@@ -94,13 +103,13 @@ export class ServiceContext<TRegistry extends RegistryType, T> {
             );
         }
         let resp;
-        const args = this.args.map(v=>{
+        const args = this.description.args.map(v=>{
             if (isPBinJKey(v)) {
                 return this.context.resolve(v);
             }
             return v;
         });
-        if (this._factory) {
+        if (this.description.factory) {
             const val = this.description.service(...args);
             this.addDependency(...ServiceContext.#dependencies);
 
@@ -120,11 +129,14 @@ export class ServiceContext<TRegistry extends RegistryType, T> {
         } else {
             try {
                 resp = new (this.description.service as any)(...args);
-                this.initializer?.invoke(resp);
+                if (this.description.initializer && hasA(resp, this.description.initializer, isFn)) {
+                   resp[this.description.initializer]();
+                }
+
                 if (this.error) {
+                    this.error = undefined;
                     this.logger.info("service has recovered");
                 }
-                this.error = undefined;
             } catch (e) {
                 const obj = { message: String(e) };
                 this.logger.error("error invoking service {message}", obj);
@@ -169,7 +181,6 @@ export class ServiceContext<TRegistry extends RegistryType, T> {
             invalid: this.invalid,
             primitive: this.primitive,
             instance: this._instance,
-            factory: this._factory,
         };
     }
 }

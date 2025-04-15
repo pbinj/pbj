@@ -13,7 +13,7 @@ import {ServiceContext} from "./service-context";
 export function newProxy<T, TRegistry extends RegistryType, V extends Returns<T>>(
   service:ServiceContext<TRegistry, T>
 ):V {
-  return new Proxy({} as any, {
+  return new Proxy( service.description.isListOf ? [] : {} as any, {
     get(_target, prop) {
       if (prop === proxyKey) {
         return service.key;
@@ -56,6 +56,10 @@ export function newProxy<T, TRegistry extends RegistryType, V extends Returns<T>
     },
     getOwnPropertyDescriptor(_target, prop) {
       const val = service.invoke();
+      if (service.description.isListOf && prop === "length") {
+        let aval = Array.isArray(val) ? val : Array.from(Object.values(val as any));
+        return Reflect.getOwnPropertyDescriptor(aval as any, prop);
+      }
       if (Array.isArray(val)) {
         return undefined;
       }

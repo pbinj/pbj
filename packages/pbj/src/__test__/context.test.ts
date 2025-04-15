@@ -1,4 +1,4 @@
-import { it, describe, expect } from "vitest";
+import { it, describe, expect, beforeEach, afterEach } from "vitest";
 import {
   context as ctx,
   createNewContext,
@@ -11,6 +11,8 @@ import {
 import { EmailService } from "./sample-services/email.js";
 import { AuthService, authServiceSymbol } from "./sample-services/auth.js";
 import { connectionPBinJKey, DBService } from "./sample-services/db.js";
+import { runBeforeEachTest, runAfterEachTest } from "../test";
+
 
 const aiSymbol = Symbol("a");
 const abSymbol = Symbol("b");
@@ -33,8 +35,11 @@ declare module "@pbinj/pbj" {
     [acSymbol]: InstanceType<typeof C>;
   }
 }
+beforeEach(runBeforeEachTest);
+afterEach(runAfterEachTest);
 
 describe("context", () => {
+
   it("should test something", () => {
     const t = { value: "I am a string" };
     const proxy = new Proxy(t, {
@@ -55,7 +60,7 @@ describe("context", () => {
 
   it("should return the an instance", () => {
     ctx.register(abSymbol, "myconnection");
-    console.log(ctx.resolve(abSymbol));
+    ctx.resolve(abSymbol);
     expect(ctx.resolve(abSymbol) == "myconnection").toBe(true);
     // ctx.register(aiSymbol, A, pbj(abSymbol));
 
@@ -76,7 +81,7 @@ describe("context", () => {
       return "fn";
     };
     const result = ctx.register(fn);
-    expect(result.invoke()).toBe("fn");
+    expect(result.service).toBe(fn);
   });
 
   it("should in inject the things", async () => {
@@ -118,21 +123,21 @@ describe("context", () => {
     }
     class TA extends Base {}
     class TB extends Base {
-      constructor(readonly a = pbj(TA)) {
+      constructor(readonly a = ctx.pbj(TA)) {
         super();
       }
     }
     class TC extends Base {
-      constructor(readonly b = pbj(TB)) {
+      constructor(readonly b = ctx.pbj(TB)) {
         super();
       }
     }
 
     class TD {
       constructor(
-        readonly a = pbj(TA),
-        readonly b = pbj(TB),
-        readonly c = pbj(TC),
+        readonly a = ctx.pbj(TA),
+        readonly b = ctx.pbj(TB),
+        readonly c = ctx.pbj(TC),
       ) {}
       toString() {
         return [this.a, this.b, this.c].join("-");
@@ -149,14 +154,13 @@ describe("context", () => {
     ctx.resolve(TD).toString();
 
     ctx.visit(TD, (v) => {
-      if (v.invoked) {
-        const val = v.invoke();
-        if (val instanceof Base) {
+      const val = ctx.resolve(v.key);
+      if (val instanceof Base) {
           val.destroy();
-        }
       }
       return destroySymbol;
     });
+
     expect(d).toBe(3);
     ctx.resolve(TD).toString();
     expect(c).toBe(3);
@@ -249,7 +253,7 @@ describe("context", () => {
     ctx.register(pkey, () => "test");
     const result = ctx.resolve(TestA, 2);
     expect(result.a == 2).toBe(true);
-    expect(result.b == "test").toBe(true);
+    expect(result.b+'' === "test").toBe(true);
   });
   it("should handle mixed invocation with constructor with a lot", () => {
     class TestAlot {
@@ -285,14 +289,15 @@ describe("context", () => {
 describe("proxy", () => {
   it("should work with proxy", () => {
     const pkey = pbjKey<string>("test-3");
-    const resp = ctx.register(pkey, () => "test");
-    expect(resp.proxy == "test").toBe(true);
+    ctx.register(pkey, () => "test");
+    const resp = ctx.pbj(pkey);
+    expect(resp == "test").toBe(true);
   });
   it("should work with proxy", () => {
     class PA {
       public a = 1;
     }
-    const resp = ctx.register(PA).proxy;
+    const resp = ctx.pbj(PA);
     expect(resp.a).toBe(1);
   });
   it("should have keys", () => {
@@ -312,7 +317,6 @@ describe("proxy", () => {
 
   describe("listOf", () => {
     it("should work with a pbjKey and tags", () => {
-      const ctx = createNewContext();
       class PA {
         public a = 1;
       }
@@ -324,15 +328,18 @@ describe("proxy", () => {
         public c = 1;
       }
       const key = pbjKey<PA | PB>("test-list-of");
-      const a = ctx.register(PA).withTags(key).proxy;
-      const b = ctx.register(PB).withTags(key).proxy;
+      ctx.register(PA).withTags(key);
+      ctx.register(PB).withTags(key);
+      const a = ctx.pbj(PA);
+      const b = ctx.pbj(PB);
       const sd = ctx.register(PC);
       //expect this to be nicely typed based on the PBinJKeyType.
       const result: (PA | PB)[] = ctx.listOf(key);
       expect(result.length).toBe(2);
       expect(result[0]).toBe(a);
       expect(result[1]).toBe(b);
-      const c = sd.withTags(key).proxy;
+      sd.withTags(key);
+      const c = ctx.pbj(PC)
 
       expect(result.length).toBe(3);
       expect(result[0]).toBe(a);
@@ -341,7 +348,6 @@ describe("proxy", () => {
     });
 
     it("should work with inheritance", () => {
-      const ctx = createNewContext();
       class Base {
         public a = 1;
       }
@@ -352,31 +358,38 @@ describe("proxy", () => {
       class PC extends Base {
         public c = 1;
       }
-      const b = ctx.register(PB).proxy;
-      const c = ctx.register(PC).proxy;
+      ctx.register(PB);
+      const b = ctx.pbj(PB);
+      ctx.register(PC);
+      const c = ctx.pbj(PC);
       const result = ctx.listOf(Base);
       expect(result.length).toBe(2);
       expect(result[0]).toBe(b);
       expect(result[1]).toBe(c);
     });
     it("should work with factories", () => {
-      const ctx = createNewContext();
       const factory = () => ({ a: 1 });
-
-      const a = ctx.register(pbjKey("test-factory-a"), factory).proxy;
-      const b = ctx.register(pbjKey("test-factory-b"), factory).proxy;
-      const c = ctx.register(factory).proxy;
+      const aKey = pbjKey<ReturnType<typeof factory>>("test-factory-a")
+      const a = ctx.pbj(aKey);
+      ctx.register(aKey, factory);
+      const bKey = pbjKey<ReturnType<typeof factory>>("test-factory-b")
+      ctx.register(bKey, factory);
+      const b = ctx.pbj(bKey);
+      ctx.register(factory)
+      const c = ctx.pbj(factory);
       const result = ctx.listOf(factory);
-
+      //This doesn't work because the proxy is not an array.
+      //Array.isArray(new Proxy([], {}) is different from
+      //Array.isArray(new Proxy({}, {}) and we may not know the type when
+      // the proxy is created.
       expect(result.length).toBe(3);
-      expect(result[0]).toBe(a);
-      expect(result[1]).toBe(b);
-      expect(result[2]).toBe(c);
+       expect(result[0]).toBe(a);
+       expect(result[1]).toBe(b);
+       expect(result[2]).toBe(c);
     });
   });
   describe("withInterceptors", () => {
     it("should work with interceptors", () => {
-      const ctx = createNewContext();
       const factory = () => ({ a: 1 });
       const a = ctx.register(pbjKey<{ a: number }>("test-factory-a"), factory);
       let i = 0;
@@ -385,14 +398,14 @@ describe("proxy", () => {
         i++;
         return invoke();
       });
-      expect(a.invoke().a).toBe(1);
+      expect(ctx.resolve(a.key).a).toBe(1);
       expect(i).toBe(1);
 
       a.withInterceptors((invoke) => {
         b++;
         return invoke();
       });
-      expect(a.invoke().a).toBe(1);
+      expect(ctx.resolve(a.key).a).toBe(1);
       expect(i).toBe(2);
 
       expect(b).toBe(1);
@@ -400,10 +413,10 @@ describe("proxy", () => {
   });
   describe("null", () => {
     it("should not blow up if a value is null", () => {
-      const ctx = createNewContext();
       const factory = () => null as any;
-      const a = ctx.register(pbjKey<{ a: number }>("test-factory-a"), factory);
-      expect(a.invoke()).toBe(null);
+      const key = pbjKey<{ a: number }>("test-factory-a");
+      const a = ctx.resolve(key, factory);
+      expect(a).toBe(null);
     });
   });
 });

@@ -87,6 +87,7 @@ export interface ServiceDescriptorI<
   TRegistry extends RegistryType,
   T extends Constructor | Fn | unknown,
 > {
+  key: PBinJKey<TRegistry>;
   [serviceSymbol]: PBinJKey<TRegistry>;
   primitive?: boolean;
   optional: boolean;

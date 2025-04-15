@@ -1,6 +1,6 @@
 import { it, describe, expect } from "vitest";
 import { pbjKey } from "../pbjKey.js";
-import { ServiceDescriptor } from "../ServiceDescriptor.js";
+import { ServiceDescriptor } from "../service-descriptor.js";
 describe("ServiceDescription", () => {
   describe("ServiceDescription#name", () => {
     it("should name it with pbjkey", () => {
@@ -23,4 +23,19 @@ describe("ServiceDescription", () => {
       expect(new ServiceDescriptor(desc).name).toEqual("my-sym");
     });
   });
+  describe("ServiceDescription#invalidte", () => {
+    it("should invalidate", () => {
+      const desc = new ServiceDescriptor(pbjKey<string>("my-cool-key"));
+      let called = 0;
+      desc.onChange.subscribe(() => {
+        called++;
+      });
+      desc.withOptional(true).withCacheable(true);
+      desc.invalid = false;
+      expect(called).toEqual(0);
+      desc.withOptional(false).withCacheable(false);
+      expect(called).toEqual(1);
+
+    });
+  })
 });

@@ -50,10 +50,8 @@ export class Context<TRegistry extends RegistryType = Registry>
     return ret;
   }
 
-  pbj<T extends PBinJKey<TRegistry>>(service: T): ValueOf<TRegistry, T>;
-  pbj(service: unknown): unknown {
-    return (this.get(keyOf(service as any)) ?? this._register(service as any))
-      .proxy;
+  pbj<T extends PBinJKey<TRegistry>>(service: T): ValueOf<TRegistry, T> {
+    return (this.get(keyOf(service as any)) ?? this._register(service as any)).proxy;
   }
 
   /**
@@ -65,7 +63,7 @@ export class Context<TRegistry extends RegistryType = Registry>
    * ```typescript
    *   context.visit(EmailService, (v)=>{
    *     v.destroy?.();
-   *     return removeSymbol;
+   *     return destroySymbol;
    *   });
    *
    * ```
@@ -102,21 +100,22 @@ export class Context<TRegistry extends RegistryType = Registry>
       return;
     }
     const ctx = this.get(service);
-    if (ctx) {
-      if (ctx.dependencies?.size) {
+    if (!ctx){
+      return;
+    }
+     if (ctx.dependencies?.size) {
         for (const dep of ctx.dependencies) {
           this._visit(dep, fn, seen);
         }
-      }
-      fn(ctx.description);
-    }
+     }
+     fn(ctx.description);
   }
 
   get(key: CKey): ServiceContext<TRegistry, any> | undefined {
     return this.map.get(key) ?? this.parent?.get(key);
   }
 
-  private invalidate(
+  public invalidate(
     key: CKey,
     ctx?: ServiceContext<TRegistry, any>,
     seen = new Set<CKey>(),
@@ -176,9 +175,7 @@ export class Context<TRegistry extends RegistryType = Registry>
         //@ts-expect-error
         inst.description.service = service;
       }
-      if (inst.invalid) {
-        this.invalidate(key);
-      }
+
       return inst;
     }
     const newInst = new ServiceContext<TRegistry, ValueOf<TRegistry, TKey>>(
@@ -347,7 +344,7 @@ export class Context<TRegistry extends RegistryType = Registry>
         );
       } else {
         yield* filterMap(this.map.values(), (v) =>
-          v.description.service && v.description.description === service ? v.proxy : undefined,
+          v.description.service === service ? v.proxy : undefined,
         );
       }
     }
@@ -373,13 +370,15 @@ export class Context<TRegistry extends RegistryType = Registry>
   ): Array<ValueOf<TRegistry, T>> {
     const ret = this._register(
       isPBinJKey(service) ? service : pbjKey(String(service)),
-      () => Array.from(this._listOf(service)),
+      () =>{
+        return Array.from(this._listOf(service));
+      }
     );
+    ret.description.withListOf(true);
     ret.description.withCacheable(false);
 
     //any time a new item is added invalidate the list, this should allow for things to be cached.
     // we would also need to invalidate on tags changes.
-    this.listeners.subscribe(()=>{ret.invalidate()});
 
     return ret.proxy as any;
   }
@@ -419,7 +418,29 @@ declare global {
 }
 
 //Make this work when pbj is imported from multiple locations.
-export const context = (globalThis["__pbj_context"] ??=
-  createNewContext<Registry>());
+// export const context = (globalThis["__pbj_context"] ??=
+//   createNewContext<Registry>());
 
-export const pbj = context.pbj.bind(context);
+export const pbj: typeof context.pbj = function _pbj(this:Context<Registry> | undefined,...args){
+  return context.pbj(...args);
+}
+
+let ctx = createNewContext<Registry>();
+export const contextProxyKey = Symbol("@pbj/private/context");
+export const context = new Proxy({} as Context, {
+  set(_target, prop, value, receiver) {
+    if (prop === contextProxyKey) {
+      ctx = value;
+      return true;
+    }
+    return Reflect.set(ctx, prop, value, receiver);
+  },
+  get(target, prop, receiver) {
+    if (prop === contextProxyKey) {
+      return ctx;
+    }else if (prop === "pbj") {
+      return ctx.pbj.bind(ctx);
+    }
+    return Reflect.get(ctx, prop, receiver);
+  },
+});

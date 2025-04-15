@@ -105,6 +105,7 @@ describe("context initialization - basic scenarios", () => {
     const spyC = vi.spyOn(ServiceC.prototype, "init");
 
     // Register and resolve ServiceA first
+    //@ts-expect-error
     context.register(key, ServiceA).withInitialize("init");
     const serviceA = context.resolve(key);
 
@@ -132,6 +133,7 @@ describe("context initialization - basic scenarios", () => {
   it("should automatically initialize services when resolved", () => {
 
     // Register services with initialization methods
+    //@ts-expect-error
     context.register(key, ServiceA).withInitialize("init");
     context.register(ServiceB).withInitialize("init");
     context.register(ServiceC).withInitialize("init");
@@ -191,6 +193,7 @@ describe("context initialization - inheritance", () => {
   it("should initialize derived classes correctly", () => {
 
     // Register services
+    //@ts-expect-error
     context.register(key, ServiceA).withInitialize("init");
     context.register(BaseService).withInitialize("init");
     context.register(DerivedService).withInitialize("init");
@@ -235,7 +238,7 @@ describe("context initialization - out-of-order execution", () => {
     ) {}
 
     init() {
-      this.initialized = true;g
+      this.initialized = true;
       initOrder.push("ServiceWithMultipleDeps");
       return "ServiceWithMultipleDeps initialized";
     }
@@ -273,8 +276,11 @@ describe("context initialization - out-of-order execution", () => {
       public initialized = false;
 
       constructor(
+          //@ts-expect-error
         private a = pbj("service-a"),
+          //@ts-expect-error
         private b = pbj("service-b"),
+          //@ts-expect-error
         private c = pbj("service-c"),
       ) {}
 
@@ -339,7 +345,7 @@ describe("context initialization - out-of-order execution", () => {
     // Create services with circular dependencies
     class ServiceX {
       public initialized = false;
-
+      //@ts-expect-error
       constructor(private y = pbj("service-y")) {}
 
       init() {
@@ -351,7 +357,7 @@ describe("context initialization - out-of-order execution", () => {
 
     class ServiceY {
       public initialized = false;
-
+      //@ts-expect-error
       constructor(private x = pbj("service-x")) {}
 
       init() {
@@ -479,6 +485,7 @@ describe("context initialization - out-of-order execution", () => {
       const spyC = vi.spyOn(ServiceC.prototype, "init");
 
       // Register and resolve ServiceA first
+      //@ts-expect-error
       context.register(key, ServiceA).withInitialize("init");
       const serviceA = context.resolve(key);
 
@@ -506,6 +513,7 @@ describe("context initialization - out-of-order execution", () => {
     it("should automatically initialize services when resolved", () => {
 
       // Register services with initialization methods
+      //@ts-expect-error
       context.register(key, ServiceA).withInitialize("init");
       context.register(ServiceB).withInitialize("init");
       context.register(ServiceC).withInitialize("init");
@@ -565,6 +573,7 @@ describe("context initialization - out-of-order execution", () => {
     it("should initialize derived classes correctly", () => {
 
       // Register services
+      //@ts-expect-error
       context.register(key, ServiceA).withInitialize("init");
       context.register(BaseService).withInitialize("init");
       context.register(DerivedService).withInitialize("init");
@@ -602,7 +611,9 @@ describe("context initialization - out-of-order execution", () => {
 
       constructor(
         private a = pbj(key),
+        //@ts-expect-error
         private b = pbj("service-b"),
+        //@ts-expect-error
         private c = pbj("service-c"),
       ) {}
 
@@ -645,8 +656,11 @@ describe("context initialization - out-of-order execution", () => {
         public initialized = false;
 
         constructor(
+            //@ts-expect-error
           private a = pbj("service-a"),
+            //@ts-expect-error
           private b = pbj("service-b"),
+            //@ts-expect-error
           private c = pbj("service-c"),
         ) {}
 
@@ -712,6 +726,7 @@ describe("context initialization - out-of-order execution", () => {
       class ServiceX {
         public initialized = false;
 
+        //@ts-expect-error
         constructor(private y = pbj("service-y")) {}
 
         init() {
@@ -724,6 +739,7 @@ describe("context initialization - out-of-order execution", () => {
       class ServiceY {
         public initialized = false;
 
+        //@ts-expect-error
         constructor(private x = pbj("service-x")) {}
 
         init() {
