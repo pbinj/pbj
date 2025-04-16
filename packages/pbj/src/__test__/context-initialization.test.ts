@@ -105,7 +105,6 @@ describe("context initialization - basic scenarios", () => {
     const spyC = vi.spyOn(ServiceC.prototype, "init");
 
     // Register and resolve ServiceA first
-    //@ts-expect-error
     context.register(key, ServiceA).withInitialize("init");
     const serviceA = context.resolve(key);
 
@@ -133,7 +132,6 @@ describe("context initialization - basic scenarios", () => {
   it("should automatically initialize services when resolved", () => {
 
     // Register services with initialization methods
-    //@ts-expect-error
     context.register(key, ServiceA).withInitialize("init");
     context.register(ServiceB).withInitialize("init");
     context.register(ServiceC).withInitialize("init");
@@ -193,7 +191,6 @@ describe("context initialization - inheritance", () => {
   it("should initialize derived classes correctly", () => {
 
     // Register services
-    //@ts-expect-error
     context.register(key, ServiceA).withInitialize("init");
     context.register(BaseService).withInitialize("init");
     context.register(DerivedService).withInitialize("init");

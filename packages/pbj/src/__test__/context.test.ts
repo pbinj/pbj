@@ -28,13 +28,11 @@ class C {
   constructor(readonly a = pbj(aiSymbol)) {}
 }
 type AI = InstanceType<typeof A>;
-declare module "@pbinj/pbj" {
-  export interface Registry {
-    [aiSymbol]: AI;
-    [abSymbol]: string;
-    [acSymbol]: InstanceType<typeof C>;
-  }
-}
+// declare module "@pbinj/pbj" {
+//   export interface Registry {
+//     [aiSymbol]: AI;
+//   }
+// }
 beforeEach(runBeforeEachTest);
 afterEach(runAfterEachTest);
 
@@ -154,7 +152,7 @@ describe("context", () => {
     ctx.resolve(TD).toString();
 
     ctx.visit(TD, (v) => {
-      const val = ctx.resolve(v.key);
+      const val = ctx.resolve(v.key as any);
       if (val instanceof Base) {
           val.destroy();
       }

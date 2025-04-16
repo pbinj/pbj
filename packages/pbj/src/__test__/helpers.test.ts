@@ -69,10 +69,11 @@ describe("helpers", () => {
     });
 
     it("should handle complex paths", () => {
-      const key = pbjKey<{ users: Array<{ name: string }> }>("test-complex");
+      type Sample = { users: Array<{ name: string }>};
+      const key = pbjKey<Sample>("test-complex");
       context.register(key, {
         users: [{ name: "Alice" }, { name: "Bob" }],
-      });
+      } as Sample);
 
       const getter = pathOf(key, "users[1].name");
       expect(getter()).toBe("Bob");

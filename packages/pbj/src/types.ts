@@ -167,7 +167,7 @@ export interface ServiceDescriptorI<
   /**
    *
    */
-  withInitialize(method?: keyof T & string): this;
+  withInitialize(method?: string): this;
 
   /**
    * Checks if the dependency has a tag

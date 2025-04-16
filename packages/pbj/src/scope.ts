@@ -23,7 +23,7 @@ const asyncLocalStorage = new AsyncLocalStorage<
  * @returns
  */
 const scoped: Context["scoped"] = function <TRegistry extends RegistryType>(this: Context<TRegistry>, key:PBinJKey<TRegistry>) {
-  const serviceDesc = this.register(key);
+  const serviceDesc = this.register(key as any);
   if (
     hasA(serviceDesc, serviceProxySymbol, isSymbol) &&
     serviceDesc[serviceProxySymbol] !== (keyOf(key) as any)
