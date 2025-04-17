@@ -59,7 +59,7 @@ export class ServiceContext<TRegistry extends RegistryType, T> {
 
   set invoked(v: boolean) {
     this._invoked = v;
-    this.description.invalid = this.invalid = !v;
+    this.description.invalid = !v;
   }
   get invoked() {
     return this._invoked;

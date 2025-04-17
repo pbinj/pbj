@@ -42,7 +42,7 @@ export class Context<TRegistry extends RegistryType = Registry> {
     this.logger.info("onServiceAdded: listener added");
     const ret = this.listeners.subscribe(fn);
     if (initialize) {
-      Array.prototype.forEach.call(this.map.values(), this.listeners);
+      this.listeners(...this.map.values());
     }
 
     return ret;
@@ -130,7 +130,7 @@ export class Context<TRegistry extends RegistryType = Registry> {
       return;
     }
     //ctx.invalidate();
-    this.logger.warn("invalidating service {key}", { key: asString(key) });
+    ///this.logger.warn("invalidating service {key}", { key: asString(key) });
     for (const [k, v] of this.map) {
       if (v.description.hasDependency(key) && !seen.has(k)) {
         v.invalidate();
