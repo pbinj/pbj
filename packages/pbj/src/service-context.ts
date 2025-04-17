@@ -52,9 +52,7 @@ export class ServiceContext<TRegistry extends RegistryType, T> {
 
         return this._invoke();
     };
-    invalid = true;
     _invoked = false;
-    primitive = false;
     _instance?: Returns<T>;
     initializer?: ServiceInitI;
 
@@ -70,25 +68,26 @@ export class ServiceContext<TRegistry extends RegistryType, T> {
     }
 
     public invalidate(){
-        //This prevents loops where we invalidate ourselves.
-        if (this.invalid) {
-            return;
-        }
-        this.invalid = true;
         this.invoked = false;
         this._instance = undefined;
         this.initializer?.invalidate();
-        if (this.context instanceof Context) {
+        if (hasA(this.context, "invalidate", isFn)) {
             this.context.invalidate(this.key, this);
         }
     }
-
+    get invalid(){
+        return this.description.invalid;
+    }
+    set invalid(v: boolean) {
+        this.description.invalid = v;
+    }
     private _promise?: Promise<T> & { resolved?: boolean };
     _invoke = (): Returns<T> => {
         if (this._promise) {
             throw new PBinJAsyncError(this.description[serviceSymbol], this._promise);
         }
         if (!this.description.invokable) {
+            this.description.invalid = false;
             return this.description.service as Returns<T>;
         }
         if (!this.invalid && this.invoked && this.description.cacheable) {
@@ -105,14 +104,16 @@ export class ServiceContext<TRegistry extends RegistryType, T> {
         let resp;
         const args = this.description.args.map(v=>{
             if (isPBinJKey(v)) {
-                return this.context.resolve(v);
+                //If we don't return a proxy, it could cause a circular dependency.
+                // It would be nice if pbj was smart enough to know when it could and couldn't return a proxy,
+                // but that's a bit of a reach.
+                return this.context.pbj(v);
             }
             return v;
         });
         if (this.description.factory) {
             const val = this.description.service(...args);
             this.addDependency(...ServiceContext.#dependencies);
-
             if (val instanceof Promise) {
                 this._promise = val;
                 this.logger.debug("waiting for promise");
@@ -148,7 +149,7 @@ export class ServiceContext<TRegistry extends RegistryType, T> {
 
         this.addDependency(...ServiceContext.#dependencies);
         this.invoked = true;
-        this.primitive = isPrimitive(resp);
+        this.description.primitive = isPrimitive(resp);
         if (resp == null && !this.description.optional) {
             throw new PBinJError(
                 `service '${String(this.description[serviceSymbol])}' is not optional and returned null`,
@@ -179,7 +180,7 @@ export class ServiceContext<TRegistry extends RegistryType, T> {
             error: this.error,
             invoked: this.invoked,
             invalid: this.invalid,
-            primitive: this.primitive,
+            primitive: this.description.primitive,
             instance: this._instance,
         };
     }

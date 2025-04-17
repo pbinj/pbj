@@ -132,10 +132,11 @@ export class Context<TRegistry extends RegistryType = Registry>
       this.logger.warn(`invalidate called on unknown key ${String(key)}`);
       return;
     }
-    ctx.invalidate();
+    //ctx.invalidate();
     this.logger.warn("invalidating service {key}", { key: asString(key) });
     for (const [k, v] of this.map) {
-      if (v.description.hasDependency(key)) {
+      if (v.description.hasDependency(key) && !seen.has(k)) {
+        v.invalidate();
         this.invalidate(k, v, seen);
       }
     }
@@ -500,6 +501,13 @@ export const context = new Proxy({} as Context, {
     }
     return Reflect.set(ctx, prop, value, receiver);
   },
+  has(_target, prop) {
+    if (prop === contextProxyKey) {
+      return true;
+    }
+    return Reflect.has(ctx, prop);
+  },
+
   get(_target, prop, receiver) {
     if (prop === contextProxyKey) {
       return ctx;

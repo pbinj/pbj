@@ -1,4 +1,4 @@
-import {  isConstructor, isFn, } from "@pbinj/pbj-guards";
+import {isConstructor, isFn, isPrimitive,} from "@pbinj/pbj-guards";
 import type { Registry } from "./registry.js";
 import {  serviceSymbol } from "./symbols.js";
 import type {
@@ -127,10 +127,11 @@ export class ServiceDescriptor<
     }
     this.invokable = isFn(_service);
     this._service = _service;
+    this.primitive = isPrimitive(_service);
     this.factory = this.invokable && !isConstructor(_service as Fn<T>);
 
     this.invalidate();
-    this.logger.debug("changed service");
+    this.logger.debug("service updated");
   }
 
   get service() {
@@ -297,7 +298,7 @@ export class ServiceDescriptor<
   }
   invalidate = () => {
     if (!this.invalid) {
-      this.logger.debug("invalidating service");
+      this.logger.debug("invalidating service {{name}}", { name: this.name });
       this.invalid = true;
       this.onChange(this);
     }

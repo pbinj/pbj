@@ -6,7 +6,7 @@ import {
   type Fn,
   isObjectish,
 } from "@pbinj/pbj-guards";
-import { proxyKey, serviceDescriptorKey, serviceSymbol } from "./symbols.js";
+import {proxyKey, proxyValueSymbol, serviceDescriptorKey, serviceSymbol} from "./symbols.js";
 import type {RegistryType, Returns, ServiceDescriptorI} from "./types.js";
 import {ServiceContext} from "./service-context";
 
@@ -18,10 +18,14 @@ export function newProxy<T, TRegistry extends RegistryType, V extends Returns<T>
       if (prop === proxyKey) {
         return service.key;
       }
+
       if (prop === serviceDescriptorKey) {
         return service;
       }
       const val = service.invoke();
+      if (prop === proxyValueSymbol){
+        return val;
+      }
       if (prop === nullableSymbol) {
         return val == null;
       }
@@ -33,7 +37,7 @@ export function newProxy<T, TRegistry extends RegistryType, V extends Returns<T>
       }
 
       //So sometimes a factory value returns a primitive, this handles that.
-      if (service.primitive) {
+      if (service.description.primitive) {
         const prim = val;
         if (
           prop === Symbol.toPrimitive ||
@@ -71,14 +75,15 @@ export function newProxy<T, TRegistry extends RegistryType, V extends Returns<T>
     },
     ownKeys() {
       const value = service.invoke();
-      if (service.primitive) {
+      if (service.description.primitive) {
         return [];
       }
       return Reflect.ownKeys(value as any);
     },
     has(_target, prop) {
+
       const val = service.invoke();
-      if (service.primitive) {
+      if (service.description.primitive) {
         return false;
       }
       return isObjectish(val) ? prop in val : false;
