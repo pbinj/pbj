@@ -37,7 +37,6 @@ export type VisitFn<
 ) => unknown | typeof destroySymbol | typeof removeSymbol;
 
 export interface RegistryType {
-  [key: symbol]: any;
 }
 
 export type PBinJKeyType<T = any> = symbol & { [serviceSymbol]: T };

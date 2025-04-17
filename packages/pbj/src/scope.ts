@@ -22,8 +22,8 @@ const asyncLocalStorage = new AsyncLocalStorage<
  * @param key - typeKey or registry key
  * @returns
  */
-const scoped: Context["scoped"] = function <TRegistry extends RegistryType>(this: Context<TRegistry>, key:PBinJKey<TRegistry>) {
-  const serviceDesc = this.register(key as any);
+const scoped: Context["scoped"] = function(this:unknown, key) {
+  const serviceDesc = (this as Context).register(key as any);
   if (
     hasA(serviceDesc, serviceProxySymbol, isSymbol) &&
     serviceDesc[serviceProxySymbol] !== (keyOf(key) as any)
@@ -50,7 +50,7 @@ const scoped: Context["scoped"] = function <TRegistry extends RegistryType>(this
       map.set(
         key,
         new ServiceContext(
-          this,
+          this as Context,
           new ServiceDescriptor(
           key,
           service,

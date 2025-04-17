@@ -28,11 +28,13 @@ class C {
   constructor(readonly a = pbj(aiSymbol)) {}
 }
 type AI = InstanceType<typeof A>;
-// declare module "@pbinj/pbj" {
-//   export interface Registry {
-//     [aiSymbol]: AI;
-//   }
-// }
+declare module "@pbinj/pbj" {
+  export interface Registry {
+    [aiSymbol]: AI;
+    [abSymbol]: string;
+    [acSymbol]: C;
+  }
+}
 beforeEach(runBeforeEachTest);
 afterEach(runAfterEachTest);
 

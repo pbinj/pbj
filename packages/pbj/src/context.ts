@@ -145,36 +145,35 @@ export class Context<TRegistry extends RegistryType = Registry>
       this.pendingInitialization.add(key);
     }
   }
-  register<T extends keyof TRegistry>(key:T, ...args:[TRegistry[T]] | []):ServiceDescriptorI<TRegistry,TRegistry[T]>;
-  register<T extends keyof TRegistry>(key:T, value:TRegistry[T] ): ServiceDescriptorI<TRegistry,TRegistry[T]>;
   register<T extends keyof TRegistry,
-      TCon extends Constructor<TRegistry[T]>,
-  >(key:T, fn:TCon,
-    ...args:ConstructorParameters<TCon>):ServiceDescriptorI<TRegistry,TRegistry[T]>;
+  TFn extends Fn<TRegistry[T]>
+  >(key:T,
+  fn:TFn, ...args:ToInject<Parameters<TFn>>
+  ):ServiceDescriptorI<TRegistry,TRegistry[T]>;
+  register<T extends keyof TRegistry>(key:T, value:TRegistry[T] ): ServiceDescriptorI<TRegistry,TRegistry[T]>;
 
-   register<T extends keyof TRegistry,
-      TCon extends Constructor<TRegistry[T]>
-   >(key:T, fn:TCon,
-    ...args:ToInject<ConstructorParameters<TCon>>):ServiceDescriptorI<TRegistry,TRegistry[T]>;
+  register<T extends keyof TRegistry,
+      TFn extends Constructor<TRegistry[T]>
+  >(key:T,
+    fn:TFn, ...args:ToInject<ConstructorParameters<TFn>>
+  ):ServiceDescriptorI<TRegistry,TRegistry[T]>;
+  register<T extends keyof TRegistry>(key:T, value:TRegistry[T] ): ServiceDescriptorI<TRegistry,TRegistry[T]>;
 
 
   register<
-      TKey extends PBinJKeyType<any>,
+      TKey extends PBinJKeyType,
       T extends TKey extends  PBinJKeyType<infer V> ? V : never,
       TCon extends Constructor<T>,
   >(key:TKey, fn:TCon ,
     ...args: ToInject<ConstructorParameters<TCon>>):ServiceDescriptorI<TRegistry,T>;
 
   register<
-      const T,
-      const TKey extends PBinJKeyType<T>,
-      const TFn extends Fn<T>,
-      const Ret extends ServiceDescriptorI<TRegistry,T>,
-  >(key:TKey, fn:TFn, ...args:Parameters<TFn>):Ret;
+      const TKey extends PBinJKeyType,
+      const TFn extends Fn<TKey[serviceSymbolType]>,
+  >(key:TKey, fn:TFn, ...args:ToInject<Parameters<TFn>>):ServiceDescriptorI<TRegistry,TKey[serviceSymbolType]>;
 
   register<
-      const TKey extends PBinJKeyType<any>,
-
+      const TKey extends PBinJKeyType,
       const T extends TKey extends  PBinJKeyType<infer V> ? V : never,
   >(key:TKey, value: T):ServiceDescriptorI<TRegistry,T>;
 
@@ -197,8 +196,8 @@ export class Context<TRegistry extends RegistryType = Registry>
   register(
     serviceKey: unknown,
     ...origArgs: unknown[]
-  ):unknown {
-   return this._register(serviceKey as any, ...origArgs as any).description ;
+  ):never {
+   return this._register(serviceKey as any, ...origArgs as any).description as unknown as never;
   }
 
   protected _register<TKey extends PBinJKey<TRegistry>>(
@@ -266,7 +265,7 @@ export class Context<TRegistry extends RegistryType = Registry>
   resolve<T extends keyof TRegistry, TFn extends Fn<TRegistry[T]>>(key:T, fn:TFn, ...args:ToInject<Parameters<TFn>>):TRegistry[T];
   resolve<T extends keyof TRegistry, TCon extends Constructor<TRegistry[T]>>(key:T, fn:TCon, ...args:ToInject<ConstructorParameters<TCon>>):TRegistry[T];
 
-  resolve<T, TKey extends PBinJKeyType<T>>(key:TKey):T;
+  resolve< TKey extends PBinJKeyType>(key:TKey):TKey[serviceSymbolType];
   resolve<T, TKey extends PBinJKeyType<T>>(key:TKey, alias:PBinJKeyType<T>):T;
   resolve<T,
       TKey extends PBinJKeyType<T>,
@@ -392,7 +391,7 @@ export class Context<TRegistry extends RegistryType = Registry>
     }
   }
 
-  scoped<R, TKey extends PBinJKeyType | (keyof TRegistry & symbol)>(
+  scoped<R, TKey extends PBinJKey<TRegistry>>(
     _key: TKey,
   ): (next: () => R, ...args: ServiceArgs<TKey, TRegistry>) => R {
     this.logger.error("scoped not enabled");

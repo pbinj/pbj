@@ -20,7 +20,7 @@ describe("ServiceDescription", () => {
     });
     it("should use symbol description", () => {
       const desc = Symbol("my-sym");
-      expect(new ServiceDescriptor(desc).name).toEqual("my-sym");
+      expect(new ServiceDescriptor(desc as any).name).toEqual("my-sym");
     });
   });
   describe("ServiceDescription#invalidte", () => {

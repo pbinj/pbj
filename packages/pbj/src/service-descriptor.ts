@@ -31,10 +31,10 @@ export class ServiceDescriptor<
   static #dependencies = new Set<CKey>();
 
   static value<
-    T extends keyof TRegistry & symbol,
+    T extends keyof TRegistry ,
     TRegistry extends RegistryType = Registry,
   >(key: T, service: TRegistry[T]) {
-    return new ServiceDescriptor(key, service, EMPTY as any, false, false);
+    return new ServiceDescriptor<TRegistry, TRegistry[T]>(key, service, EMPTY as any, false, false);
   }
 
   static singleton<T extends Constructor | Fn>(service: T, ...args: Args<T>) {
