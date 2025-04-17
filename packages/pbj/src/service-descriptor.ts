@@ -17,9 +17,9 @@ import type {
 } from "./types.js";
 import { asString, isPBinJKey } from "./pbjKey.js";
 import { Logger } from "./logger.js";
-import { ContextI } from "./context-types";
-import { keyOf, listener } from "./util";
-import { isPBinJ } from "./guards";
+import { ContextI } from "./context-types.js";
+import { keyOf, listener } from "./util.js";
+import { isPBinJ } from "./guards.js";
 
 const EMPTY = [] as const;
 

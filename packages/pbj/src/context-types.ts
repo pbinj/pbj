@@ -7,10 +7,10 @@ import type {
   ServiceDescriptorI,
   ValueOf,
   VisitFn,
-} from "./types";
-import type { Registry } from "./registry";
-import { Listener } from "./util";
-import { ServiceContext } from "./service-context";
+} from "./types.js";
+import type { Registry } from "./registry.js";
+import { Listener } from "./util.js";
+import { ServiceContext } from "./service-context.js";
 
 /**
  * This needs to make all the arguments for a type.

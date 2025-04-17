@@ -55,6 +55,7 @@
     "lint": "prettier --ignore-path ../../.prettierignore --write  . && eslint  --fix src"
   },
   "peerDependencies": {
+    "@pbinj/pbj-guards": "workspace:*",
     "@pbinj/pbj": "workspace:*"
   },
   "dependencies": {

@@ -1,17 +1,18 @@
-import { ContextI } from "./context-types";
-import { CKey, RegistryType, Returns, ServiceInitI } from "./types";
-import { PBinJAsyncError, PBinJError } from "./errors";
-import { serviceSymbol } from "./symbols";
+import { ContextI } from "./context-types.js";
+import { CKey, RegistryType, Returns, ServiceInitI } from "./types.js";
+import { PBinJAsyncError, PBinJError } from "./errors.js";
+import { serviceSymbol } from "./symbols.js";
 import { hasA, isFn, isPrimitive } from "@pbinj/pbj-guards";
-import { asString, isPBinJKey } from "./pbjKey";
-import { ServiceDescriptor } from "./service-descriptor";
-import { Logger } from "./logger";
-import { keyOf } from "./util";
-import { newProxy } from "./newProxy";
-import { Context } from "./context";
+import { asString, isPBinJKey } from "./pbjKey.js";
+import { ServiceDescriptor } from "./service-descriptor.js";
+import { Logger } from "./logger.js";
+import { keyOf } from "./util.js";
+import { newProxy } from "./newProxy.js";
+
 interface ErrorMsg {
   message: string;
 }
+
 export class ServiceContext<TRegistry extends RegistryType, T> {
   static #dependencies = new Set<CKey>();
   private _proxy?: Returns<T>;

@@ -4,13 +4,11 @@ import { Context } from "./context.js";
 import { keyOf } from "./util.js";
 import {
   type PBinJKey,
-  RegistryType,
-  type ServiceDescriptorI,
 } from "./types.js";
 import { serviceProxySymbol } from "./symbols.js";
 import { AsyncLocalStorage } from "node:async_hooks";
-import { ServiceContext } from "./service-context";
-import { ServiceDescriptor } from "./service-descriptor";
+import { ServiceContext } from "./service-context.js";
+import { ServiceDescriptor } from "./service-descriptor.js";
 
 //borrowed from https://eytanmanor.medium.com/should-you-use-asynclocalstorage-2063854356bb
 const asyncLocalStorage = new AsyncLocalStorage<

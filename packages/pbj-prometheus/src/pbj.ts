@@ -10,37 +10,30 @@ export const promClientPBinJKey = pbjKey<typeof client>(
 export const registerKey = pbjKey<InstanceType<typeof client.Registry>>(
   "@pbj/prometheus/register",
 );
-export const metricServiceKey = pbjKey<InstanceType<typeof MetricService>>(
+export const metricServiceKey = pbjKey<MetricService>(
   "@pbj/prometheus/metricService",
 );
 
 export function register(ctx = context) {
-  const p = ctx.register(promClientPBinJKey, () => client);
-  const r = ctx.register(registerKey, () => new client.Registry());
-  const c = ctx.register(MetricsConfig);
-  const m = ctx.register(
-    metricServiceKey,
-    MetricService,
-    c.proxy,
-    p.proxy,
-    r.proxy,
-  );
+  ctx.register(promClientPBinJKey, () => client);
+  ctx.register(registerKey, () => new client.Registry());
+  ctx.register(MetricsConfig);
+  ctx.register(metricServiceKey, MetricService);
   ctx.resolve(
     (config: MetricsConfig, metricService: MetricService) => {
       ctx.onServiceAdded((...services) => {
         const tags = config.tags;
         for (const service of services) {
           if (tags?.length) {
-            if (service.tags.some((v) => tags.includes(v))) {
-              metricService.withMetric(service);
+            if (service.description.tags?.some((v) => tags.includes(v))) {
+              metricService.withMetric(service.description);
             }
           } else {
-            metricService.withMetric(service);
+            metricService.withMetric(service.description);
           }
         }
       });
     },
-    c.proxy,
-    m.proxy,
+    ctx.pbj(MetricsConfig), metricServiceKey,
   );
 }

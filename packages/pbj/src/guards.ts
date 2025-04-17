@@ -1,6 +1,7 @@
-import { proxyKey } from "./symbols.js";
 import { hasA, isSymbol, isBoolean } from "@pbinj/pbj-guards";
-import { CKey } from "./types";
+
+import { proxyKey } from "./symbols.js";
+import { CKey } from "./types.js";
 
 interface HasProxyCKey {
   [proxyKey]: CKey;

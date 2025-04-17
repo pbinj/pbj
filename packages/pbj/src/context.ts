@@ -14,7 +14,7 @@ import type {
   ServiceDescriptorI,
 } from "./types.js";
 import { ServiceDescriptor } from "./service-descriptor.js";
-import { ServiceContext } from "./service-context";
+import { ServiceContext } from "./service-context.js";
 import { filterMap, isInherited, keyOf, Listener, listener } from "./util.js";
 import { pbjKey, isPBinJKey, asString } from "./pbjKey.js";
 import { isAsyncError } from "./errors.js";

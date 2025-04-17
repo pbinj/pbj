@@ -13,7 +13,7 @@ import {
   serviceSymbol,
 } from "./symbols.js";
 import type { RegistryType, Returns, ServiceDescriptorI } from "./types.js";
-import { ServiceContext } from "./service-context";
+import { ServiceContext } from "./service-context.js";
 
 export function newProxy<
   T,

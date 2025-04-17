@@ -1,5 +1,5 @@
 import { destroySymbol, removeSymbol, serviceSymbol } from "./symbols.js";
-import { RegisterArgs } from "./context-types";
+import { RegisterArgs } from "./context-types.js";
 
 export type Constructor<T = any> = new (...args: any[]) => T;
 

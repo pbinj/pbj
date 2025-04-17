@@ -1,4 +1,4 @@
-import { Constructor, ServiceInitI } from "./types";
+import type { Constructor, ServiceInitI } from "./types.js";
 type InitFn = () => void;
 
 /**
