@@ -1,5 +1,5 @@
 import { destroySymbol, removeSymbol, serviceSymbol } from "./symbols.js";
-import {RegisterArgs} from "./context-types";
+import { RegisterArgs } from "./context-types";
 
 export type Constructor<T = any> = new (...args: any[]) => T;
 
@@ -36,8 +36,7 @@ export type VisitFn<
   value: ServiceDescriptorI<TRegistry, T>,
 ) => unknown | typeof destroySymbol | typeof removeSymbol;
 
-export interface RegistryType {
-}
+export interface RegistryType {}
 
 export type PBinJKeyType<T = any> = symbol & { [serviceSymbol]: T };
 
@@ -178,7 +177,7 @@ export interface ServiceDescriptorI<
 
   invalidate(): void;
 
-  toJSON():unknown;
+  toJSON(): unknown;
 }
 /**
  * The interceptor function, allows you to intercept the invocation of a service.  The
@@ -187,7 +186,11 @@ export interface ServiceDescriptorI<
 export type InterceptFn<T> = (invoke: () => T) => T;
 
 export type FactoryOf<
-    TRegistry extends RegistryType,
-    TKey extends PBinJKey<TRegistry>,
-    TArgs extends RegisterArgs<TRegistry, TKey>,
-> = TKey extends (Constructor | Fn) ? TKey : TArgs[0] extends Constructor | Fn ? TArgs[0] : never;
+  TRegistry extends RegistryType,
+  TKey extends PBinJKey<TRegistry>,
+  TArgs extends RegisterArgs<TRegistry, TKey>,
+> = TKey extends Constructor | Fn
+  ? TKey
+  : TArgs[0] extends Constructor | Fn
+    ? TArgs[0]
+    : never;

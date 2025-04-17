@@ -35,7 +35,6 @@ describe("ServiceDescription", () => {
       expect(called).toEqual(0);
       desc.withOptional(false).withCacheable(false);
       expect(called).toEqual(1);
-
     });
-  })
+  });
 });

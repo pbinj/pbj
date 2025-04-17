@@ -76,15 +76,21 @@ export function isInherited(child: unknown, parent: unknown) {
   return isInherited(Object.getPrototypeOf(child), parent);
 }
 
-export type Listener<T> = (t:T)=>void;
+export type Listener<T> = (t: T) => void;
 
-export function listener<T,  This = unknown>(this: This, listeners = new Set<Listener<T>>()) {
-  return  Object.assign(function fire(this:This,val:T){
-    listeners.forEach((v) => v(val), this);
-  }, {
-    subscribe(fn: Listener<T>) {
-      listeners.add(fn);
-      return () => listeners.delete(fn);
+export function listener<T, This = unknown>(
+  this: This,
+  listeners = new Set<Listener<T>>(),
+) {
+  return Object.assign(
+    function fire(this: This, val: T) {
+      listeners.forEach((v) => v(val), this);
     },
-  });
+    {
+      subscribe(fn: Listener<T>) {
+        listeners.add(fn);
+        return () => listeners.delete(fn);
+      },
+    },
+  );
 }

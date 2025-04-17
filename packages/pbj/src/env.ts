@@ -29,7 +29,7 @@ Context.prototype.env = function env<
   D extends string,
 >(this: Context, envKey: K, defaultValue?: D): string | D {
   return this._register(
-    pbjKey<string| D>(`@pbj/env/${envKey}`),
+    pbjKey<string | D>(`@pbj/env/${envKey}`),
     this.pathOf(envPBinJKey, envKey, defaultValue as any) as any,
   ).proxy;
 };
@@ -37,10 +37,10 @@ Context.prototype.env = function env<
 Context.prototype.envRequired = function envRequired<
   K extends keyof PBinJEnv & string,
 >(this: Context, envKey: K): string {
-  const ret =   this._register(
-      pbjKey<string>(`@pbj/env/${envKey}`),
+  const ret = this._register(
+    pbjKey<string>(`@pbj/env/${envKey}`),
     this.pathOf(envPBinJKey as any, envKey),
-  )
+  );
   ret.description.withOptional(false);
   return ret.proxy;
 };

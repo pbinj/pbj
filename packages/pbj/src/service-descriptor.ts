@@ -1,6 +1,6 @@
-import {isConstructor, isFn, isPrimitive,} from "@pbinj/pbj-guards";
+import { isConstructor, isFn, isPrimitive } from "@pbinj/pbj-guards";
 import type { Registry } from "./registry.js";
-import {  serviceSymbol } from "./symbols.js";
+import { serviceSymbol } from "./symbols.js";
 import type {
   Args,
   CKey,
@@ -15,11 +15,11 @@ import type {
   InterceptFn,
   ValueOf,
 } from "./types.js";
-import {asString, isPBinJKey} from "./pbjKey.js";
+import { asString, isPBinJKey } from "./pbjKey.js";
 import { Logger } from "./logger.js";
-import {ContextI} from "./context-types";
-import {keyOf, listener} from "./util";
-import {isPBinJ} from "./guards";
+import { ContextI } from "./context-types";
+import { keyOf, listener } from "./util";
+import { isPBinJ } from "./guards";
 
 const EMPTY = [] as const;
 
@@ -31,10 +31,16 @@ export class ServiceDescriptor<
   static #dependencies = new Set<CKey>();
 
   static value<
-    T extends keyof TRegistry ,
+    T extends keyof TRegistry,
     TRegistry extends RegistryType = Registry,
   >(key: T, service: TRegistry[T]) {
-    return new ServiceDescriptor<TRegistry, TRegistry[T]>(key, service, EMPTY as any, false, false);
+    return new ServiceDescriptor<TRegistry, TRegistry[T]>(
+      key,
+      service,
+      EMPTY as any,
+      false,
+      false,
+    );
   }
 
   static singleton<T extends Constructor | Fn>(service: T, ...args: Args<T>) {
@@ -67,7 +73,7 @@ export class ServiceDescriptor<
   public key: PBinJKey<TRegistry>;
   public tags: PBinJKeyType<T>[] = [];
   private _name: string | undefined;
-  public context:ContextI<TRegistry> | undefined;
+  public context: ContextI<TRegistry> | undefined;
   public onChange = listener<ServiceDescriptor<any, any>>();
   [serviceSymbol]: PBinJKey<TRegistry>;
   constructor(
@@ -79,7 +85,6 @@ export class ServiceDescriptor<
     public description?: string,
     private logger = new Logger(),
   ) {
-
     this[serviceSymbol] = key;
     this.key = key;
     this.args = args as Args<T>;
@@ -102,8 +107,6 @@ export class ServiceDescriptor<
     });
     this._name = name;
   }
-
-
 
   set cacheable(_cacheable: boolean) {
     if (this._cacheable === _cacheable) {
@@ -142,27 +145,28 @@ export class ServiceDescriptor<
     return this._args!;
   }
 
-  set args(newArgs:Args<T>) {
-    if(newArgs === this._args) {
+  set args(newArgs: Args<T>) {
+    if (newArgs === this._args) {
       return;
     }
 
-    if (newArgs.length !== this._args.length || newArgs.some((v, i) => v !== this._args[i])) {
+    if (
+      newArgs.length !== this._args.length ||
+      newArgs.some((v, i) => v !== this._args[i])
+    ) {
       this.logger.debug("changed args");
-      newArgs.map(v=>{
-
-        if(isPBinJKey(v)){
+      newArgs.map((v) => {
+        if (isPBinJKey(v)) {
           this.addDependency(keyOf(v));
-        }else if (isPBinJ(v)){
+        } else if (isPBinJ(v)) {
           this.addDependency((v as any)[serviceSymbol]);
         }
 
         return v;
-      })
+      });
       this._args = newArgs;
       this.invalidate();
     }
-
   }
   addDependency(...keys: CKey[]) {
     if (keys.length) {
@@ -276,12 +280,12 @@ export class ServiceDescriptor<
     return this;
   }
   withInitialize(method?: string) {
-      this.initializer = method;
-      this.invalidate();
+    this.initializer = method;
+    this.invalidate();
     return this;
   }
 
-  withListOf(isList:boolean) {
+  withListOf(isList: boolean) {
     this.isListOf = isList;
     this.invalidate();
     return this;
@@ -330,5 +334,4 @@ export class ServiceDescriptor<
       args: this.args?.map(asString as any),
     };
   }
-
 }

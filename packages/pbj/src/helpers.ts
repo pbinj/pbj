@@ -39,16 +39,20 @@ function _pathOf<
 ) {
   return (ctx = this.pbj(service)) =>
     get(ctx as ValueOf<TRegistry, T>, path, defaultValue);
-};
+}
 //@ts-expect-error - type madness
 Context.prototype.pathOf = _pathOf;
 function _transform<
   R,
   T extends PBinJKey<TRegistry>,
   TRegistry extends RegistryType = Registry,
->(this: Context<TRegistry>, service: T, transformer: (v: ValueOf<TRegistry, T>) => R): R {
+>(
+  this: Context<TRegistry>,
+  service: T,
+  transformer: (v: ValueOf<TRegistry, T>) => R,
+): R {
   return this.pbj(() => transformer(this.resolve(service as any)));
-};
+}
 //@ts-expect-error - type madness
 Context.prototype.transform = _transform;
 

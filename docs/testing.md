@@ -3,11 +3,26 @@
 This guide covers testing strategies using PBinJ's dependency injection system, including mocking dependencies, creating isolated test contexts, and common testing patterns.
 
 ## Basic Testing Setup
+PBinJ provides a testing module that simplifies setting up test contexts and mocking dependencies.  If you want to
+isolate testing of your context, use `runBeforeEachTest` and `runAfterEachTest` from `@pbinj/pbj/test`. 
+
+If you are running into issues testing for equality you can use `isPBJProxyEqualalityTester` from `@pbinj/pbj/test` 
+which can be plugged into many testing systems.
+
+For vitest it should look like:
+
+```ts
+import {expect} from 'vitest';
+import {isPBJProxyEqualalityTester} from '@pbinj/pbj/test';
+
+expect.addEqualityTesters([isPBJProxyEqualalityTester]);
+```
+
 
 ### Creating Test Contexts
 
 Use `runBeforeEachTest` and `runAfterEachTest` from `@pbinj/pbj/test' to create isolated contexts for each test:
-With vitest it shoul dlook like
+With vitest it should look like
 
 ```typescript
 import { runBeforeEachTest, runAfterEachTest } from "@pbinj/pbj/test";
@@ -56,7 +71,7 @@ interface Logger {
 const loggerKey = pbjKey<Logger>("logger");
 
 describe("UserService", () => {
-  it("should log user creation", () => {
+  it("should log user creation", async () => {
     // Create mock
     const mockLogger = {
       log: vi.fn(),

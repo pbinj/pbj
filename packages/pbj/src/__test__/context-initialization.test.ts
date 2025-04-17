@@ -75,7 +75,6 @@ const key = pbjKey<DoSomething>("test");
 
 describe("context initialization - basic scenarios", () => {
   it("should initialize a simple service", () => {
-
     // Create a simple service with an init method
     class SimpleService {
       public initialized = false;
@@ -98,7 +97,6 @@ describe("context initialization - basic scenarios", () => {
     expect(service.initialized).toBe(true);
   });
   it("should automatically initialize services when dependencies are satisfied", () => {
-
     // Set up spies
     const spyA = vi.spyOn(ServiceA.prototype, "init");
     const spyB = vi.spyOn(ServiceB.prototype, "init");
@@ -130,7 +128,6 @@ describe("context initialization - basic scenarios", () => {
   });
 
   it("should automatically initialize services when resolved", () => {
-
     // Register services with initialization methods
     context.register(key, ServiceA).withInitialize("init");
     context.register(ServiceB).withInitialize("init");
@@ -189,7 +186,6 @@ describe("context initialization - inheritance", () => {
   }
 
   it("should initialize derived classes correctly", () => {
-
     // Register services
     context.register(key, ServiceA).withInitialize("init");
     context.register(BaseService).withInitialize("init");
@@ -273,11 +269,11 @@ describe("context initialization - out-of-order execution", () => {
       public initialized = false;
 
       constructor(
-          //@ts-expect-error
+        //@ts-expect-error
         private a = pbj("service-a"),
-          //@ts-expect-error
+        //@ts-expect-error
         private b = pbj("service-b"),
-          //@ts-expect-error
+        //@ts-expect-error
         private c = pbj("service-c"),
       ) {}
 
@@ -452,7 +448,6 @@ describe("context initialization - out-of-order execution", () => {
 
   describe("context initialization - basic scenarios", () => {
     it("should initialize a simple service", () => {
-
       // Create a simple service with an init method
       class SimpleService {
         public initialized = false;
@@ -475,7 +470,6 @@ describe("context initialization - out-of-order execution", () => {
       expect(service.initialized).toBe(true);
     });
     it("should automatically initialize services when dependencies are satisfied", () => {
-
       // Set up spies
       const spyA = vi.spyOn(ServiceA.prototype, "init");
       const spyB = vi.spyOn(ServiceB.prototype, "init");
@@ -507,7 +501,6 @@ describe("context initialization - out-of-order execution", () => {
     });
 
     it("should automatically initialize services when resolved", () => {
-
       // Register services with initialization methods
       context.register(key, ServiceA).withInitialize("init");
       context.register(ServiceB).withInitialize("init");
@@ -566,7 +559,6 @@ describe("context initialization - out-of-order execution", () => {
     }
 
     it("should initialize derived classes correctly", () => {
-
       // Register services
       context.register(key, ServiceA).withInitialize("init");
       context.register(BaseService).withInitialize("init");
@@ -650,11 +642,11 @@ describe("context initialization - out-of-order execution", () => {
         public initialized = false;
 
         constructor(
-            //@ts-expect-error
+          //@ts-expect-error
           private a = pbj("service-a"),
-            //@ts-expect-error
+          //@ts-expect-error
           private b = pbj("service-b"),
-            //@ts-expect-error
+          //@ts-expect-error
           private c = pbj("service-c"),
         ) {}
 
@@ -819,7 +811,6 @@ describe("context initialization - out-of-order execution", () => {
           return "Value from ServiceB";
         }
       }
-
 
       // Register both services with initialization
       context.register(serviceAKey, ServiceA).withInitialize("init");

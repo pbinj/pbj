@@ -1,6 +1,6 @@
 import { it, describe, expect, beforeEach, afterEach } from "vitest";
-import {context, pbjKey, createNewContext } from "../index.js";
-import {runBeforeEachTest, runAfterEachTest} from "../test.js";
+import { context, pbjKey, createNewContext } from "../index.js";
+import { runBeforeEachTest, runAfterEachTest } from "../test.js";
 beforeEach(runBeforeEachTest);
 afterEach(runAfterEachTest);
 
@@ -62,7 +62,8 @@ describe("onServiceAdded", () => {
     const events: string[] = [];
 
     const unsubscribe = context.onServiceAdded((...services) => {
-      for (const service of services) events.push('first'+service.description.name!);
+      for (const service of services)
+        events.push("first" + service.description.name!);
     });
 
     class ServiceA {}
@@ -70,12 +71,13 @@ describe("onServiceAdded", () => {
     unsubscribe();
 
     context.onServiceAdded((...services) => {
-      for (const service of services) events.push('second'+service.description.name!);
+      for (const service of services)
+        events.push("second" + service.description.name!);
     });
     class ServiceB {}
     context.register(ServiceB);
     await wait();
-    expect(events).toEqual(["secondServiceA","secondServiceB"]);
+    expect(events).toEqual(["secondServiceA", "secondServiceB"]);
   });
 
   it("should notify immediately for existing services", async () => {

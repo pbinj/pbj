@@ -1,8 +1,8 @@
-import {context, contextProxyKey,Context, createNewContext} from "./context";
-import {isObjectish} from "@pbinj/pbj-guards";
-import {proxyValueSymbol} from "./symbols";
+import { context, contextProxyKey, Context, createNewContext } from "./context";
+import { isObjectish } from "@pbinj/pbj-guards";
+import { proxyValueSymbol } from "./symbols";
 
-let origContext:Context | undefined;
+let origContext: Context | undefined;
 
 let count = 0;
 
@@ -11,33 +11,36 @@ let count = 0;
  * any pbj proxies created after this will be in the new context.
  * any pbj proxies created before this will be in the original context.
  */
-export function runBeforeEachTest(){
-    if (count){
-        console.warn('runBeforeEachTest called more than once, before runAfterEachTest');
-    }
-    console.log('runBeforeEachTest');
-    count++;
-    //@ts-ignore
-    origContext = context[contextProxyKey] as Context;
-    //@ts-ignore
-    context[contextProxyKey] = createNewContext();
-
+export function runBeforeEachTest() {
+  if (count) {
+    console.warn(
+      "runBeforeEachTest called more than once, before runAfterEachTest",
+    );
+  }
+  console.log("runBeforeEachTest");
+  count++;
+  //@ts-ignore
+  origContext = context[contextProxyKey] as Context;
+  //@ts-ignore
+  context[contextProxyKey] = createNewContext();
 }
 /**
  * Run this after each test, to restore the original context.
  */
-export function runAfterEachTest(){
-    count--;
+export function runAfterEachTest() {
+  count--;
 
-    if (count < 0){
-        console.warn('runAfterEachTest called more than once, before runBeforeEachTest');
-    }
-    //@ts-ignore
-    context[contextProxyKey] = origContext;
+  if (count < 0) {
+    console.warn(
+      "runAfterEachTest called more than once, before runBeforeEachTest",
+    );
+  }
+  //@ts-ignore
+  context[contextProxyKey] = origContext;
 }
 
-function isPBJProxy(a:unknown){
-    return isObjectish(a) && (a as any)[proxyValueSymbol] !== undefined;
+function isPBJProxy(a: unknown) {
+  return isObjectish(a) && (a as any)[proxyValueSymbol] !== undefined;
 }
 
 /**
@@ -53,17 +56,17 @@ function isPBJProxy(a:unknown){
  * ```
  *
  */
-export function isPBJProxyEqualalityTester(a:unknown, b:unknown){
-    const isAProxy = isPBJProxy(a);
-    const isBProxy = isPBJProxy(b);
-    if (isAProxy && isBProxy){
-        return (a as any)[proxyValueSymbol] === (b as any)[proxyValueSymbol];
-    }
-    if (isAProxy){
-        return (a as any)[proxyValueSymbol] === b;
-    }
-    if (isBProxy){
-        return a === (b as any)[proxyValueSymbol];
-    }
-    return undefined;
+export function isPBJProxyEqualalityTester(a: unknown, b: unknown) {
+  const isAProxy = isPBJProxy(a);
+  const isBProxy = isPBJProxy(b);
+  if (isAProxy && isBProxy) {
+    return (a as any)[proxyValueSymbol] === (b as any)[proxyValueSymbol];
+  }
+  if (isAProxy) {
+    return (a as any)[proxyValueSymbol] === b;
+  }
+  if (isBProxy) {
+    return a === (b as any)[proxyValueSymbol];
+  }
+  return undefined;
 }

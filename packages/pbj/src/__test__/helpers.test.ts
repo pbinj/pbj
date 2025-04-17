@@ -69,7 +69,7 @@ describe("helpers", () => {
     });
 
     it("should handle complex paths", () => {
-      type Sample = { users: Array<{ name: string }>};
+      type Sample = { users: Array<{ name: string }> };
       const key = pbjKey<Sample>("test-complex");
       context.register(key, {
         users: [{ name: "Alice" }, { name: "Bob" }],

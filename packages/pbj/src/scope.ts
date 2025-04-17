@@ -2,11 +2,15 @@ import { has, hasA, isFn, isSymbol } from "@pbinj/pbj-guards";
 import { PBinJError } from "./errors.js";
 import { Context } from "./context.js";
 import { keyOf } from "./util.js";
-import {type PBinJKey, RegistryType, type ServiceDescriptorI} from "./types.js";
+import {
+  type PBinJKey,
+  RegistryType,
+  type ServiceDescriptorI,
+} from "./types.js";
 import { serviceProxySymbol } from "./symbols.js";
 import { AsyncLocalStorage } from "node:async_hooks";
-import {ServiceContext} from "./service-context";
-import {ServiceDescriptor} from "./service-descriptor";
+import { ServiceContext } from "./service-context";
+import { ServiceDescriptor } from "./service-descriptor";
 
 //borrowed from https://eytanmanor.medium.com/should-you-use-asynclocalstorage-2063854356bb
 const asyncLocalStorage = new AsyncLocalStorage<
@@ -22,7 +26,7 @@ const asyncLocalStorage = new AsyncLocalStorage<
  * @param key - typeKey or registry key
  * @returns
  */
-const scoped: Context["scoped"] = function(this:unknown, key) {
+const scoped: Context["scoped"] = function (this: unknown, key) {
   const serviceDesc = (this as Context).register(key as any);
   if (
     hasA(serviceDesc, serviceProxySymbol, isSymbol) &&
@@ -52,22 +56,21 @@ const scoped: Context["scoped"] = function(this:unknown, key) {
         new ServiceContext(
           this as Context,
           new ServiceDescriptor(
-          key,
-          service,
-          args as any,
-          false,
-          isFn(service),
-          `async scoped pbj '${String(key)}'`,
-        )),
+            key,
+            service,
+            args as any,
+            false,
+            isFn(service),
+            `async scoped pbj '${String(key)}'`,
+          ),
+        ),
       );
     }
     return asyncLocalStorage.run(map, next) as any;
   };
 };
 
-function getServiceDescription(
-  key: PBinJKey<any>,
-): ServiceContext<any, any> {
+function getServiceDescription(key: PBinJKey<any>): ServiceContext<any, any> {
   const serviceDesc = asyncLocalStorage.getStore()?.get(key);
   if (!serviceDesc) {
     throw new PBinJError(

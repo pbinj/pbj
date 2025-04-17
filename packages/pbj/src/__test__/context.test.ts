@@ -13,7 +13,6 @@ import { AuthService, authServiceSymbol } from "./sample-services/auth.js";
 import { connectionPBinJKey, DBService } from "./sample-services/db.js";
 import { runBeforeEachTest, runAfterEachTest } from "../test";
 
-
 const aiSymbol = Symbol("a");
 const abSymbol = Symbol("b");
 const acSymbol = Symbol("c");
@@ -39,7 +38,6 @@ beforeEach(runBeforeEachTest);
 afterEach(runAfterEachTest);
 
 describe("context", () => {
-
   it("should test something", () => {
     const t = { value: "I am a string" };
     const proxy = new Proxy(t, {
@@ -156,7 +154,7 @@ describe("context", () => {
     ctx.visit(TD, (v) => {
       const val = ctx.resolve(v.key as any);
       if (val instanceof Base) {
-          val.destroy();
+        val.destroy();
       }
       return destroySymbol;
     });
@@ -253,7 +251,7 @@ describe("context", () => {
     ctx.register(pkey, () => "test");
     const result = ctx.resolve(TestA, 2);
     expect(result.a == 2).toBe(true);
-    expect(result.b+'' === "test").toBe(true);
+    expect(result.b + "" === "test").toBe(true);
   });
   it("should handle mixed invocation with constructor with a lot", () => {
     class TestAlot {
@@ -339,7 +337,7 @@ describe("proxy", () => {
       expect(result[0]).toBe(a);
       expect(result[1]).toBe(b);
       sd.withTags(key);
-      const c = ctx.pbj(PC)
+      const c = ctx.pbj(PC);
 
       expect(result.length).toBe(3);
       expect(result[0]).toBe(a);
@@ -369,13 +367,13 @@ describe("proxy", () => {
     });
     it("should work with factories", () => {
       const factory = () => ({ a: 1 });
-      const aKey = pbjKey<ReturnType<typeof factory>>("test-factory-a")
+      const aKey = pbjKey<ReturnType<typeof factory>>("test-factory-a");
       const a = ctx.pbj(aKey);
       ctx.register(aKey, factory);
-      const bKey = pbjKey<ReturnType<typeof factory>>("test-factory-b")
+      const bKey = pbjKey<ReturnType<typeof factory>>("test-factory-b");
       ctx.register(bKey, factory);
       const b = ctx.pbj(bKey);
-      ctx.register(factory)
+      ctx.register(factory);
       const c = ctx.pbj(factory);
       const result = ctx.listOf(factory);
       //This doesn't work because the proxy is not an array.
@@ -383,9 +381,9 @@ describe("proxy", () => {
       //Array.isArray(new Proxy({}, {}) and we may not know the type when
       // the proxy is created.
       expect(result.length).toBe(3);
-       expect(result[0]).toBe(a);
-       expect(result[1]).toBe(b);
-       expect(result[2]).toBe(c);
+      expect(result[0]).toBe(a);
+      expect(result[1]).toBe(b);
+      expect(result[2]).toBe(c);
     });
   });
   describe("withInterceptors", () => {
