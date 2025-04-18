@@ -2,8 +2,8 @@ import { it, describe, expect } from "vitest";
 import { MetricsConfig } from "../MetricsConfig.js";
 import { promClientPBinJKey, registerKey } from "../pbj.js";
 import { context, pbjKey } from "@pbinj/pbj";
-import {beforeEach, afterEach} from "vitest";
-import {runBeforeEachTest, runAfterEachTest} from "@pbinj/pbj/test";
+import { beforeEach, afterEach } from "vitest";
+import { runBeforeEachTest, runAfterEachTest } from "@pbinj/pbj/test";
 import * as client from "prom-client";
 import { MetricService } from "../MetricService.js";
 
@@ -18,7 +18,9 @@ function registerForTest(ctx = context) {
   ctx.register(MetricsConfig);
 
   // Register MetricService but don't set up the listener that causes circular refs
-  const metricServiceKey = pbjKey<MetricService>("@pbj/prometheus/metricService");
+  const metricServiceKey = pbjKey<MetricService>(
+    "@pbj/prometheus/metricService",
+  );
   ctx.register(metricServiceKey, MetricService);
 
   // Initialize the up gauge directly

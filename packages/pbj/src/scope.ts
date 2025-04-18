@@ -2,9 +2,7 @@ import { has, hasA, isFn, isSymbol } from "@pbinj/pbj-guards";
 import { PBinJError } from "./errors.js";
 import { Context } from "./context.js";
 import { keyOf } from "./util.js";
-import {
-  type PBinJKey,
-} from "./types.js";
+import { type PBinJKey } from "./types.js";
 import { serviceProxySymbol } from "./symbols.js";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { ServiceContext } from "./service-context.js";

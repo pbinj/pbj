@@ -69,7 +69,6 @@ export class ServiceContext<TRegistry extends RegistryType, T> {
   }
 
   public invalidate() {
-
     this.invoked = false;
     this._instance = undefined;
     this.initializer?.invalidate();

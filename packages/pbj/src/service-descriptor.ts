@@ -102,15 +102,15 @@ export class ServiceDescriptor<
 
   set invoked(v: boolean) {
     this._invoked = v;
-    if (v){
+    if (v) {
       this.invalid = false;
     }
   }
 
-  get invalid(){
+  get invalid() {
     return this._invalid;
   }
-  set invalid(v){
+  set invalid(v) {
     this._invalid = v;
   }
   get name() {
@@ -163,7 +163,10 @@ export class ServiceDescriptor<
   }
 
   set args(newArgs: Args<T>) {
-    if (newArgs === this._args || (newArgs.length === 0 && this._args.length === 0)) {
+    if (
+      newArgs === this._args ||
+      (newArgs.length === 0 && this._args.length === 0)
+    ) {
       return;
     }
 

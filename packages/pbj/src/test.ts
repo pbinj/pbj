@@ -1,4 +1,9 @@
-import { context, contextProxyKey, Context, createNewContext } from "./context.js";
+import {
+  context,
+  contextProxyKey,
+  Context,
+  createNewContext,
+} from "./context.js";
 import { isObjectish } from "@pbinj/pbj-guards";
 import { proxyValueSymbol } from "./symbols.js";
 

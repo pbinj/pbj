@@ -189,7 +189,7 @@ describe("Direct pbjKey usage in context.register", () => {
 
     // Resolve again and verify changes propagated
     const updatedDb = context.resolve(DatabaseService);
-    expect(updatedDb.connectionString + '').toEqual(
+    expect(updatedDb.connectionString + "").toEqual(
       "postgresql://db.example.com:5432/mydb",
     );
   });

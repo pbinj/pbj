@@ -132,4 +132,3 @@ export class Logger implements LoggerI {
     this._log("info", message, obj);
   }
 }
-

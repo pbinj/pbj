@@ -14,15 +14,11 @@ export const metricServiceKey = pbjKey<InstanceType<typeof MetricService>>(
   "@pbj/prometheus/metricService",
 );
 
-
 export function register(ctx = context) {
   ctx.register(promClientPBinJKey, () => client);
   ctx.register(registerKey, () => new client.Registry());
   ctx.register(MetricsConfig);
-  ctx.register(
-    metricServiceKey,
-    MetricService
-  );
+  ctx.register(metricServiceKey, MetricService);
   ctx.resolve(
     (config: MetricsConfig, metricService: MetricService) => {
       ctx.onServiceAdded((...services) => {
