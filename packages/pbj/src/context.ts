@@ -246,8 +246,8 @@ export class Context<TRegistry extends RegistryType = Registry> {
 
     if (inst) {
       if (origArgs?.length) {
-        this.logger.info("modifying registered service {key}", {
-          key: asString(serviceKey),
+        this.logger.info("modifying registered service {name}", {
+          name: asString(serviceKey),
         });
         //@ts-expect-error
         inst.description.args = args;

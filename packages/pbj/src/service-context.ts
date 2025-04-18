@@ -182,10 +182,7 @@ export class ServiceContext<TRegistry extends RegistryType, T> {
       ...this.description.toJSON(),
       dependencies: Array.from(this.dependencies ?? [], asString as any),
       error: this.error,
-      invoked: this.invoked,
-      invalid: this.invalid,
       primitive: this.description.primitive,
-      instance: this._instance,
     };
   }
 }
