@@ -27,7 +27,7 @@ export class Context<TRegistry extends RegistryType = Registry> {
   // implements ContextI<TRegistry>
   //this thing is used to keep track of dependencies.
   protected map = new Map<CKey, ServiceContext<TRegistry, any>>();
-  private listeners = listener<ServiceContext<TRegistry, any>>();
+  private listeners = listener<ServiceDescriptorI<TRegistry, any>>();
   // Track services that have been initialized
   private initializedServices = new Set<CKey>();
   // Track services that are pending initialization
@@ -36,10 +36,7 @@ export class Context<TRegistry extends RegistryType = Registry> {
   constructor(private readonly parent?: Context<any>) {}
 
   public onServiceAdded(
-    fn: Listener<
-      ServiceContext<TRegistry, any>,
-      ServiceContext<TRegistry, any>[]
-    >,
+    fn: Listener<ServiceDescriptorI<TRegistry, any>>,
     initialize = false,
   ): () => void {
     this.logger.info("onServiceAdded: listener added");
@@ -47,7 +44,10 @@ export class Context<TRegistry extends RegistryType = Registry> {
     if (initialize) {
       const [service, ...rest] = this.map.values();
       if (service) {
-        this.listeners(service, ...rest);
+        this.listeners(
+          service.description,
+          ...rest.map(({ description }) => description),
+        );
       }
     }
 
@@ -280,7 +280,7 @@ export class Context<TRegistry extends RegistryType = Registry> {
   private notifyAdd(inst: ServiceContext<TRegistry, any>) {
     return new Promise<void>((resolve) => {
       setTimeout(() => {
-        this.listeners(inst);
+        this.listeners(inst.description);
         resolve();
       }, 0);
     });

@@ -11,7 +11,7 @@ describe("onServiceAdded", () => {
     const events: string[] = [];
 
     context.onServiceAdded((service) => {
-      events.push(`added: ${service?.description?.name}`);
+      events.push(`added: ${service?.name}`);
     });
 
     class TestService {}
@@ -27,7 +27,7 @@ describe("onServiceAdded", () => {
     context.register(pbjKey<string>("intital"), "initial");
 
     context.onServiceAdded((service) => {
-      events.push(`changed: ${service.description.name}`);
+      events.push(`changed: ${service.name}`);
     });
 
     // Update service
@@ -42,8 +42,8 @@ describe("onServiceAdded", () => {
 
     context.onServiceAdded((...services) => {
       for (const service of services) {
-        if (service.description.hasTag(pluginKey)) {
-          events.push(`plugin: ${service.description.name}`);
+        if (service.hasTag(pluginKey)) {
+          events.push(`plugin: ${service.name}`);
         }
       }
     });
@@ -62,8 +62,7 @@ describe("onServiceAdded", () => {
     const events: string[] = [];
 
     const unsubscribe = context.onServiceAdded((...services) => {
-      for (const service of services)
-        events.push("first" + service.description.name!);
+      for (const service of services) events.push("first" + service.name!);
     });
 
     class ServiceA {}
@@ -71,8 +70,7 @@ describe("onServiceAdded", () => {
     unsubscribe();
 
     context.onServiceAdded((...services) => {
-      for (const service of services)
-        events.push("second" + service.description.name!);
+      for (const service of services) events.push("second" + service.name!);
     });
     class ServiceB {}
     context.register(ServiceB);
@@ -87,7 +85,7 @@ describe("onServiceAdded", () => {
     context.register(ExistingService);
 
     context.onServiceAdded((service) => {
-      events.push(`existing: ${service.description.name}`);
+      events.push(`existing: ${service.name}`);
     });
 
     await wait();
@@ -100,11 +98,11 @@ describe("onServiceAdded", () => {
     const events2: string[] = [];
 
     context.onServiceAdded((service) => {
-      events1.push(service.description.name!);
+      events1.push(service.name!);
     });
 
     context.onServiceAdded((service) => {
-      events2.push(service.description.name!);
+      events2.push(service.name!);
     });
 
     class TestService {}

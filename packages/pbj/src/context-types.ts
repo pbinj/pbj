@@ -10,7 +10,6 @@ import type {
 } from "./types.js";
 import type { Registry } from "./registry.js";
 import { Listener } from "./util.js";
-import { ServiceContext } from "./service-context.js";
 
 /**
  * This needs to make all the arguments for a type.
@@ -172,11 +171,7 @@ export interface ContextI<TRegistry extends RegistryType = Registry>
     fn: VisitFn<TRegistry, T>,
   ): void;
   onServiceAdded(
-    fn: Listener<ServiceContext<TRegistry, any>>,
+    fn: Listener<ServiceDescriptorI<TRegistry, any>>,
     noInitial?: boolean,
   ): () => void;
 }
-
-export type ToPBinJType<T> = T extends [infer First, ...infer Rest]
-  ? [PBinJKeyType<First>, ...ToPBinJType<Rest>]
-  : [];

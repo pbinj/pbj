@@ -25,11 +25,11 @@ export function register(ctx = context) {
         const tags = config.tags;
         for (const service of services) {
           if (tags?.length) {
-            if (service.description.tags.some((v) => tags.includes(v))) {
-              metricService.withMetric(service.description);
+            if (service.tags.some((v) => tags.includes(v))) {
+              metricService.withMetric(service);
             }
           } else {
-            metricService.withMetric(service.description);
+            metricService.withMetric(service);
           }
         }
       }, true);
