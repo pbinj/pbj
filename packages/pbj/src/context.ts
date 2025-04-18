@@ -36,13 +36,16 @@ export class Context<TRegistry extends RegistryType = Registry> {
   constructor(private readonly parent?: Context<any>) {}
 
   public onServiceAdded(
-    fn: Listener<ServiceContext<TRegistry, any>>,
-    initialize = true,
+    fn: Listener<ServiceContext<TRegistry, any>, ServiceContext<TRegistry, any>[]>,
+    initialize = false,
   ): () => void {
     this.logger.info("onServiceAdded: listener added");
     const ret = this.listeners.subscribe(fn);
     if (initialize) {
-      this.listeners(...this.map.values());
+      const [service, ...rest] = this.map.values();
+      if (service) {
+        this.listeners(service, ...rest);
+      }
     }
 
     return ret;
@@ -133,7 +136,9 @@ export class Context<TRegistry extends RegistryType = Registry> {
     ///this.logger.warn("invalidating service {key}", { key: asString(key) });
     for (const [k, v] of this.map) {
       if (v.description.hasDependency(key) && !seen.has(k)) {
-        v.invalidate();
+        if (!v.description.invalid){
+          v.invalidate();
+        }
         this.invalidate(k, v, seen);
       }
     }

@@ -11,7 +11,7 @@ describe("onServiceAdded", () => {
     const events: string[] = [];
 
     context.onServiceAdded((service) => {
-      events.push(`added: ${service.description.name}`);
+      events.push(`added: ${service?.description?.name}`);
     });
 
     class TestService {}

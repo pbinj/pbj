@@ -119,16 +119,17 @@ export class Logger implements LoggerI {
       this._listeners = this._listeners.filter((v) => v !== fn);
     };
   }
-  debug(message: string, obj?: Record<string, unknown>) {
+  debug(message: string, obj?: object) {
     this._log("debug", message, obj);
   }
-  error(message: string, obj?: Record<string, unknown>) {
+  error(message: string, obj?: object) {
     this._log("error", message, obj);
   }
-  warn(message: string, obj?: Record<string, unknown>) {
+  warn(message: string, obj?: object) {
     this._log("warn", message, obj);
   }
-  info(message: string, obj?: Record<string, unknown>) {
+  info(message: string, obj?: object) {
     this._log("info", message, obj);
   }
 }
+

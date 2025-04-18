@@ -255,21 +255,3 @@ scrape_configs:
       - targets: ["localhost:9464"]
     scrape_interval: 15s
 ```
-
-## Testing
-
-The plugin provides utilities for testing metrics:
-
-```typescript
-import { context } from "@pbinj/pbj";
-import { registerKey } from "@pbinj/pbj-prometheus";
-import { describe, expect, it } from "vitest";
-
-describe("Metrics", () => {
-  it("should record metrics", async () => {
-    const registry = context.resolve(registerKey);
-    const metrics = await registry.metrics();
-    expect(metrics).toContain("http_requests_total");
-  });
-});
-```

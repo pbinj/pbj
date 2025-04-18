@@ -53,7 +53,7 @@ export class ServiceDescriptor<
 
   //  public readonly [serviceSymbol]: PBinJKey<TRegistry>;
   dependencies?: Set<CKey>;
-  public invoked = false;
+  private _invoked = false;
   private _cacheable = true;
   private _service?: OfA<T>;
   private _args: Args<T> = [] as any;
@@ -69,7 +69,7 @@ export class ServiceDescriptor<
    * Once it is invoked, it is no longer invalid.  This is used for
    * caching and invalidation.
    */
-  public invalid = true;
+  private _invalid = true;
   public key: PBinJKey<TRegistry>;
   public tags: PBinJKeyType<T>[] = [];
   private _name: string | undefined;
@@ -96,6 +96,23 @@ export class ServiceDescriptor<
     this.service = service;
   }
 
+  get invoked() {
+    return this._invoked;
+  }
+
+  set invoked(v: boolean) {
+    this._invoked = v;
+    if (v){
+      this.invalid = false;
+    }
+  }
+
+  get invalid(){
+    return this._invalid;
+  }
+  set invalid(v){
+    this._invalid = v;
+  }
   get name() {
     return this._name ?? asString(this[serviceSymbol]);
   }
@@ -134,7 +151,7 @@ export class ServiceDescriptor<
     this.factory = this.invokable && !isConstructor(_service as Fn<T>);
 
     this.invalidate();
-    this.logger.debug("service updated");
+    this.logger.debug("service updated {name}", this);
   }
 
   get service() {
@@ -146,7 +163,7 @@ export class ServiceDescriptor<
   }
 
   set args(newArgs: Args<T>) {
-    if (newArgs === this._args) {
+    if (newArgs === this._args || (newArgs.length === 0 && this._args.length === 0)) {
       return;
     }
 
@@ -154,7 +171,6 @@ export class ServiceDescriptor<
       newArgs.length !== this._args.length ||
       newArgs.some((v, i) => v !== this._args[i])
     ) {
-      this.logger.debug("changed args");
       newArgs.map((v) => {
         if (isPBinJKey(v)) {
           this.addDependency(keyOf(v));
@@ -165,6 +181,7 @@ export class ServiceDescriptor<
         return v;
       });
       this._args = newArgs;
+      this.logger.debug("changed args {name}", this);
       this.invalidate();
     }
   }
@@ -302,7 +319,7 @@ export class ServiceDescriptor<
   }
   invalidate = () => {
     if (!this.invalid) {
-      this.logger.debug("invalidating service {{name}}", { name: this.name });
+      this.logger.debug("invalidating service {name}", this);
       this.invalid = true;
       this.onChange(this);
     }
