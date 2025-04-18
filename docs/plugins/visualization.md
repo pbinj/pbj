@@ -22,6 +22,7 @@ yarn add @pbinj/pbj-visualization
 ## Quick Start
 
 Use the pbj-visualization script to launch your app.
+
 ```bash
 $ pbj-visualization ./path/to/your/pea.ts
 ```
@@ -35,6 +36,7 @@ register(app);
 ```
 
 By default, this will:
+
 - Start the visualization server on port 3000 (configurable)
 - Expose the visualization UI at `/pbj`
 - Provide real-time updates of your dependency graph
@@ -53,17 +55,24 @@ PBJ_PATH=/pbj        # Base path for the visualization UI
 Or programmatically:
 
 ```typescript
-import { register, ServerConfig, visualizationConfigKey } from "@pbinj/pbj-visualization";
+import {
+  register,
+  ServerConfig,
+  visualizationConfigKey,
+} from "@pbinj/pbj-visualization";
 import { context } from "@pbinj/pbj";
 
-context.register(visualizationConfigKey,  new ServerConfig(4000, "0.0.0.0", "/debug"));
+context.register(
+  visualizationConfigKey,
+  new ServerConfig(4000, "0.0.0.0", "/debug"),
+);
 register(context);
-
 ```
 
 ### Network View
 
 The network view displays your dependencies as an interactive graph:
+
 - Nodes represent services
 - Edges show dependencies between services
 - Hover over nodes to see service details
@@ -73,13 +82,15 @@ The network view displays your dependencies as an interactive graph:
 ### Table View
 
 The table view provides a detailed list of all services:
+
 - Service name and type
 - Dependencies and dependents
 - Registration status
 - Lifecycle information
 
 ### Log View
-Shows the PBinJ logs in real time.   
+
+Shows the PBinJ logs in real time.
 
 ## Examples
 
@@ -114,7 +125,6 @@ register(context);
 app.listen(3000);
 ```
 
-
 ## Best Practices
 
 1. **Development Only**
@@ -126,18 +136,18 @@ app.listen(3000);
    }
    ```
 
-
-
 ## Troubleshooting
 
 ### Common Issues
 
 1. **Visualization Not Loading**
+
    - Check if the server is running on the correct port
    - Verify network access to the visualization endpoint
    - Check browser console for errors
 
 2. **Missing Dependencies**
+
    - Ensure all services are properly registered
    - Check for circular dependencies
    - Verify import paths

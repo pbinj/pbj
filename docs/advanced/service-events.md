@@ -64,7 +64,7 @@ class RouterManager {
     context.onServiceAdded((...services) => {
       if (
         services.some(
-          (service) => service.hasTag(handlerKey) || service.hasTag(adminKey)
+          (service) => service.hasTag(handlerKey) || service.hasTag(adminKey),
         )
       ) {
         this.updateRoutes();
@@ -135,11 +135,11 @@ const metricsKey = pbjKey<MetricsService>("metrics");
 const loggingKey = pbjKey<LoggerService>("logging");
 
 context.onServiceAdded((service) => {
-    if (service.hasTag(metricsKey)) {
-      updateMetrics();
-    } else if (service.hasTag(loggingKey)) {
-      updateLoggers();
-    }
+  if (service.hasTag(metricsKey)) {
+    updateMetrics();
+  } else if (service.hasTag(loggingKey)) {
+    updateLoggers();
+  }
   // Avoid else or default cases to prevent unnecessary work
 });
 ```

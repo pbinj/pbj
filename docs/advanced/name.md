@@ -25,7 +25,7 @@ context.register(myFactory); // name: "myFactory"
 
 // 4. From symbol description
 const serviceSymbol = Symbol("myService");
-context.register(serviceSymbol, ()=>"what"); // name: "myService"
+context.register(serviceSymbol, () => "what"); // name: "myService"
 
 // 5. Anonymous functions
 context.register(() => "value"); // name: "<anonymous>"
@@ -59,12 +59,8 @@ import { pbjKey, context } from "@pbinj/pbj";
 interface Plugin {
   initialize?(): void;
 }
-class AuthPlugin implements Plugin {
- 
-}
-class LogPlugin implements Plugin {
- 
-}
+class AuthPlugin implements Plugin {}
+class LogPlugin implements Plugin {}
 const pluginKey = pbjKey<Plugin>("plugin");
 
 context.register(AuthPlugin).withName("Authentication").withTags(pluginKey);
@@ -90,7 +86,7 @@ class ServiceManager {
   constructor() {
     context.onServiceAdded((service) => {
       console.log(
-        `Service ${service?.name} was ${service?.invalid ? "invalidated" : "registered"}`
+        `Service ${service?.name} was ${service?.invalid ? "invalidated" : "registered"}`,
       );
     });
   }

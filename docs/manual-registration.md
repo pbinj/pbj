@@ -23,13 +23,12 @@ context.register(LoggerService);
 
 // Use the service
 class UserService {
-  constructor(private logger:LoggerService) {
+  constructor(private logger: LoggerService) {
     logger.log("UserService initialized");
   }
 }
 
 context.register(UserService).withArgs(pbj(LoggerService));
-
 ```
 
 ### Factory Registration
@@ -65,7 +64,10 @@ class InMemoryCacheService extends CacheService {}
 
 // Environment-based registration
 context.register(CacheService, (nodeEnv = env("NODE_ENV")) =>
-nodeEnv == "production" ? new RedisCacheService() :  new InMemoryCacheService());
+  nodeEnv == "production"
+    ? new RedisCacheService()
+    : new InMemoryCacheService(),
+);
 
 // Feature flag registration
 const featureFlag = process.env.FEATURE_ENABLED === "true";
@@ -90,7 +92,7 @@ class DatabaseService {
 // Register with explicit dependencies
 context.register(
   DatabaseService,
-  (config = pbj(ConfigService)) => new DatabaseService(config)
+  (config = pbj(ConfigService)) => new DatabaseService(config),
 );
 ```
 
@@ -171,8 +173,8 @@ import { pbj, context } from "@pbinj/pbj";
 class UserService {}
 // Register with tags
 context.register(UserService).withTags("service", "user");
-
 ```
+
 1. **Testing**: Use manual registration to swap implementations in tests.
 
    ```typescript
@@ -183,7 +185,6 @@ context.register(UserService).withTags("service", "user");
    // In tests
    context.register(DatabaseService).withService(MockDatabaseService);
    ```
-
 
 ## Common Patterns
 

@@ -9,15 +9,9 @@ import { context, pbjKey } from "@pbinj/pbj";
 interface Plugin {
   initialize?(): void;
 }
-class AuthPlugin implements Plugin {
- 
-}
-class LoggingPlugin implements Plugin {
- 
-}
-class MetricsPlugin implements Plugin {
- 
-}
+class AuthPlugin implements Plugin {}
+class LoggingPlugin implements Plugin {}
+class MetricsPlugin implements Plugin {}
 // Define a tag key
 const pluginKey = pbjKey<Plugin>("plugin");
 
@@ -33,7 +27,6 @@ const plugins = context.listOf("plugin");
 ## Multiple Tags
 
 ```typescript
-
 import { pbjKey, context } from "@pbinj/pbj";
 class UserService {
   //...
@@ -169,7 +162,7 @@ context.register(AuthHandler).withTags(routeKey);
 // Setup routes
 const routes = context.listOf(routeKey);
 routes.forEach((route) => {
- // app.use(route.path, route.handle);
+  // app.use(route.path, route.handle);
 });
 ```
 

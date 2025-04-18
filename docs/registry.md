@@ -8,7 +8,7 @@ The PBinJ registry system uses TypeScript's module augmentation to provide type 
 
 To register your service types with PBinJ, augment the `Registry` interface:
 
-```typescript 
+```typescript
 import { pbjKey } from "@pbinj/pbj";
 
 // Define your service
@@ -54,7 +54,7 @@ context.register(LoggerService);
 ### Factory Registration
 
 ```typescript
-import { pbjKey , context} from "@pbinj/pbj";
+import { pbjKey, context } from "@pbinj/pbj";
 
 interface CacheService {
   get(key: string): Promise<string | null>;
@@ -217,7 +217,6 @@ declare module "@pbinj/pbj" {
 ```typescript
 import { context, pbj, pbjKey } from "@pbinj/pbj";
 
-
 interface Config {
   apiUrl: string;
   apiKey: string;
@@ -228,7 +227,10 @@ interface ApiClient {
   post(path: string, data: any): Promise<any>;
 }
 class ApiClientImpl implements ApiClient {
-  constructor(private config: Config, private logger: LoggerService) {}
+  constructor(
+    private config: Config,
+    private logger: LoggerService,
+  ) {}
   //...
 }
 
@@ -247,7 +249,7 @@ context.register(
   apiClientKey,
   (config = pbj(configKey), logger = pbj(LoggerService)) => {
     return new ApiClientImpl(config, logger);
-  }
+  },
 );
 ```
 
@@ -293,4 +295,3 @@ declare module "@pbinj/pbj" {
 context.register(dbKey, () => createMock<DatabaseService>());
 context.register(authKey, () => createMock<AuthService>());
 ```
-

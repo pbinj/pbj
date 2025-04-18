@@ -10,7 +10,7 @@ Separate your interfaces from your implementation.
 
 ```ts
 //filename=interfaces.ts
-import {  pbjKey } from "@pbinj/pbj";
+import { pbjKey } from "@pbinj/pbj";
 
 // Define your interfaces
 interface LoggerService {
@@ -21,12 +21,9 @@ interface DatabaseService {
   findUser(id: string): Promise<User>;
 }
 
-
-
 // Define your keys
 export const loggerKey = pbjKey<LoggerService>("@yourservice/logger");
 export const dbKey = pbjKey<DatabaseService>("@yourservice/database");
-
 ```
 
 ## Registering Services
@@ -41,6 +38,4 @@ import { loggerKey, dbKey } from "./services";
 
 context.register(loggerKey, LoggerService);
 context.register(dbKey, DatabaseService);
-
-
 ```

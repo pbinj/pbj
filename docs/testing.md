@@ -3,21 +3,21 @@
 This guide covers testing strategies using PBinJ's dependency injection system, including mocking dependencies, creating isolated test contexts, and common testing patterns.
 
 ## Basic Testing Setup
-PBinJ provides a testing module that simplifies setting up test contexts and mocking dependencies.  If you want to
-isolate testing of your context, use `runBeforeEachTest` and `runAfterEachTest` from `@pbinj/pbj/test`. 
 
-If you are running into issues testing for equality you can use `isPBJProxyEqualalityTester` from `@pbinj/pbj/test` 
+PBinJ provides a testing module that simplifies setting up test contexts and mocking dependencies. If you want to
+isolate testing of your context, use `runBeforeEachTest` and `runAfterEachTest` from `@pbinj/pbj/test`.
+
+If you are running into issues testing for equality you can use `isPBJProxyEqualalityTester` from `@pbinj/pbj/test`
 which can be plugged into many testing systems.
 
 For vitest it should look like:
 
 ```ts
-import {expect} from 'vitest';
-import {isPBJProxyEqualalityTester} from '@pbinj/pbj/test';
+import { expect } from "vitest";
+import { isPBJProxyEqualalityTester } from "@pbinj/pbj/test";
 
 expect.addEqualityTesters([isPBJProxyEqualalityTester]);
 ```
-
 
 ### Creating Test Contexts
 
@@ -26,15 +26,14 @@ With vitest it should look like
 
 ```typescript
 import { runBeforeEachTest, runAfterEachTest } from "@pbinj/pbj/test";
-import { describe, beforeEach, afterEach, it} from 'vitest';
+import { describe, beforeEach, afterEach, it } from "vitest";
 
 beforeEach(runBeforeEachTest);
 afterEach(runAfterEachTest);
-
 ```
 
 ```ts
-import { describe, beforeEach, it} from 'vitest';
+import { describe, beforeEach, it } from "vitest";
 class DatabaseService {
   constructor() {
     // Database setup
@@ -47,7 +46,6 @@ class UserService {
 
 describe("UserService", () => {
   let context: Context;
-
 
   it("should create user", () => {
     const userService = context.resolve(UserService);
@@ -62,7 +60,7 @@ describe("UserService", () => {
 
 ```ts
 import { context, pbj, pbjKey } from "@pbinj/pbj";
-import { describe, it } from 'vitest';
+import { describe, it } from "vitest";
 
 interface Logger {
   log(message: string): void;
@@ -85,7 +83,7 @@ describe("UserService", () => {
     await userService.createUser({ name: "Test" });
 
     expect(mockLogger.log).toHaveBeenCalledWith(
-      expect.stringContaining("User created")
+      expect.stringContaining("User created"),
     );
   });
 });
@@ -97,7 +95,7 @@ describe("UserService", () => {
 
 ```typescript
 import { context, pbj, pbjKey } from "@pbinj/pbj";
-import { describe, it } from 'vitest';
+import { describe, it } from "vitest";
 import "@pbinj/pbj/scope";
 
 describe("AuthService", () => {
@@ -118,7 +116,7 @@ describe("AuthService", () => {
 
 ```typescript
 import { context, pbj, pbjKey } from "@pbinj/pbj";
-import { describe, it } from 'vitest';
+import { describe, it } from "vitest";
 
 interface ApiClient {
   fetch(url: string): Promise<any>;
@@ -148,7 +146,7 @@ describe("DataService", () => {
 
 ```typescript
 import { context, pbj, pbjKey } from "@pbinj/pbj";
-import { describe, it } from 'vitest';
+import { describe, it } from "vitest";
 
 interface Plugin {
   execute(): void;
@@ -178,11 +176,10 @@ describe("PluginManager", () => {
 ### 1. Create Test Helpers
 
 ```ts
-import {  pbj, pbjKey } from "@pbinj/pbj";
+import { pbj, pbjKey } from "@pbinj/pbj";
 
 // test/helpers.ts
 export function createTestContext() {
-
   // Register common mocks
   context.register(loggerKey, createMockLogger());
   context.register(configKey, createTestConfig());
@@ -283,7 +280,7 @@ describe("User Registration", () => {
     expect(mockDb.saveUser).toHaveBeenCalledWith(
       expect.objectContaining({
         email: "test@example.com",
-      })
+      }),
     );
 
     expect(mockEmail.sendWelcomeEmail).toHaveBeenCalledWith("test@example.com");
@@ -298,7 +295,7 @@ describe("User Registration", () => {
       userService.register({
         email: "existing@example.com",
         password: "password123",
-      })
+      }),
     ).rejects.toThrow("Email already exists");
 
     expect(mockDb.saveUser).not.toHaveBeenCalled();

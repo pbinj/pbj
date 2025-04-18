@@ -17,7 +17,6 @@ const host = dbHostGetter(); // returns the host value
 const firstUserGetter = pathOf(configKey, "users[0]");
 ```
 
-
 ## Features
 
 ### Dot Notation
@@ -37,7 +36,7 @@ interface UserConfig {
 }
 
 const configKey = pbjKey<UserConfig>("config");
-//This is a proxy 
+//This is a proxy
 const portGetter = pathOf(configKey, "database.connection.port");
 ```
 
@@ -57,7 +56,6 @@ interface AppConfig {
 
 const configKey = pbjKey<AppConfig>("config");
 const firstUserNameGetter = pathOf(configKey, "users[0].name");
-
 ```
 
 ### Default Values
@@ -74,7 +72,6 @@ interface Config {
 
 const configKey = pbjKey<Config>("config");
 const featureGetter = pathOf(configKey, "features.experimental", false);
-
 ```
 
 ### Custom Context
@@ -83,11 +80,12 @@ Use with custom context objects:
 
 ```typescript
 import { pathOf, pbjKey } from "@pbinj/pbj";
-interface User { name: string};
+interface User {
+  name: string;
+}
 
 const userKey = pbjKey<User>("user");
 const nameGetter = pathOf(userKey, "name");
-
 ```
 
 ## Common Use Cases
@@ -121,7 +119,6 @@ class ApiService {
 }
 ```
 
-
 ### Environment Variables
 
 ```typescript
@@ -134,16 +131,16 @@ const getApiKey = pathOf(envPBinJKey, "API_KEY");
 
 class DatabaseService {
   constructor(
-    private url =  pathOf(envPBinJKey, "DATABASE_URL"), 
-    private apiKey = ApiKey = pathOf(envPBinJKey, "API_KEY")){
-  }
+    private url = pathOf(envPBinJKey, "DATABASE_URL"),
+    private apiKey = (ApiKey = pathOf(envPBinJKey, "API_KEY")),
+  ) {}
 }
 ```
 
 ### Feature Flags
 
 ```typescript
-import {pbjKey, pathOf} from '@pbinj/pbj';
+import { pbjKey, pathOf } from "@pbinj/pbj";
 
 interface Features {
   flags: {
@@ -235,7 +232,7 @@ const invalidGetter = pathOf(configKey, "database.invalid");
 
    ```typescript
    import { pathOf, pbjKey } from "@pbinj/pbj";
-   
+
    // Combine with async context
    const sessionUser = pathOf(sessionKey, "user");
 
@@ -252,5 +249,7 @@ const invalidGetter = pathOf(configKey, "database.invalid");
      }
    }
    ```
+
+```
 
 ```

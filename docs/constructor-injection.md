@@ -12,7 +12,7 @@ import { pbj } from "@pbinj/pbj";
 class UserService {
   constructor(
     private logger = pbj(LoggerService),
-    private database = pbj(DatabaseService)
+    private database = pbj(DatabaseService),
   ) {}
 }
 ```
@@ -48,7 +48,7 @@ import { pbj } from "@pbinj/pbj";
 class AnalyticsService {
   constructor(
     private logger = pbj(LoggerService),
-    private metrics = pbj(MetricsService)
+    private metrics = pbj(MetricsService),
   ) {}
 
   trackEvent(name: string) {
@@ -145,7 +145,6 @@ class CacheService {
    const loggerKey = pbjKey<ILogger>("logger");
    ```
 
-
 ## Common Patterns
 
 ### Configuration Injection
@@ -157,7 +156,7 @@ import { pbj } from "@pbinj/pbj";
 class ConfigService {
   constructor(
     readonly apiUrl = env("API_URL", "http://localhost:3000"),
-    readonly apiKey = envRequired("API_KEY")
+    readonly apiKey = envRequired("API_KEY"),
   ) {}
 }
 
@@ -180,7 +179,7 @@ import { pbj } from "@pbinj/pbj";
 class UserController {
   constructor(
     private users = pbj(UserService),
-    private auth = pbj(AuthService)
+    private auth = pbj(AuthService),
   ) {}
 
   async getUser(id: string) {
@@ -200,7 +199,7 @@ Constructor injection makes testing easier by allowing you to mock dependencies:
 
 ```typescript
 import { context } from "@pbinj/pbj";
-import {describe, it} from 'vitest';
+import { describe, it } from "vitest";
 
 describe("UserService", () => {
   it("should create user", async () => {
@@ -220,5 +219,4 @@ describe("UserService", () => {
     expect(mockDb.saveUser).toHaveBeenCalled();
   });
 });
-
 ```

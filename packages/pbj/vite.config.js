@@ -19,15 +19,17 @@ const entry = Object.keys(pkg.exports).map((key) =>
 export default defineConfig({
   resolve: {
     extensions,
-    alias:[
+    alias: [
       {
-        find:"node:async_hooks",
+        find: "node:async_hooks",
         replacement: resolve(__dirname, "src/async-local.browser.js"),
       },
-      ...Object.entries(tsconfig.compilerOptions.paths).map(([path, [value]]) => ({
-        find: path,
-        replacement: resolve(__dirname, value),
-      })),
+      ...Object.entries(tsconfig.compilerOptions.paths).map(
+        ([path, [value]]) => ({
+          find: path,
+          replacement: resolve(__dirname, value),
+        }),
+      ),
     ],
   },
   build: {

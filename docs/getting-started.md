@@ -35,7 +35,7 @@ There are several ways to register services with PBinJ:
 ```typescript
 import { pbj, context, pbjKey } from "@pbinj/pbj";
 class DatabaseService {
-  constructor(private connectionString: string) { }
+  constructor(private connectionString: string) {}
   //...
 }
 // Method 1: Direct class registration
@@ -67,7 +67,7 @@ class UserService {
   // Constructor injection
   constructor(
     private logger = pbj(LoggerService),
-    private db = pbj(dbServiceKey)
+    private db = pbj(dbServiceKey),
   ) {}
 
   async getUser(id: string) {
@@ -178,7 +178,7 @@ class AuthService {
      constructor(
        private db = pbj(dbKey),
        private logger = pbj(loggerKey),
-       private auth = pbj(authKey)
+       private auth = pbj(authKey),
      ) {}
    }
    ```

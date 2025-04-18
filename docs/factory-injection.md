@@ -13,7 +13,7 @@ import { pbj, context, pbjKey } from "@pbinj/pbj";
 class DatabaseConnection {
   constructor(
     private host: string,
-    private port: number
+    private port: number,
   ) {}
 }
 
@@ -34,8 +34,12 @@ interface Cache {
   get(key: string): Promise<string | null>;
   set(key: string, value: string): Promise<void>;
 }
-class MemoryCache implements Cache { /*...*/ }
-class RedisCache implements Cache { /*...*/ }
+class MemoryCache implements Cache {
+  /*...*/
+}
+class RedisCache implements Cache {
+  /*...*/
+}
 
 const cacheKey = pbjKey<Cache>("cache");
 
@@ -58,7 +62,7 @@ import { pbj, context, pbjKey } from "@pbinj/pbj";
 class EmailService {
   constructor(
     private apiKey: string,
-    private logger: LoggerService
+    private logger: LoggerService,
   ) {}
 }
 
@@ -66,7 +70,7 @@ context.register(
   EmailService,
   (config = pbj(ConfigService), logger = pbj(LoggerService)) => {
     return new EmailService(config.emailApiKey, logger);
-  }
+  },
 );
 ```
 
@@ -115,10 +119,10 @@ context.register(
   (
     config = pbj(ConfigService),
     logger = pbj(LoggerService),
-    retries = pbj(RetriesService)
+    retries = pbj(RetriesService),
   ) => {
     return new HttpClient({ config, logger, retries }, logger);
-  }
+  },
 );
 ```
 
@@ -139,14 +143,14 @@ context.register(
   (
     httpClient = pbj(httpClientKey),
     authService = pbj(AuthService),
-    cache = pbj(cacheKey)
+    cache = pbj(cacheKey),
   ) => {
     return new ApiClient({
       httpClient,
       authService,
       cache,
     });
-  }
+  },
 );
 ```
 
@@ -159,43 +163,45 @@ context.register(
    class DatabaseConnection {
      // ...
    }
-
-  const dbKey = pbjKey<DatabaseConnection>("database");
-
-   // Good
-   context.register(dbKey, (config: ConfigService): DatabaseConnection => {
-     return new DatabaseConnection(config.dbUrl);
-   });
-
-   // Bad - Missing return type
-   context.register(dbKey, (config) => {
-     return new DatabaseConnection(config.dbUrl);
-   });
    ```
+
+const dbKey = pbjKey<DatabaseConnection>("database");
+
+// Good
+context.register(dbKey, (config: ConfigService): DatabaseConnection => {
+return new DatabaseConnection(config.dbUrl);
+});
+
+// Bad - Missing return type
+context.register(dbKey, (config) => {
+return new DatabaseConnection(config.dbUrl);
+});
+
+````
 
 2. **Default Parameters**: Use default parameters with `pbj()`:
 
-   ```typescript
-   import { pbj, context, pbjKey } from "@pbinj/pbj";
-   class ConfigService {
-     // ...
-   }
-   class LoggerService {
-     // ...
-   }
-   class Service {
-     constructor(config: ConfigService, logger: LoggerService) {
-       // ...
-     }
-   }
-   // Good
-   context.register(
-     serviceKey,
-     (config = pbj(ConfigService), logger = pbj(LoggerService)) => {
-       return new Service(config, logger);
-     }
-   );
-   ```
+```typescript
+import { pbj, context, pbjKey } from "@pbinj/pbj";
+class ConfigService {
+  // ...
+}
+class LoggerService {
+  // ...
+}
+class Service {
+  constructor(config: ConfigService, logger: LoggerService) {
+    // ...
+  }
+}
+// Good
+context.register(
+  serviceKey,
+  (config = pbj(ConfigService), logger = pbj(LoggerService)) => {
+    return new Service(config, logger);
+  }
+);
+````
 
 3. **Error Handling**: Handle factory initialization errors:
    ```typescript
@@ -225,7 +231,7 @@ import { pbj, context, pbjKey } from "@pbinj/pbj";
 interface Pool {
   //...
 }
-const createPool = (config: PoolConfig):Pool => {
+const createPool = (config: PoolConfig): Pool => {
   //...
 };
 

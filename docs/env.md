@@ -18,8 +18,6 @@ const apiKey = envRequired("API_KEY");
 
 The `env` function retrieves an environment variable with an optional default value.
 
-
-
 ### Examples
 
 ```typescript
@@ -35,7 +33,7 @@ const region = env("AWS_REGION");
 class ConfigService {
   constructor(
     readonly apiUrl = env("API_URL", "http://localhost:3000"),
-    readonly debug = env("DEBUG", "false")
+    readonly debug = env("DEBUG", "false"),
   ) {}
 }
 ```
@@ -43,7 +41,6 @@ class ConfigService {
 ## The `envRequired` Function
 
 The `envRequired` function retrieves an environment variable and throws an error if it's not set.
-
 
 ### Examples
 
@@ -57,7 +54,7 @@ const dbUrl = envRequired("DATABASE_URL");
 class DatabaseConfig {
   constructor(
     readonly url = envRequired("DATABASE_URL"),
-    readonly authToken = envRequired("DATABASE_AUTH_TOKEN")
+    readonly authToken = envRequired("DATABASE_AUTH_TOKEN"),
   ) {}
 }
 ```
@@ -98,7 +95,7 @@ declare module "@pbinj/pbj" {
        readonly dbUrl = envRequired("DATABASE_URL"),
        readonly apiKey = envRequired("API_KEY"),
        readonly port = env("PORT", "3000"),
-       readonly logLevel = env("LOG_LEVEL", "info")
+       readonly logLevel = env("LOG_LEVEL", "info"),
      ) {}
    }
    ```
