@@ -14,10 +14,11 @@ The `transform` function allows you to apply a transformation to a resolved serv
 ### Syntax
 
 ```typescript
-function transform<R, T extends PBinJKey<TRegistry>, TRegistry extends RegistryType = Registry>(
-  service: T,
-  transformer: (v: ValueOf<TRegistry, T>) => R
-): R
+function transform<
+  R,
+  T extends PBinJKey<TRegistry>,
+  TRegistry extends RegistryType = Registry,
+>(service: T, transformer: (v: ValueOf<TRegistry, T>) => R): R;
 ```
 
 ### Parameters
@@ -32,17 +33,19 @@ The result of applying the transformer function to the resolved service.
 ### Example
 
 ```typescript
-import { transform, pbjKey } from '@pbinj/pbj';
+import { transform, pbjKey } from "@pbinj/pbj";
 
-const userService = pbjKey<UserService>('userService');
+const userService = pbjKey<UserService>("userService");
 
-const userName = transform(userService, (service) => service.getCurrentUser().name);
+const userName = transform(
+  userService,
+  (service) => service.getCurrentUser().name,
+);
 ```
 
 ## pathOf
 
 The `pathOf` function creates a type-safe getter for accessing nested properties in your PBinJ services.
-
 
 ### Parameters
 
@@ -57,7 +60,7 @@ A function that, when called, returns the value at the specified path in the ser
 ### Example
 
 ```typescript
-import { pathOf, pbjKey } from '@pbinj/pbj';
+import { pathOf, pbjKey } from "@pbinj/pbj";
 
 interface Config {
   database: {
@@ -67,15 +70,14 @@ interface Config {
   users: string[];
 }
 
-const configKey = pbjKey<Config>('config');
+const configKey = pbjKey<Config>("config");
 
 class DatabaseService {
   constructor(
-    private host = pathOf(configKey, 'database.host'),
-    private port = pathOf(configKey, 'database.port')
+    private host = pathOf(configKey, "database.host"),
+    private port = pathOf(configKey, "database.port"),
   ) {}
 }
-
 ```
 
 ### Features

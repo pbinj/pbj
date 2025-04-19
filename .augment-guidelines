@@ -1,0 +1,71 @@
+[//]: # (AUGMENT-CODEBASE-ORIENTATION-RESULTS-START)
+# PBinj Monorepo Build & Test Guide
+
+## Project Structure
+- Monorepo using pnpm workspaces with multiple packages
+- Main technologies: TypeScript, Vitest, Vite, Vue.js
+
+## Build Commands
+
+### Root-level
+```bash
+pnpm build      # Build all packages
+pnpm clean      # Clean all packages
+```
+
+### Package-specific
+```bash
+pnpm --filter @pbinj/pbj build              # Build specific package
+pnpm --filter pbj-drizzle-example build     # Build specific example
+```
+
+### Build targets (varies by package)
+```bash
+pnpm build-esm       # ESM build
+pnpm build-cjs       # CommonJS build
+pnpm build-browser   # Browser build (where applicable)
+```
+
+## Test Commands
+
+### Root-level
+```bash
+pnpm test      # Run all tests
+pnpm lint      # Run linting
+```
+
+### Package-specific
+```bash
+pnpm --filter @pbinj/pbj test               # Test specific package
+pnpm --filter @pbinj/pbj test:watch         # Test in watch mode
+```
+
+### Running specific tests
+```bash
+# Run specific test file
+pnpm --filter @pbinj/pbj vitest run src/__test__/context.test.ts
+
+# Run tests matching pattern
+pnpm --filter @pbinj/pbj vitest run --testNamePattern="context initialization"
+
+# Generate coverage
+pnpm --filter @pbinj/pbj vitest run --coverage
+```
+
+## Test Organization
+
+1. **Main packages**:
+   - Tests in `src/__test__/*.test.ts`
+   - Setup in `src/__test__/setup.ts`
+
+2. **Vue components** (pbj-visualization):
+   - Tests in `src/components/__tests__/*.spec.ts`
+   - Uses Vue Test Utils and JSDOM environment
+   - Run with: `pnpm --filter @pbinj/pbj-visualization test`
+
+3. **Documentation** (docs):
+   - Tests markdown files directly
+   - Run with: `cd docs && pnpm test`
+
+Each package has its own `vitest.config.ts` file for test configuration.
+[//]: # (AUGMENT-CODEBASE-ORIENTATION-RESULTS-END)

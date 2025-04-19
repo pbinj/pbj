@@ -15,16 +15,10 @@ export const metricServiceKey = pbjKey<InstanceType<typeof MetricService>>(
 );
 
 export function register(ctx = context) {
-  const p = ctx.register(promClientPBinJKey, () => client);
-  const r = ctx.register(registerKey, () => new client.Registry());
-  const c = ctx.register(MetricsConfig);
-  const m = ctx.register(
-    metricServiceKey,
-    MetricService,
-    c.proxy,
-    p.proxy,
-    r.proxy,
-  );
+  ctx.register(promClientPBinJKey, () => client);
+  ctx.register(registerKey, () => new client.Registry());
+  ctx.register(MetricsConfig);
+  ctx.register(metricServiceKey, MetricService);
   ctx.resolve(
     (config: MetricsConfig, metricService: MetricService) => {
       ctx.onServiceAdded((...services) => {
@@ -38,9 +32,9 @@ export function register(ctx = context) {
             metricService.withMetric(service);
           }
         }
-      });
+      }, true);
     },
-    c.proxy,
-    m.proxy,
+    ctx.pbj(MetricsConfig),
+    metricServiceKey,
   );
 }

@@ -7,7 +7,8 @@
   "scripts": {
     "start": "docsify serve .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "lint":"prettier --write ./**/*.md"
   },
   "keywords": [],
   "author": "",

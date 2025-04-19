@@ -11,49 +11,23 @@ import type {
   RegistryType,
   ServiceArgs,
   PBinJKeyType,
+  ServiceDescriptorI,
 } from "./types.js";
-import {
-  ServiceDescriptor,
-  type ServiceDescriptorListener,
-} from "./ServiceDescriptor.js";
-import { filterMap, isInherited, keyOf } from "./util.js";
+import { ServiceDescriptor } from "./service-descriptor.js";
+import { ServiceContext } from "./service-context.js";
+import { filterMap, isInherited, keyOf, Listener, listener } from "./util.js";
 import { pbjKey, isPBinJKey, asString } from "./pbjKey.js";
 import { isAsyncError } from "./errors.js";
 import { Logger } from "./logger.js";
+import { RegisterArgs, ToInject } from "./context-types.js";
+import { serviceSymbol } from "./symbols.js";
+type serviceSymbolType = typeof serviceSymbol;
 
-export interface Context<TRegistry extends RegistryType = Registry> {
-  register<TKey extends PBinJKey<TRegistry>>(
-    typeKey: TKey,
-    ...args: ServiceArgs<TKey, TRegistry> | []
-  ): ServiceDescriptor<TRegistry, ValueOf<TRegistry, TKey>>;
-  resolve<TKey extends PBinJKey<TRegistry>>(
-    typeKey: TKey,
-    ...args: ServiceArgs<TKey, TRegistry> | []
-  ): ValueOf<TRegistry, TKey>;
-  newContext<TTRegistry extends TRegistry = TRegistry>(): Context<TTRegistry>;
-  pbj<T extends PBinJKey<TRegistry>>(service: T): ValueOf<TRegistry, T>;
-  pbj(service: unknown): unknown;
-  visit(fn: VisitFn<TRegistry, any>): void;
-  visit<T extends PBinJKey<TRegistry>>(
-    service: T,
-    fn: VisitFn<TRegistry, T>,
-  ): void;
-  onServiceAdded(
-    fn: ServiceDescriptorListener,
-    noInitial?: boolean,
-  ): () => void;
-
-  resolveAsync<T extends PBinJKey<TRegistry>>(
-    typeKey: T,
-    ...args: ServiceArgs<T, TRegistry> | []
-  ): Promise<ValueOf<TRegistry, T>>;
-}
-export class Context<TRegistry extends RegistryType = Registry>
-  implements Context<TRegistry>
-{
+export class Context<TRegistry extends RegistryType = Registry> {
+  // implements ContextI<TRegistry>
   //this thing is used to keep track of dependencies.
-  protected map = new Map<CKey, ServiceDescriptor<TRegistry, any>>();
-  private listeners: ServiceDescriptorListener[] = [];
+  protected map = new Map<CKey, ServiceContext<TRegistry, any>>();
+  private listeners = listener<ServiceDescriptorI<TRegistry, any>>();
   // Track services that have been initialized
   private initializedServices = new Set<CKey>();
   // Track services that are pending initialization
@@ -62,26 +36,26 @@ export class Context<TRegistry extends RegistryType = Registry>
   constructor(private readonly parent?: Context<any>) {}
 
   public onServiceAdded(
-    fn: ServiceDescriptorListener,
-    initialize = true,
+    fn: Listener<ServiceDescriptorI<TRegistry, any>>,
+    initialize = false,
   ): () => void {
     this.logger.info("onServiceAdded: listener added");
+    const ret = this.listeners.subscribe(fn);
     if (initialize) {
-      for (const service of this.map.values()) {
-        for (const fn of this.listeners) {
-          fn(service);
-        }
+      const [service, ...rest] = this.map.values();
+      if (service) {
+        this.listeners(
+          service.description,
+          ...rest.map(({ description }) => description),
+        );
       }
     }
-    this.listeners.push(fn);
-    return () => {
-      this.listeners = this.listeners.filter((v) => v !== fn);
-    };
+
+    return ret;
   }
 
-  pbj<T extends PBinJKey<TRegistry>>(service: T): ValueOf<TRegistry, T>;
-  pbj(service: unknown): unknown {
-    return (this.get(keyOf(service as any)) ?? this.register(service as any))
+  pbj<T extends PBinJKey<TRegistry>>(service: T): ValueOf<TRegistry, T> {
+    return (this.get(keyOf(service as any)) ?? this._register(service as any))
       .proxy;
   }
 
@@ -94,7 +68,7 @@ export class Context<TRegistry extends RegistryType = Registry>
    * ```typescript
    *   context.visit(EmailService, (v)=>{
    *     v.destroy?.();
-   *     return removeSymbol;
+   *     return destroySymbol;
    *   });
    *
    * ```
@@ -131,23 +105,24 @@ export class Context<TRegistry extends RegistryType = Registry>
       return;
     }
     const ctx = this.get(service);
-    if (ctx) {
-      if (ctx.dependencies?.size) {
-        for (const dep of ctx.dependencies) {
-          this._visit(dep, fn, seen);
-        }
-      }
-      fn(ctx);
+    if (!ctx) {
+      return;
     }
+    if (ctx.dependencies?.size) {
+      for (const dep of ctx.dependencies) {
+        this._visit(dep, fn, seen);
+      }
+    }
+    fn(ctx.description);
   }
 
-  get(key: CKey): ServiceDescriptor<TRegistry, any> | undefined {
+  get(key: CKey): ServiceContext<TRegistry, any> | undefined {
     return this.map.get(key) ?? this.parent?.get(key);
   }
 
-  private invalidate(
+  public invalidate(
     key: CKey,
-    ctx?: ServiceDescriptor<TRegistry, any>,
+    ctx?: ServiceContext<TRegistry, any>,
     seen = new Set<CKey>(),
   ) {
     if (seen.size === seen.add(key).size) {
@@ -160,10 +135,13 @@ export class Context<TRegistry extends RegistryType = Registry>
       this.logger.warn(`invalidate called on unknown key ${String(key)}`);
       return;
     }
-    ctx.invalidate();
-    this.logger.warn("invalidating service {key}", { key: asString(key) });
+    //ctx.invalidate();
+    ///this.logger.warn("invalidating service {key}", { key: asString(key) });
     for (const [k, v] of this.map) {
-      if (v.hasDependency(key)) {
+      if (v.description.hasDependency(key) && !seen.has(k)) {
+        if (!v.description.invalid) {
+          v.invalidate();
+        }
         this.invalidate(k, v, seen);
       }
     }
@@ -173,11 +151,85 @@ export class Context<TRegistry extends RegistryType = Registry>
       this.pendingInitialization.add(key);
     }
   }
+  register<T extends keyof TRegistry, TFn extends Fn<TRegistry[T]>>(
+    key: T,
+    fn: TFn,
+    ...args: ToInject<Parameters<TFn>>
+  ): ServiceDescriptorI<TRegistry, TRegistry[T]>;
+  register<T extends keyof TRegistry>(
+    key: T,
+    value: TRegistry[T],
+  ): ServiceDescriptorI<TRegistry, TRegistry[T]>;
 
-  register<TKey extends PBinJKey<TRegistry>>(
+  register<T extends keyof TRegistry, TFn extends Constructor<TRegistry[T]>>(
+    key: T,
+    fn: TFn,
+    ...args: ToInject<ConstructorParameters<TFn>>
+  ): ServiceDescriptorI<TRegistry, TRegistry[T]>;
+  register<T extends keyof TRegistry>(
+    key: T,
+    value: TRegistry[T],
+  ): ServiceDescriptorI<TRegistry, TRegistry[T]>;
+
+  register<
+    TKey extends PBinJKeyType,
+    T extends TKey extends PBinJKeyType<infer V> ? V : never,
+    TCon extends Constructor<T>,
+  >(
+    key: TKey,
+    fn: TCon,
+    ...args: ToInject<ConstructorParameters<TCon>>
+  ): ServiceDescriptorI<TRegistry, T>;
+
+  register<
+    const TKey extends PBinJKeyType,
+    const TFn extends Fn<TKey[serviceSymbolType]>,
+  >(
+    key: TKey,
+    fn: TFn,
+    ...args: ToInject<Parameters<TFn>>
+  ): ServiceDescriptorI<TRegistry, TKey[serviceSymbolType]>;
+
+  register<
+    const TKey extends PBinJKeyType,
+    const T extends TKey extends PBinJKeyType<infer V> ? V : never,
+  >(key: TKey, value: T): ServiceDescriptorI<TRegistry, T>;
+
+  register<TKey extends PBinJKeyType<any>>(
+    key: TKey,
+  ): ServiceDescriptorI<
+    TRegistry,
+    TKey extends PBinJKeyType<infer T> ? T : never
+  >;
+
+  register<
+    TCon extends Constructor<any>,
+    T extends TCon extends Constructor<infer V> ? V : never,
+  >(
+    fn: TCon,
+    ...args: ToInject<ConstructorParameters<TCon>> | []
+  ): ServiceDescriptorI<TRegistry, T>;
+
+  register<T, TFn extends Fn<T>>(
+    fn: TFn,
+    ...args: ToInject<Parameters<TFn>>
+  ): ServiceDescriptorI<TRegistry, T>;
+  register<T, TFn extends Fn<T>>(fn: TFn): ServiceDescriptorI<TRegistry, T>;
+
+  // register<T extends keyof TRegistry,
+  //     V extends TRegistry[T],
+  //     TFn extends Fn<V>
+  // >(key:T, fn:TFn, ...args:ToInject<Parameters<TFn>>):ServiceDescriptorI<TRegistry,V>;
+
+  register(serviceKey: unknown, ...origArgs: unknown[]): never {
+    return this._register(serviceKey as any, ...(origArgs as any))
+      .description as unknown as never;
+  }
+
+  protected _register<TKey extends PBinJKey<TRegistry>>(
     serviceKey: TKey,
-    ...origArgs: ServiceArgs<TKey, TRegistry> | []
-  ): ServiceDescriptor<TRegistry, ValueOf<TRegistry, TKey>> {
+    ...origArgs: RegisterArgs<TRegistry, TKey> | []
+  ): ServiceContext<TRegistry, ValueOf<TRegistry, TKey>> {
     const key = keyOf(serviceKey);
 
     let service: Constructor | Fn | unknown = serviceKey;
@@ -187,32 +239,34 @@ export class Context<TRegistry extends RegistryType = Registry>
       service = args.shift();
     }
 
-    let inst = this.map.get(key);
+    let inst = this.map.get(key) as ServiceContext<
+      TRegistry,
+      ValueOf<TRegistry, TKey>
+    >;
 
     if (inst) {
       if (origArgs?.length) {
-        this.logger.info("modifying registered service {key}", {
-          key: asString(serviceKey),
+        this.logger.info("modifying registered service {name}", {
+          name: asString(serviceKey),
         });
+        //@ts-expect-error
+        inst.description.args = args;
+        //@ts-expect-error
+        inst.description.service = service;
+      }
 
-        inst.args = args;
-        inst.service = service;
-      }
-      if (inst.invalid) {
-        this.invalidate(key);
-      }
       return inst;
     }
-    const newInst = new ServiceDescriptor<TRegistry, ValueOf<TRegistry, TKey>>(
-      serviceKey,
-      service as any,
-      args as any,
-      true,
-      isFn(service),
-      undefined,
-      () => {
-        this.invalidate(key);
-      },
+    const newInst = new ServiceContext<TRegistry, ValueOf<TRegistry, TKey>>(
+      this as any,
+      new ServiceDescriptor(
+        serviceKey,
+        service as any,
+        args as any,
+        true,
+        isFn(service),
+        undefined,
+      ),
       this.logger.createChild(asString(serviceKey)!),
     );
 
@@ -223,35 +277,58 @@ export class Context<TRegistry extends RegistryType = Registry>
     });
     return newInst;
   }
-  private notifyAdd(inst: ServiceDescriptor<TRegistry, any>) {
+  private notifyAdd(inst: ServiceContext<TRegistry, any>) {
     return new Promise<void>((resolve) => {
-      setTimeout(
-        (listeners) => {
-          listeners.forEach((fn) => fn(inst));
-          resolve();
-        },
-        0,
-        this.listeners,
-      );
+      setTimeout(() => {
+        this.listeners(inst.description);
+        resolve();
+      }, 0);
     });
   }
-  resolve<TKey extends PBinJKey<TRegistry>>(
-    typeKey: TKey,
-    ...args: ServiceArgs<TKey, TRegistry> | []
-  ): ValueOf<TRegistry, TKey> {
-    const service = this.register(typeKey, ...args);
-    const result = service.invoke() as any;
+  resolve<T extends keyof TRegistry>(key: T): TRegistry[T];
+  resolve<T extends keyof TRegistry>(
+    key: T,
+    alias: PBinJKeyType<TRegistry[T]>,
+  ): TRegistry[T];
+  resolve<T extends keyof TRegistry, TFn extends Fn<TRegistry[T]>>(
+    key: T,
+    fn: TFn,
+    ...args: ToInject<Parameters<TFn>>
+  ): TRegistry[T];
+  resolve<T extends keyof TRegistry, TCon extends Constructor<TRegistry[T]>>(
+    key: T,
+    fn: TCon,
+    ...args: ToInject<ConstructorParameters<TCon>>
+  ): TRegistry[T];
 
-    // If the service has an initialization method, initialize it
-    if (service.initializer && result) {
-      const key = keyOf(typeKey);
+  resolve<TKey extends PBinJKeyType>(key: TKey): TKey[serviceSymbolType];
+  resolve<T, TKey extends PBinJKeyType<T>>(
+    key: TKey,
+    alias: PBinJKeyType<T>,
+  ): T;
+  resolve<T, TKey extends PBinJKeyType<T>, TFn extends Fn<T>>(
+    key: TKey,
+    fn: TFn,
+    ...args: ToInject<Parameters<TFn>>
+  ): T;
+  resolve<T, TKey extends PBinJKeyType<T>, TCon extends Constructor<T>>(
+    key: TKey,
+    fn: TCon,
+    ...args: ToInject<ConstructorParameters<TCon>>
+  ): T;
 
-      const set = new Set<CKey>();
-      // Initialize the service and its dependencies
-      this._initializeService(key, set);
-    }
+  resolve<TCon>(
+    fn: TCon,
+    ...args: TCon extends Constructor<any>
+      ? ToInject<ConstructorParameters<TCon>> | []
+      : never
+  ): TCon extends Constructor<any> ? InstanceType<TCon> : never;
 
-    return result;
+  resolve<T, TFn extends Fn<T>>(fn: TFn, ...args: ToInject<Parameters<TFn>>): T;
+  resolve<T, TFn extends Fn<T>>(fn: TFn): T;
+
+  resolve(typeKey: any, ...args: any[]): any {
+    return this._register(typeKey, ...(args as any)).invoke();
   }
 
   newContext<TTRegistry extends TRegistry = TRegistry>() {
@@ -303,7 +380,7 @@ export class Context<TRegistry extends RegistryType = Registry>
       // before calling the initialization method
 
       // Mark all dependencies as initialized
-      const dependencies = service.dependencies || new Set<CKey>();
+      const dependencies = service.description.dependencies || new Set<CKey>();
       for (const depKey of dependencies) {
         if (!this.initializedServices.has(depKey)) {
           this.initializedServices.add(depKey);
@@ -356,7 +433,7 @@ export class Context<TRegistry extends RegistryType = Registry>
     }
   }
 
-  scoped<R, TKey extends PBinJKeyType | (keyof TRegistry & symbol)>(
+  scoped<R, TKey extends PBinJKey<TRegistry>>(
     _key: TKey,
   ): (next: () => R, ...args: ServiceArgs<TKey, TRegistry>) => R {
     this.logger.error("scoped not enabled");
@@ -371,16 +448,16 @@ export class Context<TRegistry extends RegistryType = Registry>
 
     if (sym) {
       yield* filterMap(this.map.values(), (v) =>
-        v.tags.includes(service as any) ? v.proxy : undefined,
+        v.description.tags.includes(service as any) ? v.proxy : undefined,
       );
     } else if (isFn(service)) {
       if (isConstructor(service)) {
         yield* filterMap(this.map.values(), (v) =>
-          isInherited(v.service, service) ? v.proxy : undefined,
+          isInherited(v.description.service, service) ? v.proxy : undefined,
         );
       } else {
         yield* filterMap(this.map.values(), (v) =>
-          v.service && v.service === service ? v.proxy : undefined,
+          v.description.service === service ? v.proxy : undefined,
         );
       }
     }
@@ -404,27 +481,26 @@ export class Context<TRegistry extends RegistryType = Registry>
   listOf<T extends PBinJKey<TRegistry>>(
     service: T,
   ): Array<ValueOf<TRegistry, T>> {
-    const ret = this.register(
+    const ret = this._register(
       isPBinJKey(service) ? service : pbjKey(String(service)),
-      () => Array.from(this._listOf(service)),
-    ).withCacheable(false);
+      () => {
+        return Array.from(this._listOf(service));
+      },
+    );
+    ret.description.withListOf(true);
+    ret.description.withCacheable(false);
 
     //any time a new item is added invalidate the list, this should allow for things to be cached.
     // we would also need to invalidate on tags changes.
-    this.listeners.push(() => {
-      ret.invalidate();
-    });
 
     return ret.proxy as any;
   }
-  toJSON() {
+  toJSON(): unknown {
     return Array.from(this.map.values()).map((v) => v.toJSON());
   }
-  async resolveAsync<T extends PBinJKey<TRegistry>>(
-    key: T,
-  ): Promise<ValueOf<TRegistry, T>> {
+  async resolveAsync(key: any): Promise<any> {
     try {
-      return this.resolve(key);
+      return this.resolve(key) as any;
     } catch (e) {
       if (isAsyncError(e)) {
         this.logger.debug("waiting for promise[{waitKey}] for {key}", {
@@ -432,7 +508,7 @@ export class Context<TRegistry extends RegistryType = Registry>
           waitKey: asString(e.key),
         });
         await e.promise;
-        return this.resolveAsync(key);
+        return this.resolveAsync(key) as any;
       }
       this.logger.error("error resolving async {key} {error}", {
         key: asString(key),
@@ -447,13 +523,40 @@ export function createNewContext<TRegistry extends RegistryType>() {
   return new Context<TRegistry>();
 }
 
-declare global {
-  // noinspection ES6ConvertVarToLetConst
-  var __pbj_context: Context<Registry> | undefined;
-}
-
 //Make this work when pbj is imported from multiple locations.
-export const context = (globalThis["__pbj_context"] ??=
-  createNewContext<Registry>());
+// export const context = (globalThis["__pbj_context"] ??=
+//   createNewContext<Registry>());
 
-export const pbj = context.pbj.bind(context);
+export const pbj: typeof context.pbj = function _pbj(
+  this: Context | undefined,
+  ...args
+) {
+  return context.pbj(...args);
+};
+
+let ctx = createNewContext<Registry>();
+export const contextProxyKey = Symbol("@pbj/private/context");
+export const context = new Proxy({} as Context, {
+  set(_target, prop, value, receiver) {
+    if (prop === contextProxyKey) {
+      ctx = value;
+      return true;
+    }
+    return Reflect.set(ctx, prop, value, receiver);
+  },
+  has(_target, prop) {
+    if (prop === contextProxyKey) {
+      return true;
+    }
+    return Reflect.has(ctx, prop);
+  },
+
+  get(_target, prop, receiver) {
+    if (prop === contextProxyKey) {
+      return ctx;
+    } else if (prop === "pbj") {
+      return ctx.pbj.bind(ctx);
+    }
+    return Reflect.get(ctx, prop, receiver);
+  },
+});

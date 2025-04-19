@@ -34,6 +34,12 @@
       "browser": "./dist/browser/pbjKey.js",
       "import": "./dist/esm/pbjKey.js",
       "require": "./dist/cjs/pbjKey.js"
+    },
+    "./test": {
+      "types": "./dist/esm/test.d.ts",
+      "browser": "./dist/browser/test.js",
+      "import": "./dist/esm/test.js",
+      "require": "./dist/cjs/test.js"
     }
   },
   "files": [

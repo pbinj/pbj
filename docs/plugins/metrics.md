@@ -46,7 +46,7 @@ context.register(
     metricType: "summary",
     percentiles: [0.5, 0.75, 0.95, 0.98, 0.99],
     maxAgeSeconds: 600,
-  })
+  }),
 );
 ```
 
@@ -68,7 +68,7 @@ import { promClientPBinJKey } from "@pbinj/pbj-prometheus";
 class CustomMetricsService {
   constructor(
     private prometheus = pbj(promClientPBinJKey),
-    register = pbj(registerKey)
+    register = pbj(registerKey),
   ) {
     this.requestCounter = new prometheus.Counter({
       name: "http_requests_total",
@@ -228,7 +228,7 @@ class ApiMetrics {
     method: string,
     path: string,
     status: number,
-    duration: number
+    duration: number,
   ) {
     this.requestDuration.observe({ method, path, status }, duration);
   }
@@ -254,22 +254,4 @@ scrape_configs:
     static_configs:
       - targets: ["localhost:9464"]
     scrape_interval: 15s
-```
-
-## Testing
-
-The plugin provides utilities for testing metrics:
-
-```typescript
-import { context } from "@pbinj/pbj";
-import { registerKey } from "@pbinj/pbj-prometheus";
-import { describe, expect, it } from "vitest";
-
-describe("Metrics", () => {
-  it("should record metrics", async () => {
-    const registry = context.resolve(registerKey);
-    const metrics = await registry.metrics();
-    expect(metrics).toContain("http_requests_total");
-  });
-});
 ```

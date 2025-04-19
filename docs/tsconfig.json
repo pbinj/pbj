@@ -106,6 +106,13 @@
     /* Completeness */
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
+    "paths": {
+      "@pbinj/pbj/*": ["../packages/pbj/src/*"],
+      "@pbinj/pbj": ["../packages/pbj/src/index.ts"],
+      "@pbinj/pbj-guards": ["../packages/pbj-guards/src/index.ts"],
+      "@pbinj/pbj-prometheus": ["../packages/pbj-prometheus/src/index.ts"],
+      "@pbinj/pbj-visualization": ["../packages/pbj-visualization/src/index.ts"]
+    }
   },
   "include": ["src"]
 }

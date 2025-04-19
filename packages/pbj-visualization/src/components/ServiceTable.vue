@@ -18,7 +18,7 @@ const search = "";
       :headers="headers"
       :items="props.services"
       :search="search"
-      height="400px"
+      height="100%"
       item-value="name"
     >
       <!-- eslint-disable-next-line vue/valid-v-slot -->

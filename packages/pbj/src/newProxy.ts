@@ -6,22 +6,33 @@ import {
   type Fn,
   isObjectish,
 } from "@pbinj/pbj-guards";
-import { proxyKey, serviceDescriptorKey, serviceSymbol } from "./symbols.js";
-import type { ServiceDescriptorI } from "./types.js";
+import {
+  proxyKey,
+  proxyValueSymbol,
+  serviceDescriptorKey,
+  serviceSymbol,
+} from "./symbols.js";
+import type { RegistryType, Returns, ServiceDescriptorI } from "./types.js";
+import { ServiceContext } from "./service-context.js";
 
-export function newProxy<T extends Constructor>(
-  key: unknown,
-  service: ServiceDescriptorI<any, any>,
-) {
-  return new Proxy({} as InstanceType<T>, {
+export function newProxy<
+  T,
+  TRegistry extends RegistryType,
+  V extends Returns<T>,
+>(service: ServiceContext<TRegistry, T>): V {
+  return new Proxy(service.description.isListOf ? [] : ({} as any), {
     get(_target, prop) {
       if (prop === proxyKey) {
-        return key;
+        return service.key;
       }
+
       if (prop === serviceDescriptorKey) {
         return service;
       }
       const val = service.invoke();
+      if (prop === proxyValueSymbol) {
+        return val;
+      }
       if (prop === nullableSymbol) {
         return val == null;
       }
@@ -33,7 +44,7 @@ export function newProxy<T extends Constructor>(
       }
 
       //So sometimes a factory value returns a primitive, this handles that.
-      if (service.primitive) {
+      if (service.description.primitive) {
         const prim = val;
         if (
           prop === Symbol.toPrimitive ||
@@ -56,25 +67,31 @@ export function newProxy<T extends Constructor>(
     },
     getOwnPropertyDescriptor(_target, prop) {
       const val = service.invoke();
+      if (service.description.isListOf && prop === "length") {
+        let aval = Array.isArray(val)
+          ? val
+          : Array.from(Object.values(val as any));
+        return Reflect.getOwnPropertyDescriptor(aval as any, prop);
+      }
       if (Array.isArray(val)) {
         return undefined;
       }
-      return Reflect.getOwnPropertyDescriptor(val, prop);
+      return Reflect.getOwnPropertyDescriptor(val as any, prop);
     },
     set(_target, prop, value) {
-      service.invoke()[prop] = value;
+      (service.invoke() as any)[prop] = value;
       return true;
     },
     ownKeys() {
       const value = service.invoke();
-      if (service.primitive) {
+      if (service.description.primitive) {
         return [];
       }
-      return Reflect.ownKeys(value);
+      return Reflect.ownKeys(value as any);
     },
     has(_target, prop) {
       const val = service.invoke();
-      if (service.primitive) {
+      if (service.description.primitive) {
         return false;
       }
       return isObjectish(val) ? prop in val : false;

@@ -28,19 +28,21 @@ Context.prototype.env = function env<
   K extends keyof PBinJEnv & string,
   D extends string,
 >(this: Context, envKey: K, defaultValue?: D): string | D {
-  return this.register(
-    Symbol.for(`@pbj/env/${envKey}`),
-    this.pathOf(envPBinJKey, envKey, defaultValue as any),
+  return this._register(
+    pbjKey<string | D>(`@pbj/env/${envKey}`),
+    this.pathOf(envPBinJKey, envKey, defaultValue as any) as any,
   ).proxy;
 };
 
 Context.prototype.envRequired = function envRequired<
   K extends keyof PBinJEnv & string,
 >(this: Context, envKey: K): string {
-  return this.register(
-    Symbol.for(`@pbj/env/${envKey}`),
-    this.pathOf(envPBinJKey, envKey),
-  ).withOptional(false).proxy;
+  const ret = this._register(
+    pbjKey<string>(`@pbj/env/${envKey}`),
+    this.pathOf(envPBinJKey as any, envKey),
+  );
+  ret.description.withOptional(false);
+  return ret.proxy;
 };
 export const env = context.env.bind(context);
 export const envRequired = context.envRequired.bind(context);

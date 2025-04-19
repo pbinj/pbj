@@ -15,7 +15,8 @@
     "lint:check": "pnpm run -r lint:check",
     "ci:version": "changeset version",
     "ci:publish": "pnpm --filter=./packages/** publish --access=public",
-    "reset-verify": "git clean -fdx && pnpm install && pnpm  build && pnpm  test && pnpm lint"
+    "reset-verify": "git clean -fdx && pnpm install && pnpm  build && pnpm  test && pnpm lint",
+    "prepare-release": "pnpm reset-verify && pnpm changeset"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.10",

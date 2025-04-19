@@ -106,7 +106,11 @@ const plugin = {
     }
 
     const code = `
-import { test, expect } from 'vitest';
+import { test, expect, beforeEach, afterEach } from 'vitest';
+import {runBeforeEachTest, runAfterEachTest} from "@pbinj/pbj/test";
+beforeEach(runBeforeEachTest);
+afterEach(runAfterEachTest);
+
 ${Array.from(importSet, (name, idx) => `import * as __${idx} from '${name}'`).join(';\n')}
 const require = ((map)=>(name) => map[name])(${toObjStrMap(...importSet)})
 

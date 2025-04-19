@@ -100,7 +100,7 @@ context.register(UserService).withInterceptors(
     const result = invoke();
     console.log(`Duration: ${performance.now() - start}ms`);
     return result;
-  }
+  },
 );
 ```
 

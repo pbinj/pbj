@@ -105,9 +105,7 @@ handlers.forEach((handler) => handler.handle("test"));
 The `listOf` function maintains type safety through the registry:
 
 ```typescript
-
 import { pbj, pbjKey, context as ctx } from "@pbinj/pbj";
-
 
 interface Plugin {
   name: string;
@@ -133,7 +131,6 @@ const plugins: Plugin[] = ctx.listOf(pluginKey);
 ### Plugin System
 
 ```typescript
-
 import { pbj, pbjKey, context } from "@pbinj/pbj";
 
 interface Plugin {
@@ -157,7 +154,6 @@ class PluginManager {
 ### Event Handlers
 
 ```typescript
-
 import { pbj, pbjKey, context } from "@pbinj/pbj";
 
 interface EventHandler {
@@ -171,7 +167,9 @@ class EventBus {
   constructor(private handlers = context.listOf(handlerKey)) {}
 
   emit(event: string, data: any) {
-    this.handlers.filter((h) => h.event === event).forEach((h) => h.handle(data));
+    this.handlers
+      .filter((h) => h.event === event)
+      .forEach((h) => h.handle(data));
   }
 }
 ```
@@ -179,7 +177,6 @@ class EventBus {
 ### Middleware Chain
 
 ```typescript
-
 import { pbj, pbjKey, context } from "@pbinj/pbj";
 
 interface Middleware {
@@ -243,16 +240,18 @@ class MiddlewareChain {
 
    const createValidator = (type: string) => ({
      type,
-     validate(){ 
-      //...
-      return true;
-     }
+     validate() {
+       //...
+       return true;
+     },
    });
 
-   ctx.register(pbjKey("email"), () => createValidator("email"))
-      .withTags(validatorKey);
-   ctx.register(pbjKey("phone"), () => createValidator("phone"))
-      .withTags(validatorKey);
+   ctx
+     .register(pbjKey("email"), () => createValidator("email"))
+     .withTags(validatorKey);
+   ctx
+     .register(pbjKey("phone"), () => createValidator("phone"))
+     .withTags(validatorKey);
    ```
 
 3. **Order Management**
@@ -268,13 +267,17 @@ class MiddlewareChain {
    const pluginKey = pbjKey<OrderedPlugin>("plugin");
 
    class PluginOrchestrator {
-     constructor(private ctx = context, private plugins = ctx.listOf(pluginKey)) {}
+     constructor(
+       private ctx = context,
+       private plugins = ctx.listOf(pluginKey),
+     ) {}
 
      executeInOrder() {
-       this.plugins.toSorted(({ order: a }, { order: b }) => a - b).forEach((p) => p.execute());
+       this.plugins
+         .toSorted(({ order: a }, { order: b }) => a - b)
+         .forEach((p) => p.execute());
      }
    }
-
    ```
 
 4. **Dynamic Registration**
@@ -287,10 +290,12 @@ class MiddlewareChain {
    const featureKey = pbjKey<Feature>("feature");
 
    class FeatureRegistry {
-    constructor(private ctx = context, public features = ctx.listOf(featureKey)) {}
-    registerFeature(feature: Feature) {
+     constructor(
+       private ctx = context,
+       public features = ctx.listOf(featureKey),
+     ) {}
+     registerFeature(feature: Feature) {
        return this.ctx.register(feature).withTags(featureKey);
      }
    }
    ```
-

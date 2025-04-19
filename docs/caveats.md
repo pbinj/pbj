@@ -60,7 +60,6 @@ class ConfigService {
 PBinJ can handle circular dependencies, but they should be avoided:
 
 ```typescript
-
 // ❌ Bad: Circular dependency
 class ServiceA {
   constructor(private b = pbj(ServiceB)) {}
@@ -91,7 +90,6 @@ Services are initialized lazily, which can lead to unexpected async behavior:
 Type inference with generics can be tricky:
 
 ```ts
-
 // ❌ Bad: Generic type lost in proxy
 class Repository<T> {
   constructor(private db = pbj(Database)) {}
@@ -169,7 +167,6 @@ class Service {
 2. **Avoid Object Manipulation**
 
 ```ts
-
 // Don't manipulate proxy objects directly
 const config = pbj(Config);
 Object.assign(config, newValues); // ❌ Bad

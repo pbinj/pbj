@@ -51,7 +51,6 @@ import { getSession } from "@authjs/express";
 
 const sessionPBinJKey = pbjKey<typeof getSession>("session");
 
-
 // Create scoped handler for session
 const requestScoped = context.scoped(sessionPBinJKey);
 

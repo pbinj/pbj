@@ -1,7 +1,12 @@
-import { proxyKey } from "./symbols.js";
 import { hasA, isSymbol, isBoolean } from "@pbinj/pbj-guards";
 
-export function isPBinJ(v: unknown): v is { [proxyKey]: symbol } {
+import { proxyKey } from "./symbols.js";
+import { CKey } from "./types.js";
+
+interface HasProxyCKey {
+  [proxyKey]: CKey;
+}
+export function isPBinJ(v: unknown): v is HasProxyCKey {
   return hasA(v, proxyKey, isSymbol);
 }
 
