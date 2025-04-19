@@ -166,10 +166,7 @@ export class ServiceContext<TRegistry extends RegistryType, T> {
     return resp;
   };
   addDependency(...keys: CKey[]) {
-    if (keys.length) {
-      const set = (this.description.dependencies ??= new Set<CKey>());
-      keys.forEach((v) => set.add(v));
-    }
+    this.description.addDependency(...keys);
     return this;
   }
   get proxy(): Returns<T> {
@@ -180,7 +177,6 @@ export class ServiceContext<TRegistry extends RegistryType, T> {
   toJSON() {
     return {
       ...this.description.toJSON(),
-      dependencies: Array.from(this.dependencies ?? [], asString as any),
       error: this.error,
       primitive: this.description.primitive,
     };

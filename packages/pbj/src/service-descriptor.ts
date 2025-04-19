@@ -190,8 +190,9 @@ export class ServiceDescriptor<
   }
   addDependency(...keys: CKey[]) {
     if (keys.length) {
+      const key = keyOf(this[serviceSymbol]);
       const set = (this.dependencies ??= new Set<CKey>());
-      keys.forEach((v) => set.add(v));
+      keys.forEach((v) => v !== key && set.add(v));
     }
     return this;
   }

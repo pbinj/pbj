@@ -12,6 +12,8 @@ import { EmailService } from "./sample-services/email.js";
 import { AuthService, authServiceSymbol } from "./sample-services/auth.js";
 import { connectionPBinJKey, DBService } from "./sample-services/db.js";
 import { runBeforeEachTest, runAfterEachTest } from "../test";
+import { ServiceDescriptor } from "../service-descriptor";
+import { keyOf } from "../util";
 
 const aiSymbol = Symbol("a");
 const abSymbol = Symbol("b");
@@ -415,6 +417,30 @@ describe("proxy", () => {
       const key = pbjKey<{ a: number }>("test-factory-a");
       const a = ctx.resolve(key, factory);
       expect(a).toBe(null);
+    });
+  });
+
+  describe("should not be a dependency on itself", () => {
+    it("should not be a dependency on itself", () => {
+      const key = pbjKey<{ a: number }>("test-factory-a");
+      const resp = ctx.register(key, () => ({ a: 1 })) as ServiceDescriptor<
+        any,
+        any
+      >;
+
+      resp.addDependency(keyOf(key));
+      expect(resp.dependencies?.size).toBe(0);
+    });
+
+    it("should serialize ctx", () => {
+      const key1 = pbjKey<{ a: number }>("test-factory-a");
+      const key2 = pbjKey<{ a: number }>("test-factory-b");
+      const key3 = pbjKey<{ a: number }>("test-factory-c");
+      const factory = (a: { a: number }) => ({ a: 1 });
+      ctx.register(key1, factory, { a: 1 });
+      ctx.register(key2, factory, key1);
+      ctx.register(key3, factory, key2);
+      expect(ctx.toJSON()).toMatchSnapshot();
     });
   });
 });

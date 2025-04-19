@@ -1,0 +1,64 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`proxy > should not be a dependency on itself > should serialize ctx 1`] = `
+[
+  {
+    "args": [
+      "[object Object]",
+    ],
+    "cacheable": true,
+    "dependencies": [],
+    "description": undefined,
+    "error": undefined,
+    "factory": true,
+    "invalid": true,
+    "invokable": true,
+    "invoked": false,
+    "listOf": false,
+    "name": "test-factory-a",
+    "optional": true,
+    "primitive": false,
+    "tags": [],
+  },
+  {
+    "args": [
+      "test-factory-a",
+    ],
+    "cacheable": true,
+    "dependencies": [
+      "test-factory-a",
+    ],
+    "description": undefined,
+    "error": undefined,
+    "factory": true,
+    "invalid": true,
+    "invokable": true,
+    "invoked": false,
+    "listOf": false,
+    "name": "test-factory-b",
+    "optional": true,
+    "primitive": false,
+    "tags": [],
+  },
+  {
+    "args": [
+      "test-factory-b",
+    ],
+    "cacheable": true,
+    "dependencies": [
+      "test-factory-b",
+    ],
+    "description": undefined,
+    "error": undefined,
+    "factory": true,
+    "invalid": true,
+    "invokable": true,
+    "invoked": false,
+    "listOf": false,
+    "name": "test-factory-c",
+    "optional": true,
+    "primitive": false,
+    "tags": [],
+  },
+]
+`;
