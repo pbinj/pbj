@@ -1,5 +1,5 @@
 import { isPBinJ } from "./guards.js";
-import { proxyKey } from "./symbols.js";
+import { proxyKey,pbjKeySymbol } from "./symbols.js";
 import type { CKey, Constructor, Fn, PBinJKey, PBinJKeyType } from "./types.js";
 import { isConstructor, isFn, isSymbol } from "@pbinj/pbj-guards";
 
@@ -8,6 +8,7 @@ const anonymousMap = new WeakMap<Fn, string>();
 
 export const pbjKey = <T>(name: string): PBinJKeyType<T> => {
   const sym = Symbol();
+  (sym as any)[pbjKeySymbol] = name;
   pbjKeyMap.set(sym, name);
   return sym as any;
 };
