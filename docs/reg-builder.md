@@ -3,6 +3,10 @@
 The `RegBuilder` class provides a modular, type-safe way to create and compose dependency registries in PBinJ. This approach allows you to define reusable registry modules that can be combined and applied to contexts. It
  is accesed via the builder function.
 
+This is a more advanced pattern that is optional to use.  It is meant for situations
+where there are a lot of dependencies and you want to be able to compose them together.
+
+
 ## Basic Usage
 
 ```typescript
@@ -155,7 +159,7 @@ describe("UserService", () => {
     
     // Test the service
     const userService = context.resolve("userService");
-    const users = userService.getUsers();
+    const users = userService.getUses();
     
     expect(users).toEqual([{ id: 1 }]);
     expect(context.resolve("logger").log).toHaveBeenCalled();
