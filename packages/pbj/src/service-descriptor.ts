@@ -1,6 +1,12 @@
-import {hasA, isConstructor, isFn, isPrimitive, isString} from "@pbinj/pbj-guards";
+import {
+  hasA,
+  isConstructor,
+  isFn,
+  isPrimitive,
+  isString,
+} from "@pbinj/pbj-guards";
 import type { Registry } from "./registry.js";
-import {serviceSymbol, typeAliasSymbol} from "./symbols.js";
+import { serviceSymbol, typeAliasSymbol } from "./symbols.js";
 import type {
   Args,
   CKey,
@@ -15,12 +21,12 @@ import type {
   InterceptFn,
   ValueOf,
 } from "./types.js";
-import {asString, isPBinJKey, isTypeAlias} from "./pbjKey.js";
+import { asString, isPBinJKey, isTypeAlias } from "./pbjKey.js";
 import { Logger } from "./logger.js";
 import { ContextI } from "./context-types.js";
 import { keyOf, listener } from "./util.js";
 import { isPBinJ } from "./guards.js";
-import {type} from "node:os";
+import { type } from "node:os";
 
 const EMPTY = [] as const;
 
@@ -180,7 +186,7 @@ export class ServiceDescriptor<
           this.addDependency(keyOf(v));
         } else if (isPBinJ(v)) {
           this.addDependency((v as any)[serviceSymbol]);
-        } else if (isTypeAlias(v)){
+        } else if (isTypeAlias(v)) {
           this.addDependency(v[typeAliasSymbol] as any);
         }
 

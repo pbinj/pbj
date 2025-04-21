@@ -16,7 +16,7 @@ import type {
 import { ServiceDescriptor } from "./service-descriptor.js";
 import { ServiceContext } from "./service-context.js";
 import { filterMap, isInherited, keyOf, Listener, listener } from "./util.js";
-import {pbjKey, isPBinJKey, asString, isTypeAlias} from "./pbjKey.js";
+import { pbjKey, isPBinJKey, asString, isTypeAlias } from "./pbjKey.js";
 import { isAsyncError } from "./errors.js";
 import { Logger } from "./logger.js";
 import { RegisterArgs, ToInject } from "./context-types.js";
@@ -231,15 +231,15 @@ export class Context<TRegistry extends RegistryType = Registry> {
     ...origArgs: RegisterArgs<TRegistry, TKey> | []
   ): ServiceContext<TRegistry, ValueOf<TRegistry, TKey>> {
     if (serviceKey instanceof ServiceDescriptor) {
-      const key =  keyOf(serviceKey.key);
+      const key = keyOf(serviceKey.key);
       return this.addServiceContext(
-             key,
-            new ServiceContext<TRegistry, ValueOf<TRegistry, TKey>>(
-            this as any,
-            serviceKey,
-            this.logger.createChild(serviceKey.name!),
-          ),
-       )
+        key,
+        new ServiceContext<TRegistry, ValueOf<TRegistry, TKey>>(
+          this as any,
+          serviceKey,
+          this.logger.createChild(serviceKey.name!),
+        ),
+      );
     }
     const key = keyOf(serviceKey);
 
@@ -271,21 +271,23 @@ export class Context<TRegistry extends RegistryType = Registry> {
     return this.addServiceContext(
       key,
       new ServiceContext<TRegistry, ValueOf<TRegistry, TKey>>(
-      this as any,
-      new ServiceDescriptor(
-        serviceKey,
-        service as any,
-        args as any,
-        true,
-        isFn(service),
-        undefined,
+        this as any,
+        new ServiceDescriptor(
+          serviceKey,
+          service as any,
+          args as any,
+          true,
+          isFn(service),
+          undefined,
+        ),
+        this.logger.createChild(asString(serviceKey)!),
       ),
-      this.logger.createChild(asString(serviceKey)!),
-    ));
-
-
+    );
   }
-  private addServiceContext(key: CKey, newInst: ServiceContext<TRegistry, any>) {
+  private addServiceContext(
+    key: CKey,
+    newInst: ServiceContext<TRegistry, any>,
+  ) {
     this.map.set(key, newInst);
     void this.notifyAdd(newInst);
     this.logger.info("registering service with key {key}", {

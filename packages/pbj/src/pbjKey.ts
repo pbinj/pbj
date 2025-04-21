@@ -1,7 +1,13 @@
 import { isPBinJ } from "./guards.js";
-import {proxyKey, pbjKeySymbol, typeAliasSymbol} from "./symbols.js";
+import { proxyKey, pbjKeySymbol, typeAliasSymbol } from "./symbols.js";
 import type { CKey, Constructor, Fn, PBinJKey, PBinJKeyType } from "./types.js";
-import {hasA, isConstructor, isFn, isString, isSymbol} from "@pbinj/pbj-guards";
+import {
+  hasA,
+  isConstructor,
+  isFn,
+  isString,
+  isSymbol,
+} from "@pbinj/pbj-guards";
 
 const pbjKeyMap = new WeakMap<{}, string>();
 const anonymousMap = new WeakMap<Fn, string>();

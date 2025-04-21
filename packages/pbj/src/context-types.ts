@@ -107,7 +107,6 @@ export interface ResolveAsyncContext<TRegistry extends RegistryType> {
 }
 
 export interface RegisterContext<TRegistry extends RegistryType> {
-
   register<T extends keyof TRegistry>(
     key: T | ServiceDescriptorI<TRegistry, T>,
   ): ServiceDescriptorI<TRegistry, TRegistry[T]>;
