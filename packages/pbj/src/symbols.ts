@@ -6,3 +6,4 @@ export const serviceDescriptorKey = Symbol("@pbj/service-descriptor");
 export const serviceProxySymbol = Symbol("@pbj/ServiceDescriptorProxy");
 export const proxyValueSymbol = Symbol("@pbj/ServiceDescriptorProxy.value");
 export const pbjKeySymbol = Symbol("@pbj/pbjKey");
+export const typeAliasSymbol = Symbol("@pbj/typeAlias");

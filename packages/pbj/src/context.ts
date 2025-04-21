@@ -16,7 +16,7 @@ import type {
 import { ServiceDescriptor } from "./service-descriptor.js";
 import { ServiceContext } from "./service-context.js";
 import { filterMap, isInherited, keyOf, Listener, listener } from "./util.js";
-import { pbjKey, isPBinJKey, asString } from "./pbjKey.js";
+import {pbjKey, isPBinJKey, asString, isTypeAlias} from "./pbjKey.js";
 import { isAsyncError } from "./errors.js";
 import { Logger } from "./logger.js";
 import { RegisterArgs, ToInject } from "./context-types.js";
@@ -231,7 +231,7 @@ export class Context<TRegistry extends RegistryType = Registry> {
     ...origArgs: RegisterArgs<TRegistry, TKey> | []
   ): ServiceContext<TRegistry, ValueOf<TRegistry, TKey>> {
     if (serviceKey instanceof ServiceDescriptor) {
-      const key = keyOf(serviceKey.key);
+      const key =  keyOf(serviceKey.key);
       return this.addServiceContext(
              key,
             new ServiceContext<TRegistry, ValueOf<TRegistry, TKey>>(
@@ -246,7 +246,7 @@ export class Context<TRegistry extends RegistryType = Registry> {
     let service: Constructor | Fn | unknown = serviceKey;
     let args: any[] = [...origArgs];
 
-    if (isSymbol(serviceKey)) {
+    if (isSymbol(serviceKey) || key !== (serviceKey as any)) {
       service = args.shift();
     }
 
