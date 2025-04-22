@@ -11,9 +11,9 @@ import {
 import { EmailService } from "./sample-services/email.js";
 import { AuthService, authServiceSymbol } from "./sample-services/auth.js";
 import { connectionPBinJKey, DBService } from "./sample-services/db.js";
-import { runBeforeEachTest, runAfterEachTest } from "../test";
-import { ServiceDescriptor } from "../service-descriptor";
-import { keyOf } from "../util";
+import { runBeforeEachTest, runAfterEachTest } from "../test.js";
+import { ServiceDescriptor } from "../service-descriptor.js";
+import { keyOf } from "../util.js";
 
 const aiSymbol = Symbol("a");
 const abSymbol = Symbol("b");

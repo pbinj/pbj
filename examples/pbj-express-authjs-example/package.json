@@ -1,6 +1,6 @@
 {
   "name": "pbj-express-authjs-example",
-  "version": "3.0.3",
+  "version": "4.0.0-next.0",
   "type": "module",
   "private": true,
   "scripts": {

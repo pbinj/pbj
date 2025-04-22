@@ -1,0 +1,17 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "pbj-drizzle-example": "1.1.4",
+    "pbj-express-authjs-example": "3.0.3",
+    "pbj-prometheus-example": "1.1.4",
+    "@pbinj/pbj": "3.0.3",
+    "@pbinj/pbj-guards": "3.0.3",
+    "@pbinj/pbj-prometheus": "3.0.3",
+    "@pbinj/pbj-visualization": "3.0.3"
+  },
+  "changesets": [
+    "blue-panthers-lie",
+    "quiet-shrimps-repeat"
+  ]
+}

@@ -1,5 +1,14 @@
 # @pbinj/pbj-metrics-example
 
+## 1.1.5-next.0
+
+### Patch Changes
+
+- Updated dependencies [0fe7344]
+- Updated dependencies [474837b]
+  - @pbinj/pbj-prometheus@4.0.0-next.0
+  - @pbinj/pbj@4.0.0-next.0
+
 ## 1.1.4
 
 ### Patch Changes

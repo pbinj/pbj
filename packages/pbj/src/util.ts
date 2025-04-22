@@ -1,6 +1,7 @@
 import { hasA, isSymbol } from "@pbinj/pbj-guards";
-import { serviceSymbol } from "./symbols.js";
+import { serviceSymbol, typeAliasSymbol } from "./symbols.js";
 import type { CKey, PBinJKey, Service } from "./types.js";
+import { isTypeAlias } from "./pbjKey.js";
 
 export type PathOf<
   T,
@@ -30,7 +31,9 @@ export function get<T, TKey extends string>(
 export function keyOf(key: PBinJKey<any> | Service): CKey {
   return hasA(key, serviceSymbol, isSymbol)
     ? (key[serviceSymbol] as any)
-    : (key as any);
+    : isTypeAlias(key)
+      ? (key[typeAliasSymbol] as any)
+      : (key as any);
 }
 
 export function* filter<T>(it: Iterable<T>, fn: (v: T) => boolean) {
