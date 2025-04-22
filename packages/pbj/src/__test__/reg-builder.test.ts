@@ -1,15 +1,18 @@
 import { builder } from "../reg-builder.js";
 import { it, describe, expect } from "vitest";
 import { createNewContext } from "@pbinj/pbj";
+const fn = (a: number, b: string) => a + 1 + b;
 
 describe("reg-builder", () => {
   it("should merge", () => {
     const reg = builder().register("a", 1);
     const a2 = builder().register("c", 3);
     const reg3 = reg.uses(a2.export());
+    expect(reg3.refs.c).toBeDefined();
+    expect(reg3.refs.a).toBeDefined();
+
   });
   it("should factory", () => {
-    const fn = (a: number, b: string) => a + 1 + b;
     const reg = builder().register("a", "");
     const a2 = builder().register("b", 3);
     const reg3 = reg.uses(a2.export());
@@ -17,7 +20,6 @@ describe("reg-builder", () => {
     expect(a.configure("b").service).toEqual(3);
   });
   it("should factory more", () => {
-    const fn = (a: number, b: string) => a + 1 + b;
     const reg = builder().register("a", "");
     const a2 = builder().register("b", 3);
     const reg3 = reg.uses(a2.export());
