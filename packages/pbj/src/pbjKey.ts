@@ -1,5 +1,5 @@
 import { isPBinJ } from "./guards.js";
-import { proxyKey, pbjKeySymbol, typeAliasSymbol } from "./symbols.js";
+import { proxyKey, typeAliasSymbol } from "./symbols.js";
 import {
   CKey,
   Constructor,

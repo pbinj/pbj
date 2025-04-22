@@ -8,7 +8,7 @@ import {
 import { ServiceDescriptor } from "./service-descriptor.js";
 import type { ContextI, ToInject } from "./context-types.js";
 import { typeAliasSymbol } from "./symbols.js";
-import { asString } from "./pbjKey";
+import { asString } from "./pbjKey.js";
 
 type Merge<T> = T extends [infer First, ...infer Rest]
   ? First extends ApplyContext<infer T>
