@@ -74,7 +74,6 @@ class RegBuilder<
     ...args: ToKey<Parameters<TFn>>
   ): RegBuilder<TRegistry & { [K in T]: V }>;
 
-
   register<T extends string, V>(
       key: T,
       val: V,
