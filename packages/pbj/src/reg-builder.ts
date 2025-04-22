@@ -63,9 +63,9 @@ class RegBuilder<
   }
 
   register<T extends string, V, TFn extends Constructor<V>>(
-      key: T,
-      val: TFn,
-      ...args: ToKey<ConstructorParameters<TFn>>
+    key: T,
+    val: TFn,
+    ...args: ToKey<ConstructorParameters<TFn>>
   ): RegBuilder<TRegistry & { [K in T]: V }>;
 
   register<T extends string, V, TFn extends Fn<V>>(
@@ -75,8 +75,8 @@ class RegBuilder<
   ): RegBuilder<TRegistry & { [K in T]: V }>;
 
   register<T extends string, V>(
-      key: T,
-      val: V,
+    key: T,
+    val: V,
   ): RegBuilder<TRegistry & { [K in T]: V }>;
 
   /**
