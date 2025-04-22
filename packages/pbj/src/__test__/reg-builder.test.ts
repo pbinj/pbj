@@ -10,7 +10,6 @@ describe("reg-builder", () => {
     const reg3 = reg.uses(a2.export());
     expect(reg3.refs.c).toBeDefined();
     expect(reg3.refs.a).toBeDefined();
-
   });
   it("should factory", () => {
     const reg = builder().register("a", "");

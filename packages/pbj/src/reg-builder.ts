@@ -120,7 +120,9 @@ class RegBuilder<
       : { [K in T[number]]: TRegistry[K] },
   >(...keys: T): ApplyContext<TRet> {
     return new ApplyContext<TRet>(
-      keys.length ? Object.entries(keys.map(v=>([v, this._descriptions[v]]))) : this._descriptions as any,
+      keys.length
+        ? Object.entries(keys.map((v) => [v, this._descriptions[v]]))
+        : (this._descriptions as any),
       this.registries,
       (ctx) => {
         for (const builder of this.registries) {
