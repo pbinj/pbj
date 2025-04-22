@@ -1,7 +1,7 @@
-import { hasA, isString, isSymbol } from "@pbinj/pbj-guards";
+import { hasA,  isSymbol } from "@pbinj/pbj-guards";
 import { serviceSymbol, typeAliasSymbol } from "./symbols.js";
 import type { CKey, PBinJKey, Service } from "./types.js";
-import { isTypeAlias } from "./pbjKey";
+import { isTypeAlias } from "./pbjKey.js";
 
 export type PathOf<
   T,

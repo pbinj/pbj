@@ -16,7 +16,7 @@ import { builder, context } from "@pbinj/pbj";
 const coreRegistry = builder()
   .register("logger", console)
   .register("config", { apiUrl: "https://api.example.com" })
-  .close();
+  .export();
 
 // Create a context and apply the registry
 coreRegistry.apply(context);
@@ -35,22 +35,22 @@ Registry builders maintain full type safety through TypeScript's type system:
 One of the key benefits of `RegBuilder` is the ability to compose registries:
 
 ```typescript
-import { builder } from "@pbinj/pbj";
+import { builder, context } from "@pbinj/pbj";
 
 // Core services registry
 const coreRegistry = builder()
   .register("logger", console)
-  .register("config", { apiUrl: "https://api.example.com" }).close();
+  .register("config", { apiUrl: "https://api.example.com" }).export();
 
 // Database registry that depends on core
 const dbRegistry = builder()
   .register("database", { connect: () => console.log("Connected to DB") })
-  .uses(coreRegistry).close();
+  .uses(coreRegistry).export();
 
 // API registry that depends on both core and database
 const apiRegistry = builder()
   .register("api", { fetch: (url: string) => console.log(`Fetching ${url}`) })
-  .uses(dbRegistry).close();
+  .uses(dbRegistry).export();
 
 // Create a context with all registries
 apiRegistry.apply(context);
@@ -69,19 +69,19 @@ const registry = builder()
   .register("logger", console);
 
 // Register a factory that uses other services
-const dbRegistry = registry.factory("database", 
+const dbRegistry = registry.register("database", 
   (config, logger) => {
     logger.log(`Connecting to ${config.dbUrl}`);
     return { 
       query: (sql: string) => console.log(`Executing: ${sql}`) 
     };
   }, 
-  registry.ref("config"), 
-  registry.ref("logger")
+  registry.refs.config, 
+  registry.refs.logger
 );
 
 // Use the factory-created service
-dbRegistry.close().apply(context);
+dbRegistry.export().apply(context);
 const db = context.resolve("database");
 db.query("SELECT * FROM users");
 ```
@@ -107,33 +107,34 @@ registry.configure("httpClient")
 `builder` enables a modular application structure:
 
 ```typescript
-// auth/registry.ts
-export function createAuthRegistry() {
-  return builder()
+//file: ./auth/registry.ts
+import {builder} from '@pbinj/pbj';
+export const auth =  builder()
     .register("authService", { login: (user, pass) => true })
-    .register("tokenService", { generate: () => "token" });
-}
+    .register("tokenService", { generate: () => "token" })
+        .export();
+```
 
-// users/registry.ts
-export function createUsersRegistry(authRegistry: builder) {
-  return builder()
+```typescript
+//file: ./users/registry.ts
+import {builder} from '@pbinj/pbj';
+export const users = builder()
     .register("userService", { getUsers: () => ["user1", "user2"] })
-    .uses(authRegistry.close());
-}
+        .export();
 
-// app.ts
-import { createAuthRegistry } from "./auth/registry";
-import { createUsersRegistry } from "./users/registry";
+```
 
-const authRegistry = createAuthRegistry();
-const usersRegistry = createUsersRegistry(authRegistry);
+```ts
+import {builder, context, pbj} from '@pbinj/pbj';
+import { auth } from "./auth/registry.ts";
+import { users } from "./users/registry.ts";
+
 
 const appRegistry = builder()
   .register("app", { name: "MyApp", version: "1.0.0" })
-  .uses(usersRegistry.close());
+  .uses(users, auth);
 
-const context = pbj.newContext();
-appRegistry.close().apply(context);
+appRegistry.export().apply(context);
 ```
 
 ## Testing with Registry Builder
@@ -142,6 +143,7 @@ appRegistry.close().apply(context);
 
 ```typescript
 import { builder, context } from "@pbinj/pbj";
+import { describe, it } from "vitest";
 
 describe("UserService", () => {
   it("should get users", () => {
@@ -149,10 +151,10 @@ describe("UserService", () => {
     const testRegistry = builder()
       .register("database", { query: vi.fn().mockResolvedValue([{ id: 1 }]) })
       .register("logger", { log: vi.fn() })
-      .factory("userService", UserService, 
-        testRegistry.ref("database"), 
-        testRegistry.ref("logger")
-      ).close();
+      .register("userService", UserService, 
+        testRegistry.refs.database, 
+        testRegistry.refs.logger
+      ).export();
     
     // Apply to a test context
     testRegistry.apply(context);
