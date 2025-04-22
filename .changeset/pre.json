@@ -2,13 +2,13 @@
   "mode": "pre",
   "tag": "next",
   "initialVersions": {
-    "pbj-drizzle-example": "1.1.4",
-    "pbj-express-authjs-example": "3.0.3",
-    "pbj-prometheus-example": "1.1.4",
-    "@pbinj/pbj": "3.0.3",
-    "@pbinj/pbj-guards": "3.0.3",
-    "@pbinj/pbj-prometheus": "3.0.3",
-    "@pbinj/pbj-visualization": "3.0.3"
+    "pbj-drizzle-example": "1.1.5-next.0",
+    "pbj-express-authjs-example": "4.0.0-next.0",
+    "pbj-prometheus-example": "1.1.5-next.0",
+    "@pbinj/pbj": "4.0.0-next.0",
+    "@pbinj/pbj-guards": "4.0.0-next.0",
+    "@pbinj/pbj-prometheus": "4.0.0-next.0",
+    "@pbinj/pbj-visualization": "4.0.0-next.0"
   },
   "changesets": [
     "blue-panthers-lie",
