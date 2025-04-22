@@ -1,5 +1,16 @@
 # @pbinj/pbj
 
+## 4.0.0-next.0
+
+### Major Changes
+
+- 0fe7344: Changed the api to expose less of the guts and make future features easier. Added the ability to use PBinJKeyTypes as place holders during registration.
+
+### Patch Changes
+
+- 474837b: Added builder to make intitializing easier
+  - @pbinj/pbj-guards@4.0.0-next.0
+
 ## 3.0.3
 
 ### Patch Changes
