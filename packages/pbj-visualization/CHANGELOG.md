@@ -1,5 +1,13 @@
 # @pbinj/pbj-visualization
 
+## 4.0.1
+
+### Patch Changes
+
+- Updated dependencies [eb27007]
+  - @pbinj/pbj@4.0.1
+  - @pbinj/pbj-guards@4.0.1
+
 ## 4.0.0
 
 ### Major Changes
