@@ -1,7 +1,7 @@
 {
   "name": "pbj-prometheus-example",
   "type": "module",
-  "version": "1.1.5-next.0",
+  "version": "1.1.5",
   "description": "A simple example on how to use @pbinj/pbj-prometheus in your app",
   "scripts": {
     "prometheus": "docker run -p 9090:9090  -v ./prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus",

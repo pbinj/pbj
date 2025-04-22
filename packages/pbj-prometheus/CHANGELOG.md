@@ -1,5 +1,18 @@
 # @pbinj/pbj-metrics
 
+## 4.0.0
+
+### Major Changes
+
+- 0fe7344: Changed the api to expose less of the guts and make future features easier. Added the ability to use PBinJKeyTypes as place holders during registration.
+
+### Patch Changes
+
+- Updated dependencies [0fe7344]
+- Updated dependencies [84e61c7]
+  - @pbinj/pbj@4.0.0
+  - @pbinj/pbj-guards@4.0.0
+
 ## 4.0.0-next.0
 
 ### Major Changes
