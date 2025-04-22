@@ -3,7 +3,7 @@ import { CKey, RegistryType, Returns, ServiceInitI } from "./types.js";
 import { PBinJAsyncError, PBinJError } from "./errors.js";
 import { serviceSymbol, typeAliasSymbol } from "./symbols.js";
 import { hasA, isFn, isPrimitive, isString } from "@pbinj/pbj-guards";
-import { asString, isPBinJKey } from "./pbjKey.js";
+import { asString, isPBinJKey, isTypeAlias } from "./pbjKey.js";
 import { ServiceDescriptor } from "./service-descriptor.js";
 import { Logger } from "./logger.js";
 import { keyOf } from "./util.js";
@@ -104,8 +104,8 @@ export class ServiceContext<TRegistry extends RegistryType, T> {
     }
     let resp;
     const args = this.description.args.map((v) => {
-      if (hasA(v, typeAliasSymbol, isString)) {
-        return this.context.pbj(v[typeAliasSymbol] as any);
+      if (isTypeAlias(v)) {
+        return this.context.pbj(v[typeAliasSymbol]);
       } else if (isPBinJKey(v)) {
         //If we don't return a proxy, it could cause a circular dependency.
         // It would be nice if pbj was smart enough to know when it could and couldn't return a proxy,

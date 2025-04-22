@@ -1,4 +1,4 @@
-import { hasA, isSymbol } from "@pbinj/pbj-guards";
+import { hasA, isString, isSymbol } from "@pbinj/pbj-guards";
 import { serviceSymbol, typeAliasSymbol } from "./symbols.js";
 import type { CKey, PBinJKey, Service } from "./types.js";
 import { isTypeAlias } from "./pbjKey.js";
@@ -29,32 +29,15 @@ export function get<T, TKey extends string>(
 }
 
 export function keyOf(key: PBinJKey<any> | Service): CKey {
-  return hasA(key, serviceSymbol, isSymbol)
-    ? (key[serviceSymbol] as any)
-    : isTypeAlias(key)
-      ? (key[typeAliasSymbol] as any)
-      : (key as any);
+  return isString(key) || isString(key)
+    ? key
+    : hasA(key, serviceSymbol, isSymbol)
+      ? (key[serviceSymbol] as any)
+      : isTypeAlias(key)
+        ? keyOf(key[typeAliasSymbol])
+        : (key as any);
 }
 
-export function* filter<T>(it: Iterable<T>, fn: (v: T) => boolean) {
-  for (const v of it) {
-    if (fn(v)) {
-      yield v;
-    }
-  }
-}
-/**
- * Concat a bunch of iterables, skipping nulls and undefined.
- * @param it
- */
-export function* concat<T>(...it: (Iterable<T> | undefined | null)[]) {
-  for (const v of it) {
-    if (v == null) {
-      continue;
-    }
-    yield* v;
-  }
-}
 /**
  * Filters and maps iterable, skipping nulls and undefined.
  * @param it

@@ -1,4 +1,9 @@
-import { destroySymbol, removeSymbol, serviceSymbol } from "./symbols.js";
+import {
+  destroySymbol,
+  removeSymbol,
+  serviceSymbol,
+  typeAliasSymbol,
+} from "./symbols.js";
 import { RegisterArgs } from "./context-types.js";
 
 export type Constructor<T = any> = new (...args: any[]) => T;
@@ -185,12 +190,4 @@ export interface ServiceDescriptorI<
  */
 export type InterceptFn<T> = (invoke: () => T) => T;
 
-export type FactoryOf<
-  TRegistry extends RegistryType,
-  TKey extends PBinJKey<TRegistry>,
-  TArgs extends RegisterArgs<TRegistry, TKey>,
-> = TKey extends Constructor | Fn
-  ? TKey
-  : TArgs[0] extends Constructor | Fn
-    ? TArgs[0]
-    : never;
+export type TypeAlias = { [typeAliasSymbol]: PBinJKey<any> };
