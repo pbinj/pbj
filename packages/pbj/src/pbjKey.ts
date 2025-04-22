@@ -1,7 +1,15 @@
 import { isPBinJ } from "./guards.js";
-import { proxyKey, pbjKeySymbol, typeAliasSymbol } from "./symbols.js";
-import type { CKey, Constructor, Fn, PBinJKey, PBinJKeyType } from "./types.js";
+import { proxyKey, typeAliasSymbol } from "./symbols.js";
 import {
+  CKey,
+  Constructor,
+  Fn,
+  PBinJKey,
+  PBinJKeyType,
+  TypeAlias,
+} from "./types.js";
+import {
+  has,
   hasA,
   isConstructor,
   isFn,
@@ -24,17 +32,21 @@ export const pbjKeyName = (key: PBinJKeyType<any>) => {
 export function isPBinJKey(v: unknown): v is PBinJKeyType<unknown> {
   return pbjKeyMap.has(v as any);
 }
-export function isTypeAlias(v: unknown): v is { [typeAliasSymbol]: string } {
-  return hasA(v, typeAliasSymbol, isString);
+
+export function isTypeAlias(v: unknown): v is TypeAlias {
+  return has(v, typeAliasSymbol);
 }
 export function asString(
-  key: PBinJKey<any> | CKey | Constructor | Fn | symbol | unknown,
+  key: PBinJKey<any> | TypeAlias | CKey | Constructor | Fn | symbol | unknown,
 ): string {
   if (key == null) {
     return "<unknown>";
   }
   if (typeof key === "string") {
     return key;
+  }
+  if (isTypeAlias(key)) {
+    return asString(key[typeAliasSymbol]);
   }
   if (isPBinJ(key)) {
     const service = key[proxyKey];
@@ -48,7 +60,7 @@ export function asString(
   }
 
   if (isFn(key)) {
-    if (isConstructor(key)) {
+    if (isConstructor(key) && hasA(key, "name", isString)) {
       return key.name;
     }
     return key.name || anonymous(key);

@@ -6,8 +6,9 @@ import {
   ServiceDescriptorI,
 } from "./types.js";
 import { ServiceDescriptor } from "./service-descriptor.js";
-import { ContextI } from "./context-types.js";
+import type { ContextI, ToInject } from "./context-types.js";
 import { typeAliasSymbol } from "./symbols.js";
+import { asString } from "./pbjKey.js";
 
 type Merge<T> = T extends [infer First, ...infer Rest]
   ? First extends ApplyContext<infer T>
@@ -35,10 +36,10 @@ abstract class HasRefsImpl<TRegistry extends RegistryType> {
   }
   public get refs(): { [K in keyof TRegistry]: PBinJKeyType<TRegistry[K]> } {
     return Object.fromEntries(
-      Object.entries(this.descriptions).map(([key, value]) => {
+      Object.keys(this.descriptions).map((key) => {
         return [
           key,
-          regKey<TRegistry, keyof TRegistry>(key as keyof TRegistry),
+          typeAlias<TRegistry, keyof TRegistry>(key as keyof TRegistry),
         ] as const;
       }),
     ) as any;
@@ -65,13 +66,13 @@ class RegBuilder<
   register<T extends string, V, TFn extends Constructor<V>>(
     key: T,
     val: TFn,
-    ...args: ToKey<ConstructorParameters<TFn>>
+    ...args: ToInject<ConstructorParameters<TFn>>
   ): RegBuilder<TRegistry & { [K in T]: V }>;
 
   register<T extends string, V, TFn extends Fn<V>>(
     key: T,
     val: TFn,
-    ...args: ToKey<Parameters<TFn>>
+    ...args: ToInject<Parameters<TFn>>
   ): RegBuilder<TRegistry & { [K in T]: V }>;
 
   register<T extends string, V>(
@@ -90,7 +91,7 @@ class RegBuilder<
       val[0] as any,
       val.slice(1) as any,
     );
-    serviceDescriptor.withName(String(key));
+    serviceDescriptor.withName(asString(key));
     this.services.add(serviceDescriptor);
     (this._descriptions as any)[key] = serviceDescriptor;
     return this as any;
@@ -163,14 +164,10 @@ class ApplyContext<
     return ctx as any;
   }
 }
-function regKey<TRegistry extends RegistryType, Key extends keyof TRegistry>(
+function typeAlias<TRegistry extends RegistryType, Key extends keyof TRegistry>(
   name: Key,
 ): RegistryRef<TRegistry[Key]> {
   return { [typeAliasSymbol]: name } as any;
 }
-
-type ToKey<T> = T extends [infer First, ...infer Rest]
-  ? [First | RegistryRef<First>, ...ToKey<Rest>]
-  : [];
 
 type RegistryRef<V> = PBinJKeyType<V>;
