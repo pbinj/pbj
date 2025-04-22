@@ -54,7 +54,9 @@ describe("reg-builder", () => {
     );
     const e = a.export("a", "f");
     const ctx = e.apply(createNewContext());
-    expect(ctx.resolve(e.refs.a)).toEqual(1);
+    const aref = e.refs.a;
+    const ra = ctx.resolve(aref);
+    expect(ra).toEqual(1);
     expect(ctx.resolve(e.refs.f)).toEqual(4);
     //@ts-expect-error - this should be an error please do not remove.  `export` should prevent this from being accessible.
     const error = e.refs.b;

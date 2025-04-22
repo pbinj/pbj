@@ -7,8 +7,8 @@ import {
 } from "./types.js";
 import { ServiceDescriptor } from "./service-descriptor.js";
 import { ContextI } from "./context-types.js";
-import { pbjKey } from "./pbjKey.js";
-import { typeAliasSymbol } from "./symbols";
+import { typeAliasSymbol } from "./symbols.js";
+
 type Merge<T> = T extends [infer First, ...infer Rest]
   ? First extends ApplyContext<infer T>
     ? T & Merge<Rest>
@@ -29,10 +29,11 @@ abstract class HasRefsImpl<TRegistry extends RegistryType> {
     [K in keyof TRegistry]: ServiceDescriptorI<TRegistry, TRegistry[K]>;
   } {
     return this.registries.reduce((acc, cur) => {
-      return { ...acc, ...cur.descriptions };
+      const desc = cur.descriptions;
+      return { ...acc, ...desc };
     }, this._descriptions) as any;
   }
-  public get refs(): { [K in keyof TRegistry]: RegistryRef<TRegistry[K]> } {
+  public get refs(): { [K in keyof TRegistry]: PBinJKeyType<TRegistry[K]> } {
     return Object.fromEntries(
       Object.entries(this.descriptions).map(([key, value]) => {
         return [
@@ -119,20 +120,17 @@ class RegBuilder<
       ? TRegistry
       : { [K in T[number]]: TRegistry[K] },
   >(...keys: T): ApplyContext<TRet> {
-    return new ApplyContext<TRet>(
-      keys.length
-        ? Object.entries(keys.map((v) => [v, this._descriptions[v]]))
-        : (this._descriptions as any),
-      this.registries,
-      (ctx) => {
-        for (const builder of this.registries) {
-          builder.apply(ctx);
-        }
-        for (const val of this.services) {
-          ctx.register(val);
-        }
-      },
-    );
+    const descriptions = keys.length
+      ? (Object.fromEntries(keys.map((v) => [v, this._descriptions[v]])) as any)
+      : this._descriptions;
+    return new ApplyContext<TRet>(descriptions, this.registries, (ctx) => {
+      for (const builder of this.registries) {
+        builder.apply(ctx);
+      }
+      for (const val of this.services) {
+        ctx.register(val);
+      }
+    });
   }
 }
 
