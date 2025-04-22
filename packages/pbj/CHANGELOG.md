@@ -1,5 +1,12 @@
 # @pbinj/pbj
 
+## 4.0.1
+
+### Patch Changes
+
+- eb27007: a little type cleanup
+  - @pbinj/pbj-guards@4.0.1
+
 ## 4.0.0
 
 ### Major Changes
