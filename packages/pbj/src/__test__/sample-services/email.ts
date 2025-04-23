@@ -1,7 +1,6 @@
 import { auth, authServiceSymbol } from "./auth.js";
 import { DBService, IDBService } from "./db.js";
-import { pbj, serviceSymbol } from "@pbinj/pbj";
-import { ContextI } from "../../context-types";
+import { pbj, serviceSymbol, type ContextI } from "@pbinj/pbj";
 
 export const emailServiceSymbol = Symbol("email-service-type");
 

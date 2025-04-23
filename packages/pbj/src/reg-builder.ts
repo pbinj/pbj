@@ -8,10 +8,8 @@ import {
 import { ServiceDescriptor } from "./service-descriptor.js";
 import type { ContextI, ToInject } from "./context-types.js";
 import { typeAliasSymbol } from "./symbols.js";
-import { asString, pbjKey } from "./pbjKey.js";
+import { pbjKey } from "./pbjKey.js";
 import { has, hasA, isFn } from "@pbinj/pbj-guards";
-import { Context } from "./context.js";
-import { isAsyncFunction } from "node:util/types";
 
 export interface HasDescriptions<TRegistry extends RegistryType> {
   readonly descriptions: {
