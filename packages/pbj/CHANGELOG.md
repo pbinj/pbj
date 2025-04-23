@@ -1,5 +1,12 @@
 # @pbinj/pbj
 
+## 4.0.3
+
+### Patch Changes
+
+- 41243d9: Fixing the types so they work better
+  - @pbinj/pbj-guards@4.0.3
+
 ## 4.0.2
 
 ### Patch Changes

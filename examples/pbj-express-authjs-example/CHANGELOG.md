@@ -1,5 +1,13 @@
 # @pbinj/pbj-express-authjs-example
 
+## 4.0.3
+
+### Patch Changes
+
+- Updated dependencies [41243d9]
+  - @pbinj/pbj@4.0.3
+  - pbj-drizzle-example@1.1.8
+
 ## 4.0.2
 
 ### Patch Changes
