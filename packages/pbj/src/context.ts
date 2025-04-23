@@ -246,7 +246,7 @@ export class Context<TRegistry extends RegistryType = Registry> {
     let service: Constructor | Fn | unknown = serviceKey;
     let args: any[] = [...origArgs];
 
-    if (isSymbol(serviceKey)) {
+    if (isSymbol(serviceKey) || isTypeAlias(serviceKey)) {
       service = args.shift();
     }
 
