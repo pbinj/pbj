@@ -4,7 +4,6 @@ import {
   serviceSymbol,
   typeAliasSymbol,
 } from "./symbols.js";
-import { RegisterArgs } from "./context-types.js";
 
 export type Constructor<T = any> = new (...args: any[]) => T;
 
@@ -43,7 +42,7 @@ export type VisitFn<
 
 export interface RegistryType {}
 
-export type PBinJKeyType<T = any> = symbol & { [serviceSymbol]: T };
+export type PBinJKeyType<T = any> = { [serviceSymbol]: T };
 
 export type OfA<T> = Constructor<T> | Fn<T> | T;
 //The second argument is usually a factory.  It could also be a value.   This tries to enforce if it is a factory, it should
