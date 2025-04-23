@@ -1,6 +1,11 @@
-import { builder } from "../reg-builder.js";
 import { it, describe, expect } from "vitest";
-import { createNewContext } from "@pbinj/pbj";
+import { builder, context } from "@pbinj/pbj";
+import {runBeforeEachTest, runAfterEachTest} from "../test";
+import {beforeEach, afterEach} from "vitest";
+
+beforeEach(runBeforeEachTest)
+afterEach(runAfterEachTest);
+
 const fn = (a: number, b: string) => a + 1 + b;
 
 describe("reg-builder", () => {
@@ -37,7 +42,7 @@ describe("reg-builder", () => {
       reg3.refs.a,
     );
 
-    const ctx = a.export().apply(createNewContext());
+    const ctx = a.export().apply(context);
     expect(ctx.resolve(reg.refs.a)).toEqual(1);
     expect(ctx.resolve(a2.refs.b)).toEqual(3);
     expect(ctx.resolve(a.refs.f)).toEqual(4);
@@ -53,7 +58,7 @@ describe("reg-builder", () => {
       reg3.refs.a,
     );
     const e = a.export("a", "f");
-    const ctx = e.apply(createNewContext());
+    const ctx = e.apply(context);
     const aref = e.refs.a;
     const ra = ctx.resolve(aref);
     expect(ra).toEqual(1);
