@@ -1,5 +1,12 @@
 # @pbinj/pbj-drizzle-example
 
+## 1.1.7
+
+### Patch Changes
+
+- Updated dependencies [e4d03b1]
+  - @pbinj/pbj@4.0.2
+
 ## 1.1.6
 
 ### Patch Changes

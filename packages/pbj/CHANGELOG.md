@@ -1,5 +1,12 @@
 # @pbinj/pbj
 
+## 4.0.2
+
+### Patch Changes
+
+- e4d03b1: a little type cleanup
+  - @pbinj/pbj-guards@4.0.2
+
 ## 4.0.1
 
 ### Patch Changes
