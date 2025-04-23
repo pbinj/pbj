@@ -9,7 +9,11 @@ import {
   serviceSymbol,
 } from "@pbinj/pbj";
 import { EmailService } from "./sample-services/email.js";
-import { AuthService, authServiceSymbol } from "./sample-services/auth.js";
+import {
+  auth,
+  AuthService,
+  authServiceSymbol,
+} from "./sample-services/auth.js";
 import { connectionPBinJKey, DBService } from "./sample-services/db.js";
 import { runBeforeEachTest, runAfterEachTest } from "../test.js";
 import { ServiceDescriptor } from "../service-descriptor.js";
@@ -85,6 +89,7 @@ describe("context", () => {
   });
 
   it("should in inject the things", async () => {
+    auth(ctx);
     ctx.register(authServiceSymbol, AuthService);
     ctx.register(connectionPBinJKey, "hello");
     ctx.register(DBService);

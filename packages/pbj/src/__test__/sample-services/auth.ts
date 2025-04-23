@@ -1,5 +1,5 @@
-import { pbj } from "../../context.js";
-import { DBService } from "./db.js";
+import { pbj, type ContextI } from "@pbinj/pbj";
+import { db, dbServiceSymbol } from "./db.js";
 
 export const authServiceSymbol = Symbol("auth-service-type");
 
@@ -10,7 +10,7 @@ export interface IAuthService {
 export class AuthService implements IAuthService {
   public static readonly service = authServiceSymbol;
 
-  constructor(private readonly dbService = pbj(DBService)) {}
+  constructor(private readonly dbService = pbj(dbServiceSymbol)) {}
 
   async isAuthenticated() {
     this.dbService.connection();
@@ -23,4 +23,9 @@ declare module "@pbinj/pbj" {
   export interface Registry {
     [authServiceSymbol]: InstanceType<typeof AuthService>;
   }
+}
+
+export function auth(ctx: ContextI) {
+  db(ctx).register(authServiceSymbol, AuthService);
+  return ctx;
 }

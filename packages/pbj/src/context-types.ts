@@ -142,7 +142,10 @@ export interface RegisterContext<TRegistry extends RegistryType> {
     fn: TCon,
     ...args: ToInject<ConstructorParameters<TCon>>
   ): ServiceDescriptorI<TRegistry, T>;
-
+  register<T, TKey extends PBinJKeyType<T>>(
+    key: TKey,
+    fn: T,
+  ): ServiceDescriptorI<TRegistry, T>;
   register<T, TFn extends Fn<T>>(fn: TFn): ServiceDescriptorI<TRegistry, T>;
   register<T, TFn extends Fn<T>>(
     fn: TFn,

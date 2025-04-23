@@ -8,77 +8,116 @@ import {
 import { ServiceDescriptor } from "./service-descriptor.js";
 import type { ContextI, ToInject } from "./context-types.js";
 import { typeAliasSymbol } from "./symbols.js";
-import { asString } from "./pbjKey.js";
+import { pbjKey } from "./pbjKey.js";
+import { has, hasA, isFn } from "@pbinj/pbj-guards";
 
-type Merge<T> = T extends [infer First, ...infer Rest]
-  ? First extends ApplyContext<infer T>
-    ? T & Merge<Rest>
-    : T & Merge<Rest>
-  : T;
-
-export const builder = () => {
-  return new RegBuilder();
-};
-abstract class HasRefsImpl<TRegistry extends RegistryType> {
-  protected constructor(
-    protected _descriptions: {
-      [K in keyof TRegistry]: ServiceDescriptorI<TRegistry, TRegistry[K]>;
-    } = {} as any,
-    protected registries: HasRefsImpl<any>[] = [],
-  ) {}
-  public get descriptions(): {
+export interface HasDescriptions<TRegistry extends RegistryType> {
+  readonly descriptions: {
     [K in keyof TRegistry]: ServiceDescriptorI<TRegistry, TRegistry[K]>;
-  } {
-    return this.registries.reduce((acc, cur) => {
-      const desc = cur.descriptions;
-      return { ...acc, ...desc };
-    }, this._descriptions) as any;
-  }
-  public get refs(): { [K in keyof TRegistry]: PBinJKeyType<TRegistry[K]> } {
-    return Object.fromEntries(
-      Object.keys(this.descriptions).map((key) => {
-        return [
-          key,
-          typeAlias<TRegistry, keyof TRegistry>(key as keyof TRegistry),
-        ] as const;
-      }),
-    ) as any;
-  }
-  protected addRegistry(...reg: HasRefsImpl<any>[]) {
-    this.registries.push(...reg);
-  }
-
-  apply(ctx: ContextI<TRegistry>) {
-    for (const reg of this.registries) {
-      reg.apply(ctx);
-    }
-  }
+  };
 }
 
-class RegBuilder<
-  TRegistry extends RegistryType = {},
-> extends HasRefsImpl<TRegistry> {
-  private services = new Set<ServiceDescriptorI<TRegistry, any>>();
-  constructor() {
-    super();
-  }
+export interface HasRefs<TRegistry extends RegistryType> {
+  readonly refs: { [K in keyof TRegistry]: PBinJKeyType<TRegistry[K]> };
+}
+export interface ApplyContextI<TRegistry extends RegistryType>
+  extends HasRefs<TRegistry> {
+  apply<TCRegistry extends RegistryType = {}>(
+    ctx: ContextI<TCRegistry>,
+  ): ContextI<TRegistry & TCRegistry>;
+}
 
-  register<T extends string, V, TFn extends Constructor<V>>(
+export interface RegBuilderI<TRegistry extends RegistryType>
+  extends HasRefs<TRegistry>,
+    HasDescriptions<TRegistry> {
+  export<
+    T extends (keyof TRegistry)[],
+    TRet extends { [K in T[number]]: TRegistry[K] } = T extends []
+      ? TRegistry
+      : { [K in T[number]]: TRegistry[K] },
+  >(
+    ...keys: T
+  ): ApplyContextI<TRet>;
+
+  register<T extends string, TFn extends Constructor>(
     key: T,
     val: TFn,
     ...args: ToInject<ConstructorParameters<TFn>>
-  ): RegBuilder<TRegistry & { [K in T]: V }>;
+  ): RegBuilderI<TRegistry & { [K in T]: InstanceType<TFn> }>;
 
-  register<T extends string, V, TFn extends Fn<V>>(
+  register<T extends string, V, TFn extends Fn>(
     key: T,
     val: TFn,
     ...args: ToInject<Parameters<TFn>>
-  ): RegBuilder<TRegistry & { [K in T]: V }>;
+  ): RegBuilderI<TRegistry & { [K in T]: ReturnType<TFn> }>;
 
   register<T extends string, V>(
     key: T,
     val: V,
-  ): RegBuilder<TRegistry & { [K in T]: V }>;
+  ): RegBuilderI<TRegistry & { [K in T]: V }>;
+
+  configure<T extends keyof TRegistry>(
+    key: T,
+  ): ServiceDescriptorI<TRegistry, TRegistry[T]>;
+
+  uses<T extends ApplyContextI<any>[]>(
+    ...args: T
+  ): RegBuilderI<TRegistry & Merge<T>>;
+}
+
+type Merge<T extends ApplyContextI<any>[]> = T extends [
+  infer First,
+  ...infer Rest extends ApplyContextI<any>[],
+]
+  ? First extends ApplyContextI<infer V>
+    ? V & Merge<Rest>
+    : {}
+  : {};
+
+export const builder = <T extends RegistryType = {}>(): RegBuilderI<T> => {
+  return new RegBuilder<T>();
+};
+
+export class HasRefsImpl<TRegistry extends RegistryType>
+  implements HasRefs<TRegistry>
+{
+  protected constructor(
+    protected _descriptions: {
+      [K in keyof TRegistry]: ServiceDescriptorI<TRegistry, TRegistry[K]>;
+    } = {} as any,
+    protected _appliedContexts: ApplyContextI<any>[] = [],
+  ) {}
+
+  public get descriptions(): {
+    [K in keyof TRegistry]: ServiceDescriptorI<TRegistry, TRegistry[K]>;
+  } {
+    return this._appliedContexts.reduce(
+      (acc, cur) => {
+        const desc = has(cur, "descriptions")
+          ? (cur as any).descriptions
+          : undefined;
+        return desc ? Object.assign(acc, desc) : acc;
+      },
+      Object.assign({}, this._descriptions as any),
+    );
+  }
+
+  public get refs(): { [K in keyof TRegistry]: PBinJKeyType<TRegistry[K]> } {
+    return Object.fromEntries(
+      Object.keys(this.descriptions).map((key) => {
+        return [key, typeAlias<TRegistry>(key as keyof TRegistry)] as const;
+      }),
+    ) as any;
+  }
+}
+
+class RegBuilder<TRegistry extends RegistryType = {}>
+  extends HasRefsImpl<TRegistry>
+  implements RegBuilderI<TRegistry>, HasDescriptions<TRegistry>
+{
+  constructor() {
+    super();
+  }
 
   /**
    * Register a value. with a key.
@@ -86,14 +125,10 @@ class RegBuilder<
    * @param val
    */
   register<T extends keyof TRegistry>(key: T, ...val: unknown[]) {
-    const serviceDescriptor = new ServiceDescriptor<TRegistry, TRegistry[T]>(
-      key,
-      val[0] as any,
-      val.slice(1) as any,
-    );
-    serviceDescriptor.withName(asString(key));
-    this.services.add(serviceDescriptor);
-    (this._descriptions as any)[key] = serviceDescriptor;
+    (this._descriptions as any)[key] = new ServiceDescriptor<
+      TRegistry,
+      TRegistry[T]
+    >(key, val[0] as any, val.slice(1) as any);
     return this as any;
   }
 
@@ -101,17 +136,24 @@ class RegBuilder<
    * Merge in other registries.
    * @param args
    */
-  uses<T extends ApplyContext<any>[]>(
+  uses<T extends ApplyContextI<any>[]>(
     ...args: T
-  ): RegBuilder<TRegistry & Merge<T>> {
-    this.addRegistry(...args);
+  ): RegBuilderI<TRegistry & Merge<T>> {
+    this._appliedContexts.push(...args);
     return this as any;
   }
 
-  configure(key: keyof TRegistry) {
-    return this.descriptions[key];
+  configure<T extends keyof TRegistry>(key: T) {
+    return this.descriptions[key] as any;
   }
-
+  private _apply = (ctx: ContextI<any>) => {
+    for (const val of Object.values(this._descriptions) as ServiceDescriptorI<
+      any,
+      any
+    >[]) {
+      ctx.register(val);
+    }
+  };
   /**
    * Close the registry and return an ApplyContext. This instance
    * should be used to apply the registry to a context.  The original
@@ -122,18 +164,17 @@ class RegBuilder<
     TRet extends { [K in T[number]]: TRegistry[K] } = T extends []
       ? TRegistry
       : { [K in T[number]]: TRegistry[K] },
-  >(...keys: T): ApplyContext<TRet> {
+  >(...keys: T): ApplyContextI<TRet> {
+    const desc = this.descriptions;
     const descriptions = keys.length
-      ? (Object.fromEntries(keys.map((v) => [v, this._descriptions[v]])) as any)
-      : this._descriptions;
-    return new ApplyContext<TRet>(descriptions, this.registries, (ctx) => {
-      for (const builder of this.registries) {
-        builder.apply(ctx);
-      }
-      for (const val of this.services) {
-        ctx.register(val);
-      }
-    });
+      ? (Object.fromEntries(keys.map((v) => [v, desc[v]])) as any)
+      : desc;
+
+    return new ApplyContext<TRet>(
+      descriptions,
+      this._appliedContexts,
+      this._apply,
+    );
   }
 }
 
@@ -142,31 +183,44 @@ class RegBuilder<
  * we can create typesafe registries that can be composed together.
  *
  */
-class ApplyContext<
-  TRegistry extends RegistryType,
-> extends HasRefsImpl<TRegistry> {
-  private applied = false;
+class ApplyContext<TRegistry extends RegistryType>
+  extends HasRefsImpl<TRegistry>
+  implements ApplyContextI<TRegistry>
+{
   constructor(
     _descriptions: {
       [K in keyof TRegistry]: ServiceDescriptorI<TRegistry, TRegistry[K]>;
     } = {} as any,
-    registries: HasRefsImpl<any>[],
+    registries: ApplyContextI<any>[],
     private onApplyContext: (ctx: ContextI<TRegistry>) => void,
+    private appliedContextKey = pbjKey<ApplyContextI<TRegistry>>(
+      "applied-builder-context",
+    ),
   ) {
     super(_descriptions, registries);
   }
   apply<TCRegistry extends RegistryType = {}>(
     ctx: ContextI<TCRegistry>,
   ): ContextI<TRegistry & TCRegistry> {
-    if (this.applied) return ctx as any;
+    if (hasA(ctx, "get", isFn)) {
+      //checks if we are registered already.
+      if (ctx.get(this.appliedContextKey as any)) {
+        return ctx as any;
+      }
+    }
+
+    for (const builder of this._appliedContexts) {
+      builder.apply(ctx);
+    }
+    ctx.register(this.appliedContextKey, this as any);
     this.onApplyContext(ctx as any);
-    this.applied = true;
     return ctx as any;
   }
 }
-function typeAlias<TRegistry extends RegistryType, Key extends keyof TRegistry>(
-  name: Key,
-): RegistryRef<TRegistry[Key]> {
+function typeAlias<
+  TRegistry extends RegistryType,
+  Key extends keyof TRegistry = keyof TRegistry,
+>(name: Key): RegistryRef<TRegistry[Key]> {
   return { [typeAliasSymbol]: name } as any;
 }
 

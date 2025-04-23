@@ -158,7 +158,9 @@ export class ServiceDescriptor<
     this.factory = this.invokable && !isConstructor(_service as Fn<T>);
 
     this.invalidate();
-    this.logger.debug("service updated {name}", this);
+    this.logger.debug("service updated {name}", {
+      name: this.name || asString(this.key),
+    });
   }
 
   get service() {
