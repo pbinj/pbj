@@ -1,9 +1,9 @@
 import { it, describe, expect } from "vitest";
 import { builder, context } from "@pbinj/pbj";
-import {runBeforeEachTest, runAfterEachTest} from "../test";
-import {beforeEach, afterEach} from "vitest";
+import { runBeforeEachTest, runAfterEachTest } from "../test";
+import { beforeEach, afterEach } from "vitest";
 
-beforeEach(runBeforeEachTest)
+beforeEach(runBeforeEachTest);
 afterEach(runAfterEachTest);
 
 const fn = (a: number, b: string) => a + 1 + b;
