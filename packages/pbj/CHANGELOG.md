@@ -1,5 +1,16 @@
 # @pbinj/pbj
 
+## 5.0.0
+
+### Major Changes
+
+- 316da0d: Fix type weirdness with importing in older versions of typescript
+
+### Patch Changes
+
+- 316da0d: Fixes issue with older versions of TypeScript that can't resolve
+  - @pbinj/pbj-guards@5.0.0
+
 ## 4.0.3
 
 ### Patch Changes

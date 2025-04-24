@@ -1,5 +1,14 @@
 # @pbinj/pbj-visualization
 
+## 5.0.0
+
+### Patch Changes
+
+- Updated dependencies [316da0d]
+- Updated dependencies [316da0d]
+  - @pbinj/pbj@5.0.0
+  - @pbinj/pbj-guards@5.0.0
+
 ## 4.0.3
 
 ### Patch Changes
