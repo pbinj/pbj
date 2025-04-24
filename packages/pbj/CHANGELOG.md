@@ -1,5 +1,12 @@
 # @pbinj/pbj
 
+## 4.0.4
+
+### Patch Changes
+
+- 316da0d: Fixes issue with older versions of TypeScript that can't resolve
+  - @pbinj/pbj-guards@4.0.4
+
 ## 4.0.3
 
 ### Patch Changes
