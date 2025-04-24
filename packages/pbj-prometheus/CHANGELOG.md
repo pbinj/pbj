@@ -1,5 +1,13 @@
 # @pbinj/pbj-metrics
 
+## 4.0.4
+
+### Patch Changes
+
+- Updated dependencies [316da0d]
+  - @pbinj/pbj@4.0.4
+  - @pbinj/pbj-guards@4.0.4
+
 ## 4.0.3
 
 ### Patch Changes
