@@ -1,5 +1,5 @@
 import { it, describe, expect } from "vitest";
-import { builder, context } from "@pbinj/pbj";
+import { builder, context, ToInject } from "@pbinj/pbj";
 import { runBeforeEachTest, runAfterEachTest } from "../test";
 import { beforeEach, afterEach } from "vitest";
 
@@ -65,5 +65,22 @@ describe("reg-builder", () => {
     expect(ctx.resolve(e.refs.f)).toEqual(4);
     //@ts-expect-error - this should be an error please do not remove.  `export` should prevent this from being accessible.
     const error = e.refs.b;
+  });
+
+  it("should work with optional dependencies", () => {
+    class OptA {
+      constructor(public a?: string) {}
+    }
+    const reg = builder().register("opt", OptA, "a");
+    const a = reg.export().apply(context).resolve(reg.refs.opt);
+    expect(a.a).toEqual("a");
+  });
+  it("should work with optional dependencies without option", () => {
+    class OptA {
+      constructor(public a?: string) {}
+    }
+    const reg = builder().register("opt", OptA);
+    const a = reg.export().apply(context).resolve(reg.refs.opt);
+    expect(a.a).toEqual(undefined);
   });
 });
