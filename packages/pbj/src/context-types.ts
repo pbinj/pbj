@@ -23,10 +23,14 @@ import { Listener } from "./util.js";
  * register(fn, aKey, "b");
  *              ----  ---  -- MakeFactory
  *
+ *
+ * Note:
+ * You may wonder why we aren't destructuring the tuple, well that doesn't work well with
+ * optional parameter types.   This seems to make everything work better.
  */
-export type ToInject<T> = T extends [infer First, ...infer Rest]
-  ? [PBinJKeyType<First> | First, ...ToInject<Rest>]
-  : [];
+export type ToInject<T extends any[]> = {
+  [K in keyof T]: T[K] | PBinJKeyType<Exclude<T[K], undefined>>;
+};
 
 type FlatInvoke<
   TValue,
@@ -74,7 +78,9 @@ export interface ResolveContext<TRegistry extends RegistryType> {
     ...args: ToInject<ConstructorParameters<TCon>>
   ): TRegistry[T];
 
-  resolve<T, TKey extends PBinJKeyType<T>>(key: TKey): T;
+  resolve<TKey extends PBinJKeyType>(
+    key: TKey,
+  ): TKey extends PBinJKeyType<infer T> ? T : never;
   resolve<T, TKey extends PBinJKeyType<T>>(
     key: TKey,
     alias: PBinJKeyType<T>,
@@ -96,7 +102,7 @@ export interface ResolveContext<TRegistry extends RegistryType> {
   resolve<T, TCon extends Constructor<T>>(fn: TCon): T;
   resolve<T, TCon extends Constructor<T>>(
     fn: TCon,
-    ...args: ToInject<Constructor<TCon>>
+    ...args: ToInject<ConstructorParameters<TCon>>
   ): T;
 }
 export interface ResolveAsyncContext<TRegistry extends RegistryType> {
@@ -157,7 +163,7 @@ export interface RegisterContext<TRegistry extends RegistryType> {
   ): ServiceDescriptorI<TRegistry, T>;
   register<T, TCon extends Constructor<T>>(
     fn: TCon,
-    ...args: ToInject<Constructor<TCon>>
+    ...args: ToInject<ConstructorParameters<TCon>>
   ): ServiceDescriptorI<TRegistry, T>;
 }
 
