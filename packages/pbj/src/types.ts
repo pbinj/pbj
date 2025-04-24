@@ -1,5 +1,6 @@
 import {
-  destroySymbol, pbjKeySymbol,
+  destroySymbol,
+  pbjKeySymbol,
   removeSymbol,
   serviceSymbol,
   typeAliasSymbol,

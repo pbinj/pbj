@@ -320,7 +320,9 @@ export class Context<TRegistry extends RegistryType = Registry> {
     ...args: ToInject<ConstructorParameters<TCon>>
   ): TRegistry[T];
 
-  resolve<TKey extends PBinJKeyType>(key: TKey): TKey extends PBinJKeyType<infer T> ? T : never;
+  resolve<TKey extends PBinJKeyType>(
+    key: TKey,
+  ): TKey extends PBinJKeyType<infer T> ? T : never;
   resolve<T, TKey extends PBinJKeyType<T>>(
     key: TKey,
     alias: PBinJKeyType<T>,
