@@ -1,5 +1,12 @@
 # @pbinj/pbj
 
+## 4.0.5
+
+### Patch Changes
+
+- c472de5: Makes optional dependencies work more correctly
+  - @pbinj/pbj-guards@4.0.5
+
 ## 4.0.4
 
 ### Patch Changes
