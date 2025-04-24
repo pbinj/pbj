@@ -183,12 +183,13 @@ export class Context<TRegistry extends RegistryType = Registry> {
 
   register<
     const TKey extends PBinJKeyType,
-    const TFn extends Fn<TKey[serviceSymbolType]>,
+    const TFn extends Fn<TValue>,
+    const TValue extends TKey extends PBinJKeyType<infer V> ? V : never,
   >(
     key: TKey,
     fn: TFn,
     ...args: ToInject<Parameters<TFn>>
-  ): ServiceDescriptorI<TRegistry, TKey[serviceSymbolType]>;
+  ): ServiceDescriptorI<TRegistry, TValue>;
 
   register<
     const TKey extends PBinJKeyType,
@@ -319,7 +320,7 @@ export class Context<TRegistry extends RegistryType = Registry> {
     ...args: ToInject<ConstructorParameters<TCon>>
   ): TRegistry[T];
 
-  resolve<TKey extends PBinJKeyType>(key: TKey): TKey[serviceSymbolType];
+  resolve<TKey extends PBinJKeyType>(key: TKey): TKey extends PBinJKeyType<infer T> ? T : never;
   resolve<T, TKey extends PBinJKeyType<T>>(
     key: TKey,
     alias: PBinJKeyType<T>,

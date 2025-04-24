@@ -1,5 +1,5 @@
 import {
-  destroySymbol,
+  destroySymbol, pbjKeySymbol,
   removeSymbol,
   serviceSymbol,
   typeAliasSymbol,
@@ -42,7 +42,7 @@ export type VisitFn<
 
 export interface RegistryType {}
 
-export type PBinJKeyType<T = any> = { [serviceSymbol]: T };
+export type PBinJKeyType<T = any> = { [pbjKeySymbol]: T };
 
 export type OfA<T> = Constructor<T> | Fn<T> | T;
 //The second argument is usually a factory.  It could also be a value.   This tries to enforce if it is a factory, it should
