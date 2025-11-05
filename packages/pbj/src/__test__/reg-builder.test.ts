@@ -83,4 +83,44 @@ describe("reg-builder", () => {
     const a = reg.export().apply(context).resolve(reg.refs.opt);
     expect(a.a).toEqual(undefined);
   });
+
+  it('should work with default values', ()=>{
+    class Def {
+      constructor(public a = "a") {}
+    }
+    const reg = builder().register("def", Def);
+    const a = reg.export().apply(context).resolve(reg.refs.def);
+    expect(a.a).toEqual("a");
+  });
+  it('should work with default values override', ()=>{
+    class Def {
+      constructor(public a = "a") {}
+    }
+    const reg = builder().register("def", Def, "b");
+    const a = reg.export().apply(context).resolve(reg.refs.def);
+    expect(a.a).toEqual("b");
+  });
+  it('conflict', ()=>{
+    const reg1 = builder().register("a", 1);
+    const reg2 = builder().register("a", "2");
+    const v = reg1.export().apply(context);
+    const val = v.resolve("a");
+    expect(() => reg1.uses(reg2.export())).toThrowError();
+
+  });
+  it('should namespace simple', ()=>{
+    const v = builder("ns1").register("a", 1).export().apply(context);
+    expect( v.resolve("ns1:a")).toEqual(1);
+  });
+  it('should namespace be more simple', ()=>{
+    const a1 = builder("ns1").register("a", 1).export();
+    const b2 = builder("ns2").uses(a1).register("b", 2).export();
+    const ctx = b2.apply(context);
+    const v = ctx.resolve("ns2:b");
+
+    expect(v).toEqual(2);
+    expect(ctx.resolve(b2.refs.b)).toEqual(2);
+    expect(ctx.resolve(a1.refs.a)).toEqual(1);
+    expect(ctx.resolve("ns1:a")).toEqual(1);
+  })
 });
