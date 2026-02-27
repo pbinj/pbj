@@ -92,9 +92,10 @@ class RegBuilder<
    * @param val
    */
   register<T extends keyof TRegistry>(key: T, ...val: any[]) {
+    const [service, ...args] = val;
     (this._descriptions as any)[key] = new ServiceDescriptor<
       any,
-      any>(key, ...val);
+      any>(key, service, args);
     return this as any;
   }
 

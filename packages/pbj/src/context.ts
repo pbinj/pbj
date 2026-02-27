@@ -23,6 +23,31 @@ import { RegisterArgs, ToInject } from "./context-types.js";
 import { serviceSymbol } from "./symbols.js";
 type serviceSymbolType = typeof serviceSymbol;
 
+/**
+ * The main dependency injection context for PBinJ.
+ *
+ * Context manages service registration, resolution, and lifecycle. It provides
+ * type-safe dependency injection with support for factories, constructors, and values.
+ *
+ * @template TRegistry - The registry type defining available services
+ *
+ * @example
+ * ```typescript
+ * import { context, pbjKey } from "@pbinj/pbj";
+ *
+ * // Register a simple value
+ * context.register("config", { apiUrl: "https://api.example.com" });
+ *
+ * // Register a class with dependencies
+ * class UserService {
+ *   constructor(private config: Config) {}
+ * }
+ * context.register(UserService, context.pbj("config"));
+ *
+ * // Resolve a service
+ * const userService = context.resolve(UserService);
+ * ```
+ */
 export class Context<TRegistry extends RegistryType = Registry> {
   // implements ContextI<TRegistry>
   //this thing is used to keep track of dependencies.
@@ -33,8 +58,34 @@ export class Context<TRegistry extends RegistryType = Registry> {
   // Track services that are pending initialization
   private pendingInitialization = new Set<CKey>();
   public logger = new Logger();
+
+  /**
+   * Creates a new Context instance.
+   *
+   * @param parent - Optional parent context for hierarchical dependency resolution
+   */
   constructor(private readonly parent?: Context<any>) {}
 
+  /**
+   * Subscribe to service registration events.
+   *
+   * This method allows you to be notified when services are added to the context.
+   * Useful for implementing plugins, monitoring, or dynamic service discovery.
+   *
+   * @param fn - Callback function invoked when services are added
+   * @param initialize - If true, immediately invoke callback for existing services
+   * @returns Unsubscribe function to remove the listener
+   *
+   * @example
+   * ```typescript
+   * const unsubscribe = context.onServiceAdded((descriptor) => {
+   *   console.log(`Service registered: ${descriptor.name}`);
+   * });
+   *
+   * // Later, to stop listening:
+   * unsubscribe();
+   * ```
+   */
   public onServiceAdded(
     fn: Listener<ServiceDescriptorI<TRegistry, any>>,
     initialize = false,
@@ -54,6 +105,25 @@ export class Context<TRegistry extends RegistryType = Registry> {
     return ret;
   }
 
+  /**
+   * Get a proxy reference to a service without resolving it immediately.
+   *
+   * This method returns a proxy that will resolve the service lazily when accessed.
+   * Useful for avoiding circular dependencies and deferring service initialization.
+   *
+   * @template T - The service key type
+   * @param service - The service key to get a proxy for
+   * @returns A proxy that will resolve to the service value when accessed
+   *
+   * @example
+   * ```typescript
+   * const configKey = pbjKey<Config>("config");
+   * const configProxy = context.pbj(configKey);
+   *
+   * // Service is not resolved until accessed
+   * console.log(configProxy.apiUrl); // Resolves here
+   * ```
+   */
   pbj<T extends PBinJKey<TRegistry>>(service: T): ValueOf<TRegistry, T> {
     return (this.get(keyOf(service as any)) ?? this._register(service as any))
       .proxy;
@@ -151,6 +221,50 @@ export class Context<TRegistry extends RegistryType = Registry> {
       this.pendingInitialization.add(key);
     }
   }
+
+  /**
+   * Register a service with the context.
+   *
+   * This is the primary method for registering services. It supports multiple patterns:
+   * - Register a value directly
+   * - Register a factory function with dependencies
+   * - Register a class constructor with dependencies
+   * - Register using a PBinJKey for type safety
+   *
+   * Dependencies can be specified as:
+   * - Direct values
+   * - PBinJKey references (using `context.pbj(key)`)
+   * - Other registered services
+   *
+   * @template T - The service type
+   * @param key - Service key (string, symbol, class, or PBinJKey)
+   * @param value - The service value, factory function, or constructor
+   * @param args - Dependencies to inject (optional)
+   * @returns Service descriptor for further configuration
+   *
+   * @example
+   * ```typescript
+   * // Register a simple value
+   * context.register("apiUrl", "https://api.example.com");
+   *
+   * // Register a factory with dependencies
+   * const configKey = pbjKey<Config>("config");
+   * context.register("apiClient", (config: Config) => new ApiClient(config), context.pbj(configKey));
+   *
+   * // Register a class with dependencies
+   * class UserService {
+   *   constructor(private apiClient: ApiClient) {}
+   * }
+   * context.register(UserService, context.pbj("apiClient"));
+   *
+   * // Configure the service descriptor
+   * context.register("cache", CacheService)
+   *   .withInterceptors((value) => {
+   *     console.log("Cache accessed");
+   *     return value;
+   *   });
+   * ```
+   */
   register<T extends keyof TRegistry, TFn extends Fn<TRegistry[T]>>(
     key: T,
     fn: TFn,
@@ -348,10 +462,60 @@ export class Context<TRegistry extends RegistryType = Registry> {
   resolve<T, TFn extends Fn<T>>(fn: TFn, ...args: ToInject<Parameters<TFn>>): T;
   resolve<T, TFn extends Fn<T>>(fn: TFn): T;
 
+  /**
+   * Resolve a service and return its instance.
+   *
+   * This method retrieves or creates an instance of a registered service.
+   * If the service hasn't been registered yet, it will be registered automatically.
+   *
+   * Services are cached by default, so subsequent calls return the same instance
+   * unless the service is configured as non-cacheable.
+   *
+   * @template T - The service type
+   * @param typeKey - Service key (string, symbol, class, or PBinJKey)
+   * @param args - Optional arguments to override registered dependencies
+   * @returns The resolved service instance
+   *
+   * @throws {PBinJError} If the service cannot be resolved
+   *
+   * @example
+   * ```typescript
+   * // Resolve a registered service
+   * const config = context.resolve("config");
+   *
+   * // Resolve a class
+   * const userService = context.resolve(UserService);
+   *
+   * // Resolve with custom arguments (overrides registered dependencies)
+   * const customService = context.resolve(MyService, customDep1, customDep2);
+   * ```
+   */
   resolve(typeKey: any, ...args: any[]): any {
     return this._register(typeKey, ...(args as any)).invoke();
   }
 
+  /**
+   * Create a new child context that inherits from this context.
+   *
+   * Child contexts can access services from their parent but maintain
+   * their own service registrations. This is useful for creating isolated
+   * scopes or test contexts.
+   *
+   * @template TTRegistry - The registry type for the new context
+   * @returns A new Context instance with this context as its parent
+   *
+   * @example
+   * ```typescript
+   * const parentContext = context;
+   * const childContext = parentContext.newContext();
+   *
+   * // Child can access parent services
+   * const config = childContext.resolve("config");
+   *
+   * // But has its own registrations
+   * childContext.register("childService", ChildService);
+   * ```
+   */
   newContext<TTRegistry extends TRegistry = TRegistry>() {
     this.logger.info("new context");
 

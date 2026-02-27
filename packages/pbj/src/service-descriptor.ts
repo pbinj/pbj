@@ -30,6 +30,27 @@ import { type } from "node:os";
 
 const EMPTY = [] as const;
 
+/**
+ * Describes a service registration in the dependency injection container.
+ *
+ * ServiceDescriptor manages the metadata and lifecycle of a registered service,
+ * including its dependencies, caching behavior, interceptors, and initialization.
+ *
+ * @template TRegistry - The registry type defining available services
+ * @template T - The service type (Constructor, Function, or value)
+ *
+ * @example
+ * ```typescript
+ * // Create a service descriptor for a singleton
+ * const descriptor = ServiceDescriptor.singleton(MyService, dependency1, dependency2);
+ *
+ * // Create a service descriptor for a factory
+ * const factoryDescriptor = ServiceDescriptor.factory(createUser, configDep);
+ *
+ * // Create a service descriptor for a value
+ * const valueDescriptor = ServiceDescriptor.value("config", { apiUrl: "..." });
+ * ```
+ */
 export class ServiceDescriptor<
   TRegistry extends RegistryType,
   T extends Constructor | Fn | unknown,
@@ -37,6 +58,15 @@ export class ServiceDescriptor<
 {
   static #dependencies = new Set<CKey>();
 
+  /**
+   * Create a service descriptor for a non-cacheable value.
+   *
+   * @template T - The registry key type
+   * @template TRegistry - The registry type
+   * @param key - The service key
+   * @param service - The service value
+   * @returns A new ServiceDescriptor configured as a non-cacheable value
+   */
   static value<
     T extends keyof TRegistry,
     TRegistry extends RegistryType = Registry,
@@ -50,10 +80,26 @@ export class ServiceDescriptor<
     );
   }
 
+  /**
+   * Create a service descriptor for a singleton (cached instance).
+   *
+   * @template T - The service constructor or factory type
+   * @param service - The constructor or factory function
+   * @param args - Dependencies to inject
+   * @returns A new ServiceDescriptor configured as a singleton
+   */
   static singleton<T extends Constructor | Fn>(service: T, ...args: Args<T>) {
     return new ServiceDescriptor(service, service, args, true);
   }
 
+  /**
+   * Create a service descriptor for a factory (non-cached, new instance each time).
+   *
+   * @template T - The service constructor or factory type
+   * @param service - The constructor or factory function
+   * @param args - Dependencies to inject
+   * @returns A new ServiceDescriptor configured as a factory
+   */
   static factory<T extends Constructor | Fn>(service: T, ...args: Args<T>) {
     return new ServiceDescriptor(service, service, args, false);
   }
@@ -172,18 +218,21 @@ export class ServiceDescriptor<
   }
 
   set args(newArgs: Args<T>) {
+    // Ensure newArgs is always an array
+    const argsArray = Array.isArray(newArgs) ? newArgs : [];
+
     if (
-      newArgs === this._args ||
-      (newArgs.length === 0 && this._args.length === 0)
+      argsArray === this._args ||
+      (argsArray.length === 0 && this._args.length === 0)
     ) {
       return;
     }
 
     if (
-      newArgs.length !== this._args.length ||
-      newArgs.some((v, i) => v !== this._args[i])
+      argsArray.length !== this._args.length ||
+      argsArray.some((v, i) => v !== this._args[i])
     ) {
-      newArgs.map((v) => {
+      argsArray.forEach((v) => {
         if (isPBinJKey(v)) {
           this.addDependency(keyOf(v));
         } else if (isPBinJ(v)) {
@@ -191,10 +240,8 @@ export class ServiceDescriptor<
         } else if (isTypeAlias(v)) {
           this.addDependency(v[typeAliasSymbol] as any);
         }
-
-        return v;
       });
-      this._args = newArgs;
+      this._args = argsArray;
       this.logger.debug("changed args {name}", this);
       this.invalidate();
     }
